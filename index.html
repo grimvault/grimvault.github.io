@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Grimoire - The Void</title>
     <link rel="icon" type="image/png" href="https://i.ibb.co/Mk6zfrV1/cropped-circle-image-11.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,6 +36,7 @@
             color: #e5e5e5;
             overflow-x: hidden;
             margin: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         body.modal-open { overflow: hidden; }
         
@@ -112,6 +113,12 @@
         }
         .input-void:focus { border-color: var(--blood-red); box-shadow: 0 0 15px rgba(138, 3, 3, 0.1); }
         .input-void:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        /* Validation Feedback States */
+        .input-error { border-color: #8a0303 !important; }
+        .input-success { border-color: #2dce89 !important; }
+        .text-error { color: #ff0f0f; font-size: 0.75rem; margin-top: 4px; }
+        .text-success { color: #2dce89; font-size: 0.75rem; margin-top: 4px; }
 
         .spin-edit-container {
             display: flex;
@@ -286,7 +293,8 @@
         #reader-body blockquote, #diff-original blockquote, #diff-new blockquote { border-left: 3px solid var(--blood-red); padding-left: 1rem; font-style: italic; color: #888; }
         #editor-content img, #reader-body img, #diff-original img, #diff-new img { max-width: 100%; height: auto; margin: 1rem 0; display: block; }
 
-        .toolbar-layer { position: relative; z-index: 50; }
+        .toolbar-layer { position: relative; z-index: 50; overflow-x: auto; whitespace: nowrap; scrollbar-width: none; }
+        .toolbar-layer::-webkit-scrollbar { display: none; }
         
         /* Horizontal Scroll */
         .scroller {
@@ -342,6 +350,11 @@
             margin-bottom: 1.5rem;
         }
 
+        @media (max-width: 640px) {
+            .view-section { padding-bottom: 80px; }
+            .font-horror { letter-spacing: 0.05em; }
+        }
+
     </style>
 </head>
 <body>
@@ -358,7 +371,7 @@
 
     <!-- NOTIFICATION MODAL -->
     <div id="modal-alert" class="fixed inset-0 z-[110] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass max-w-sm w-full p-8 rounded-lg text-center border border-red-900/40">
+        <div class="glass w-[90%] max-w-sm p-8 rounded-lg text-center border border-red-900/40">
             <h3 id="alert-title" class="font-horror text-2xl text-red-500 mb-2">Notice</h3>
             <p id="alert-msg" class="text-gray-400 mb-8 text-sm leading-relaxed">Message</p>
             <div id="alert-actions">
@@ -369,7 +382,7 @@
 
     <!-- COVEN MEMBERS MODAL -->
     <div id="modal-coven-members" class="fixed inset-0 z-[110] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass w-full max-w-md p-6 rounded-lg border border-white/10 relative">
+        <div class="glass w-[95%] max-w-md p-6 rounded-lg border border-white/10 relative">
             <button onclick="ui.closeModal('modal-coven-members')" class="absolute top-3 right-3 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
             <h3 class="font-horror text-2xl text-red-500 mb-4">Coven Coveneers</h3>
             <div id="coven-members-list" class="max-h-80 overflow-y-auto space-y-3 pr-2">
@@ -380,7 +393,7 @@
     
     <!-- FOLLOW LIST MODAL -->
     <div id="modal-follow-list" class="fixed inset-0 z-[110] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass w-full max-w-sm p-6 rounded-lg border border-white/10 relative">
+        <div class="glass w-[95%] max-w-sm p-6 rounded-lg border border-white/10 relative">
             <button onclick="ui.closeModal('modal-follow-list')" class="absolute top-3 right-3 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
             <h3 id="follow-list-title" class="font-horror text-2xl text-red-500 mb-4">Souls</h3>
             <div id="follow-list-content" class="max-h-80 overflow-y-auto space-y-3 pr-2">
@@ -391,7 +404,7 @@
 
     <!-- HOW IT WORKS MODAL -->
     <div id="modal-how-it-works" class="fixed inset-0 z-[110] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass w-full max-w-2xl p-8 rounded-lg border border-white/10 relative max-h-[90vh] flex flex-col">
+        <div class="glass w-[95%] max-w-2xl p-8 rounded-lg border border-white/10 relative max-h-[90vh] flex flex-col">
             <button onclick="ui.closeModal('modal-how-it-works')" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
             <h3 class="font-horror text-3xl text-red-500 mb-4">Grimoire Guide</h3>
             <div class="flex-grow overflow-y-auto pr-4 space-y-6 text-gray-400 text-sm leading-relaxed font-story">
@@ -444,7 +457,7 @@
 
     <!-- AVATAR CROPPER MODAL (IMPROVED) -->
     <div id="cropper-modal" class="fixed inset-0 z-[120] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass w-full max-w-md p-8 rounded-xl">
+        <div class="glass w-[95%] max-w-md p-8 rounded-xl">
             <h3 class="font-horror text-3xl text-white mb-4 text-center">Shape Your Visage</h3>
             <p class="text-center text-gray-500 mb-6 text-sm">A circle, to contain the soul.</p>
             <div id="cropper-image-container">
@@ -460,7 +473,7 @@
 
     <!-- REPORT MODAL -->
     <div id="modal-report" class="fixed inset-0 z-[110] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass max-w-sm w-full p-6 rounded-lg border border-red-900/40">
+        <div class="glass max-w-sm w-[90%] p-6 rounded-lg border border-red-900/40">
             <h3 class="font-horror text-2xl text-red-500 mb-4">Report Anomaly</h3>
             <div class="space-y-2 mb-6 max-h-60 overflow-y-auto pr-2">
                 <button onclick="reader.submitReport('AI Content')" class="w-full text-left p-3 rounded bg-white/5 hover:bg-red-900/20 border border-transparent hover:border-red-900 transition-colors text-sm font-bold text-gray-400 hover:text-white">AI Generated Content</button>
@@ -521,7 +534,7 @@
 
     <!-- CREATE COMMUNITY MODAL -->
     <div id="modal-create-coven" class="fixed inset-0 z-[110] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass w-full max-w-md p-8 rounded-xl border border-red-900/40 relative">
+        <div class="glass w-[95%] max-w-md p-8 rounded-xl border border-red-900/40 relative">
             <button onclick="ui.closeModal('modal-create-coven')" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
             <h2 class="font-horror text-3xl text-red-500 mb-6">Found a Coven</h2>
             
@@ -622,12 +635,15 @@
                     </div>
                     <input type="file" id="signup-avatar-input" class="hidden" accept="image/*">
                 </div>
-                <input type="text" id="signup-name" placeholder="Chosen Name" class="input-void" required>
+                <div>
+                    <input type="text" id="signup-name" placeholder="Chosen Name" class="input-void" required autocomplete="off">
+                    <p id="signup-username-feedback" class="hidden text-xs font-bold mt-1"></p>
+                </div>
                 <input type="email" id="signup-email" placeholder="Email Address" class="input-void" required>
                 <input type="password" id="signup-pass" placeholder="Password (Min 6)" class="input-void" required>
                 <textarea id="signup-bio" class="input-void h-20 resize-none" placeholder="A brief bio..."></textarea>
                 <input type="text" id="signup-link" class="input-void" placeholder="Website Link (optional)">
-                <button type="submit" class="btn-main w-full py-3 mt-4">Sign in Blood</button>
+                <button type="submit" class="btn-main w-full py-3 mt-4" id="btn-signup-submit">Sign in Blood</button>
                 <div class="text-center mt-6 pt-6 border-t border-white/5">
                     <p class="text-xs text-gray-500">Existing soul? <span onclick="ui.toggleAuth('login')" class="text-red-500 cursor-pointer hover:text-red-400 transition-colors">Return</span></p>
                 </div>
@@ -680,8 +696,8 @@
                         </div>
                     </div>
 
-                    <div class="hidden md:flex flex-col items-end cursor-pointer group" onclick="profile.viewSelf()">
-                        <span id="nav-user" class="text-xs font-bold text-gray-300 group-hover:text-white">User</span>
+                    <div class="flex flex-col items-end cursor-pointer group" onclick="profile.viewSelf()">
+                        <span id="nav-user" class="text-xs font-bold text-gray-300 group-hover:text-white hidden md:block">User</span>
                         <span class="text-[10px] text-yellow-600 font-mono tracking-wide"><i class="fas fa-coins mr-1"></i><span id="nav-credits">0</span></span>
                     </div>
                     <button onclick="auth.logout()" class="text-gray-500 hover:text-red-500 transition-colors"><i class="fas fa-power-off text-lg"></i></button>
@@ -701,10 +717,10 @@
                         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-hover:text-red-500 transition-colors pointer-events-none"></i>
                         <i id="feed-search-clear" class="fas fa-times absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 cursor-pointer hidden hover:text-white"></i>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="feed.sort('new')" id="sort-new" class="btn-secondary text-xs active bg-white/5 text-white">Newest</button>
-                        <button onclick="feed.sort('hot')" id="sort-hot" class="btn-secondary text-xs">Hottest</button>
-                        <button onclick="feed.sort('following')" id="sort-following" class="btn-secondary text-xs border-purple-900 text-purple-400 hover:border-purple-500">Following</button>
+                    <div class="flex gap-2 w-full md:w-auto overflow-x-auto">
+                        <button onclick="feed.sort('new')" id="sort-new" class="btn-secondary text-xs active bg-white/5 text-white whitespace-nowrap">Newest</button>
+                        <button onclick="feed.sort('hot')" id="sort-hot" class="btn-secondary text-xs whitespace-nowrap">Hottest</button>
+                        <button onclick="feed.sort('following')" id="sort-following" class="btn-secondary text-xs border-purple-900 text-purple-400 hover:border-purple-500 whitespace-nowrap">Following</button>
                     </div>
                 </div>
 
@@ -751,23 +767,23 @@
                      </div>
                      <div class="px-8 pb-8 relative">
                          <div class="flex flex-col md:flex-row gap-6 items-end -mt-16">
-                             <div id="profile-img-container" class="w-32 h-32 rounded-full border-4 border-[#050505] overflow-hidden bg-black shadow-xl relative group flex-shrink-0">
+                             <div id="profile-img-container" class="w-32 h-32 rounded-full border-4 border-[#050505] overflow-hidden bg-black shadow-xl relative group flex-shrink-0 mx-auto md:mx-0">
                                  <img id="profile-view-img" class="w-full h-full object-cover">
                                  <div id="profile-img-edit-overlay" class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center cursor-pointer text-white/80 text-xs uppercase font-bold" onclick="document.getElementById('btn-edit-profile').click()">Edit</div>
                              </div>
-                             <div class="flex-1 mb-2">
-                                 <div class="flex items-center gap-3 flex-wrap">
+                             <div class="flex-1 mb-2 text-center md:text-left">
+                                 <div class="flex items-center justify-center md:justify-start gap-3 flex-wrap">
                                     <h2 id="profile-view-name" class="text-3xl font-bold text-white font-story tracking-tight">Username</h2>
                                     <span id="profile-leaderboard-rank" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-yellow-900 text-yellow-500 tracking-widest bg-yellow-900/10 hidden">#0</span>
                                     <span id="profile-rank" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-red-900 text-red-500 tracking-widest bg-red-900/10">Neophyte</span>
                                     <div id="profile-badges" class="flex items-center gap-2 text-yellow-400"></div>
                                  </div>
-                                 <p id="profile-view-bio" class="text-gray-400 text-sm mt-2 max-w-lg leading-relaxed">Bio goes here...</p>
+                                 <p id="profile-view-bio" class="text-gray-400 text-sm mt-2 max-w-lg leading-relaxed mx-auto md:mx-0">Bio goes here...</p>
                                  <div id="profile-view-joined" class="text-xs text-gray-600 mt-3 font-mono hidden"><i class="fas fa-clock mr-1"></i></div>
-                                 <div id="profile-links" class="mt-3 flex gap-3 text-xs text-blue-400 font-mono"></div>
+                                 <div id="profile-links" class="mt-3 flex justify-center md:justify-start gap-3 text-xs text-blue-400 font-mono"></div>
                              </div>
                              
-                             <div class="grid grid-cols-3 gap-3 mb-4">
+                             <div class="grid grid-cols-3 gap-3 mb-4 w-full md:w-auto">
                                  <div onclick="profile.showFollowList('followers')" class="stats-card group clickable">
                                      <div id="profile-view-followers" class="font-bold text-white text-xl font-mono group-hover:text-red-500 transition-colors">0</div>
                                      <div class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Followers</div>
@@ -782,7 +798,7 @@
                                  </div>
                              </div>
 
-                             <div class="mb-4 flex flex-col items-center justify-center gap-2">
+                             <div class="mb-4 flex flex-col items-center justify-center gap-2 w-full md:w-auto">
                                  <button id="btn-follow" class="btn-main py-2 px-8 text-xs hidden shadow-lg" onclick="profile.toggleFollow()">Follow</button>
                                  <button id="btn-edit-profile" class="btn-secondary py-2 px-6 text-xs hidden border-white/20 hover:bg-white/10 text-gray-300" onclick="ui.openProfileEditor()">Edit Profile</button>
                                  <button onclick="ui.openModal('modal-how-it-works')" class="text-gray-600 hover:text-white transition-colors text-xs flex items-center gap-1"><i class="fas fa-question-circle"></i> How It Works</button>
@@ -792,10 +808,10 @@
                 </div>
 
                 <!-- Tabs -->
-                <div class="flex gap-6 border-b border-white/5 mb-6">
-                    <button onclick="profile.switchTab('artifacts')" id="tab-artifacts" class="profile-tab active">Artifacts</button>
-                    <button onclick="profile.switchTab('allies')" id="tab-allies" class="profile-tab">Allies</button>
-                    <button onclick="profile.switchTab('covens')" id="tab-covens" class="profile-tab">Covens</button>
+                <div class="flex gap-6 border-b border-white/5 mb-6 overflow-x-auto">
+                    <button onclick="profile.switchTab('artifacts')" id="tab-artifacts" class="profile-tab active whitespace-nowrap">Artifacts</button>
+                    <button onclick="profile.switchTab('allies')" id="tab-allies" class="profile-tab whitespace-nowrap">Allies</button>
+                    <button onclick="profile.switchTab('covens')" id="tab-covens" class="profile-tab whitespace-nowrap">Covens</button>
                 </div>
 
                 <div id="profile-content-area" class="min-h-[200px]">
@@ -984,17 +1000,17 @@
 
 
                     <div class="glass border-b-0 rounded-t-lg p-3 flex gap-2 items-center flex-wrap toolbar-layer">
-                        <button onclick="document.execCommand('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400" title="Bold"><i class="fas fa-bold"></i></button>
-                        <button onclick="document.execCommand('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400" title="Italic"><i class="fas fa-italic"></i></button>
-                        <button onclick="document.execCommand('insertOrderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400" title="Ordered List"><i class="fas fa-list-ol"></i></button>
-                        <button onclick="document.execCommand('insertUnorderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400" title="Unordered List"><i class="fas fa-list-ul"></i></button>
-                        <div class="w-px h-5 bg-white/10 mx-2"></div>
-                        <button onclick="document.execCommand('justifyLeft')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400"><i class="fas fa-align-left"></i></button>
-                        <button onclick="document.execCommand('justifyCenter')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400"><i class="fas fa-align-center"></i></button>
-                        <button onclick="document.execCommand('justifyRight')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400"><i class="fas fa-align-right"></i></button>
-                        <div class="w-px h-5 bg-white/10 mx-2"></div>
+                        <button onclick="document.execCommand('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0" title="Bold"><i class="fas fa-bold"></i></button>
+                        <button onclick="document.execCommand('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0" title="Italic"><i class="fas fa-italic"></i></button>
+                        <button onclick="document.execCommand('insertOrderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0" title="Ordered List"><i class="fas fa-list-ol"></i></button>
+                        <button onclick="document.execCommand('insertUnorderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0" title="Unordered List"><i class="fas fa-list-ul"></i></button>
+                        <div class="w-px h-5 bg-white/10 mx-2 flex-shrink-0"></div>
+                        <button onclick="document.execCommand('justifyLeft')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0"><i class="fas fa-align-left"></i></button>
+                        <button onclick="document.execCommand('justifyCenter')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0"><i class="fas fa-align-center"></i></button>
+                        <button onclick="document.execCommand('justifyRight')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0"><i class="fas fa-align-right"></i></button>
+                        <div class="w-px h-5 bg-white/10 mx-2 flex-shrink-0"></div>
                         
-                        <div class="flex items-center bg-black/40 rounded border border-white/10">
+                        <div class="flex items-center bg-black/40 rounded border border-white/10 flex-shrink-0">
                              <div class="custom-select" id="img-scale-select" style="min-width: 80px; border: none;" onclick="ui.toggleSelect('img-scale-select')">
                                  <div class="select-selected" id="img-scale-selected" style="background: transparent; border: none; padding: 8px;">Full</div>
                                  <div class="select-items">
@@ -1009,7 +1025,7 @@
                         <input type="file" id="inline-image-input" class="hidden" accept="image/*">
                     </div>
 
-                    <div id="editor-content" contenteditable="true" class="glass rounded-b-lg p-8 border-t-0 min-h-[500px] focus:outline-none focus:bg-black/60 transition-colors text-gray-300 font-story leading-loose text-lg relative z-0"></div>
+                    <div id="editor-content" contenteditable="true" class="glass rounded-b-lg p-4 md:p-8 border-t-0 min-h-[500px] focus:outline-none focus:bg-black/60 transition-colors text-gray-300 font-story leading-loose text-base md:text-lg relative z-0"></div>
 
                     <div class="flex justify-between items-center mt-8">
                         <div class="text-xs text-gray-500 font-mono">
@@ -1034,15 +1050,15 @@
                     <button onclick="router.back()" class="mb-6 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-white flex items-center gap-2 transition-colors"><i class="fas fa-arrow-left"></i> The Void</button>
 
                     <article class="glass rounded-xl overflow-hidden mb-8 border-t border-white/10">
-                        <div class="relative h-80 w-full">
+                        <div class="relative h-64 md:h-80 w-full">
                             <img id="reader-cover" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#0c0c0c] via-transparent to-transparent"></div>
-                            <h1 id="reader-title" class="absolute bottom-8 left-8 right-8 font-horror text-5xl text-red-600 drop-shadow-lg leading-tight">Title</h1>
+                            <h1 id="reader-title" class="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8 font-horror text-3xl md:text-5xl text-red-600 drop-shadow-lg leading-tight">Title</h1>
                         </div>
 
-                        <div class="px-8 py-6 flex justify-between items-center border-b border-white/5 bg-[#0c0c0c]">
+                        <div class="px-6 py-4 md:px-8 md:py-6 flex justify-between items-center border-b border-white/5 bg-[#0c0c0c]">
                             <div class="flex items-center gap-4 cursor-pointer hover:opacity-80" onclick="profile.openFromReader()">
-                                <div class="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-gray-700">
+                                <div class="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-gray-700 flex-shrink-0">
                                     <img id="reader-avatar" src="" class="w-full h-full object-cover">
                                 </div>
                                 <div>
@@ -1051,7 +1067,7 @@
                                 </div>
                             </div>
                             <div class="flex gap-4">
-                                <button id="btn-reader-edit" onclick="reader.startEdit()" class="hidden text-green-500 hover:text-green-400 transition-colors" title="Edit Story"><i class="fas fa-pen"></i></button>
+                                <button id="btn-reader-edit" onclick="reader.startEdit()" class="hidden text-red-500 hover:text-red-400 transition-colors" title="Edit Story"><i class="fas fa-pen"></i></button>
                                 <button id="btn-reader-suggest" onclick="reader.startSuggestion()" class="text-gray-500 hover:text-red-400 transition-colors" title="Suggest Edit"><i class="fas fa-edit"></i></button>
                                 <button onclick="reader.share()" class="text-gray-500 hover:text-white transition-colors" title="Share URL"><i class="fas fa-share-alt"></i></button>
                                 <button onclick="reader.toggleLike()" class="group flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors cursor-pointer" id="btn-like">
@@ -1062,7 +1078,7 @@
                             </div>
                         </div>
 
-                        <div id="reader-body" class="p-8 md:p-12 font-story text-lg text-gray-300 leading-8 bg-[#0c0c0c]"></div>
+                        <div id="reader-body" class="p-6 md:p-12 font-story text-base md:text-lg text-gray-300 leading-8 bg-[#0c0c0c]"></div>
                         
                         <div id="reader-access-denied" class="hidden p-8 md:p-12 text-center bg-[#0c0c0c]">
                             <i class="fas fa-lock text-5xl text-red-800 mb-4"></i>
@@ -1070,8 +1086,8 @@
                             <p class="text-gray-500 mt-2">This story is for Coven coveneers only. Join the Coven to unlock its secrets.</p>
                         </div>
 
-                        <div class="px-8 py-6 bg-black/40 border-t border-white/5 flex justify-between items-center flex-wrap gap-4">
-                            <div>
+                        <div class="px-8 py-6 bg-black/40 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div class="text-center md:text-left">
                                 <h4 class="font-bold text-gray-400 text-sm">Enjoyed the terror?</h4>
                                 <p class="text-xs text-gray-600 mt-1">Reward the creator with credits.</p>
                             </div>
@@ -1080,7 +1096,7 @@
                                     <button onclick="reader.creshare(10)" class="btn-secondary text-xs border-green-900 text-green-700 hover:text-green-400 hover:border-green-500"><i class="fas fa-coins mr-1"></i> 10</button>
                                     <button onclick="reader.creshare(50)" class="btn-secondary text-xs border-green-900 text-green-700 hover:text-green-400 hover:border-green-500"><i class="fas fa-coins mr-1"></i> 50</button>
                                 </div>
-                                <div class="h-6 w-px bg-white/10"></div>
+                                <div class="h-6 w-px bg-white/10 hidden md:block"></div>
                                 <div class="flex items-center gap-2">
                                     <div class="spin-edit-container">
                                         <button class="spin-btn" onclick="ui.spin('reader-tip-input', -1)">-</button>
@@ -1096,11 +1112,11 @@
                     </article>
 
                     <!-- Comments -->
-                    <div class="glass p-8 rounded-xl">
+                    <div class="glass p-6 md:p-8 rounded-xl">
                         <h3 class="font-horror text-2xl text-gray-500 mb-6">Echoes</h3>
-                        <div class="flex gap-4 mb-8">
-                            <input type="text" id="comment-input" placeholder="Whisper into the dark..." class="input-void">
-                            <button onclick="reader.postComment()" class="btn-main py-2 px-6">Post</button>
+                        <div class="flex flex-col md:flex-row gap-4 mb-8">
+                            <input type="text" id="comment-input" placeholder="Whisper into the dark..." class="input-void w-full">
+                            <button onclick="reader.postComment()" class="btn-main py-2 px-6 w-full md:w-auto">Post</button>
                         </div>
                         <div id="comments-list" class="space-y-6"></div>
                         <div id="comments-empty" class="text-center text-gray-700 py-4 hidden">
@@ -1116,7 +1132,7 @@
 
     <!-- PROFILE EDITOR MODAL -->
     <div id="modal-profile" class="fixed inset-0 z-[80] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass w-full max-w-md p-8 rounded-xl border border-white/10 relative">
+        <div class="glass w-[95%] max-w-md p-8 rounded-xl border border-white/10 relative">
             <button onclick="ui.closeProfileEditor()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
             <h2 class="font-horror text-3xl text-white mb-6">Identity</h2>
             
@@ -1131,7 +1147,8 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-xs text-gray-500 uppercase">Username</label>
-                    <input type="text" id="edit-username" class="input-void">
+                    <input type="text" id="edit-username" class="input-void" autocomplete="off">
+                    <p id="edit-username-feedback" class="hidden text-xs font-bold mt-1"></p>
                 </div>
                 <div>
                     <label class="text-xs text-gray-500 uppercase">Realm Link (Website)</label>
@@ -1141,29 +1158,29 @@
                     <label class="text-xs text-gray-500 uppercase">Bio</label>
                     <textarea id="edit-bio" class="input-void h-20 resize-none"></textarea>
                 </div>
-                <button onclick="profile.save()" class="btn-main w-full">Save Changes</button>
+                <button onclick="profile.save()" class="btn-main w-full" id="btn-profile-save">Save Changes</button>
             </div>
         </div>
     </div>
 
     <!-- SUGGESTION REVIEW MODAL (REDESIGNED) -->
     <div id="modal-diff" class="fixed inset-0 z-[100] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass w-full max-w-6xl p-8 rounded-xl border border-green-900/40 relative max-h-[90vh] flex flex-col">
+        <div class="glass w-[95%] max-w-6xl p-6 md:p-8 rounded-xl border border-green-900/40 relative max-h-[90vh] flex flex-col">
              <h2 class="font-horror text-3xl text-green-500 mb-2">Review Suggestion</h2>
              <p class="text-gray-400 text-sm mb-6">Compare the original version with the suggested changes. Accepting will update the story.</p>
              
              <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
                 <!-- Original Column -->
-                <div>
+                <div class="h-40 md:h-auto overflow-hidden flex flex-col">
                     <h3 class="font-bold text-gray-500 uppercase tracking-widest text-xs mb-2">Original Version</h3>
-                    <div id="diff-original" class="h-full overflow-y-auto bg-black/50 p-6 rounded border border-white/10 font-story leading-relaxed text-gray-400">
+                    <div id="diff-original" class="flex-grow overflow-y-auto bg-black/50 p-6 rounded border border-white/10 font-story leading-relaxed text-gray-400">
                         <!-- Original content here -->
                     </div>
                 </div>
                 <!-- New Column -->
-                <div>
+                <div class="h-40 md:h-auto overflow-hidden flex flex-col">
                     <h3 class="font-bold text-green-500 uppercase tracking-widest text-xs mb-2">Suggested Version</h3>
-                    <div id="diff-new" class="h-full overflow-y-auto bg-black/50 p-6 rounded border border-green-900/40 font-story leading-relaxed text-gray-300">
+                    <div id="diff-new" class="flex-grow overflow-y-auto bg-black/50 p-6 rounded border border-green-900/40 font-story leading-relaxed text-gray-300">
                         <!-- New content here -->
                     </div>
                 </div>
@@ -1225,13 +1242,25 @@
             listeners: [],
             cropper: null,
             signupAvatarBlob: null,
+            profileEditAvatarBlob: null,
             userCache: {},
-            leaderboard: []
+            leaderboard: [],
+            usernameValid: false
         };
 
         // --- HELPERS ---
         const dmp = new diff_match_patch();
         
+        // Debounce helper for input events
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
         const getRank = (credits) => {
             if(credits < 100) return "Neophyte";
             if(credits < 500) return "Acolyte";
@@ -1240,7 +1269,6 @@
             return "Elder God";
         };
 
-        // Helper to format username with special creator style
         const formatUsername = (uid, username) => {
              if(uid === CREATOR_ID) {
                  return `<span class="text-creator">${username}</span>`;
@@ -1299,6 +1327,12 @@
             toggleAuth: (mode) => {
                 document.getElementById('form-login').classList.toggle('hidden', mode === 'signup');
                 document.getElementById('form-signup').classList.toggle('hidden', mode === 'login');
+                // Reset validation state on toggle
+                state.usernameValid = false;
+                const feedback = document.getElementById('signup-username-feedback');
+                const input = document.getElementById('signup-name');
+                if(feedback) feedback.classList.add('hidden');
+                if(input) input.classList.remove('input-error', 'input-success');
             },
             alert: (title, msg) => {
                 document.getElementById('alert-title').innerText = title;
@@ -1340,6 +1374,14 @@
                 document.getElementById('edit-bio').value = state.profile.bio || '';
                 document.getElementById('edit-link').value = state.profile.link || '';
                 document.getElementById('edit-profile-avatar').src = state.profile.avatar;
+                
+                // Reset edit validation
+                const feedback = document.getElementById('edit-username-feedback');
+                const input = document.getElementById('edit-username');
+                feedback.classList.add('hidden');
+                input.classList.remove('input-error', 'input-success');
+                state.profileEditAvatarBlob = null;
+                
                 document.getElementById('modal-profile').classList.remove('hidden');
             },
             closeProfileEditor: () => document.getElementById('modal-profile').classList.add('hidden'),
@@ -1532,7 +1574,53 @@
         };
         window.onpopstate = router.handlePopState;
 
-        // --- AUTH ---
+        // --- AUTH & USERNAME VALIDATION ---
+        window.checkUsername = async (username, currentUsername = null) => {
+            if (!username) return { valid: false, message: "Username cannot be empty." };
+            if (username.length < 3) return { valid: false, message: "Username is too short (min 3)." };
+            
+            // If checking specifically for profile edit and it matches current, it's valid (yours)
+            if (currentUsername && username === currentUsername) {
+                return { valid: true, message: "This is your current name." }; 
+            }
+
+            // Check DB
+            try {
+                const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users'), where('username', '==', username));
+                const snap = await getDocs(q);
+                if (!snap.empty) return { valid: false, message: "This name is already taken." };
+                return { valid: true, message: "This name is available." };
+            } catch(e) {
+                console.error(e);
+                return { valid: false, message: "Error checking name." };
+            }
+        };
+
+        const handleUsernameInput = async (inputId, feedbackId, currentName = null) => {
+            const input = document.getElementById(inputId);
+            const feedback = document.getElementById(feedbackId);
+            const val = input.value.trim();
+            
+            feedback.classList.remove('hidden');
+            feedback.innerText = "Checking...";
+            feedback.className = "text-xs font-bold mt-1 text-gray-500";
+            input.classList.remove('input-error', 'input-success');
+
+            const result = await checkUsername(val, currentName);
+            
+            if (result.valid) {
+                state.usernameValid = true;
+                feedback.innerText = result.message;
+                feedback.className = "text-xs font-bold mt-1 text-success";
+                input.classList.add('input-success');
+            } else {
+                state.usernameValid = false;
+                feedback.innerText = result.message;
+                feedback.className = "text-xs font-bold mt-1 text-error";
+                input.classList.add('input-error');
+            }
+        };
+
         window.auth = {
             login: async () => {
                 ui.loading(true);
@@ -1543,8 +1631,13 @@
                 } catch(err) { ui.loading(false); ui.alert('Login Failed', err.message); }
             },
             signup: async () => {
+                const n = document.getElementById('signup-name').value.trim();
+                
+                // Pre-check availability
+                const check = await checkUsername(n);
+                if(!check.valid) return ui.alert("Invalid Name", check.message);
+
                 ui.loading(true);
-                const n = document.getElementById('signup-name').value;
                 const e = document.getElementById('signup-email').value;
                 const p = document.getElementById('signup-pass').value;
                 const bio = document.getElementById('signup-bio').value;
@@ -1601,11 +1694,11 @@
                             el.className = 'glass p-3 rounded flex items-center gap-3 cursor-pointer hover:bg-white/5 transition-colors border-l-2 border-red-900/30 hover:border-red-500';
                             el.onclick = () => profile.open(d.id);
                             el.innerHTML = `
-                                <div class="w-10 h-10 rounded-full border border-gray-800 overflow-hidden">
+                                <div class="w-10 h-10 rounded-full border border-gray-800 overflow-hidden flex-shrink-0">
                                     <img src="${u.avatar}" class="w-full h-full object-cover">
                                 </div>
-                                <div>
-                                    <div class="font-bold text-gray-300 text-sm">${formatUsername(d.id, u.username)}</div>
+                                <div class="overflow-hidden">
+                                    <div class="font-bold text-gray-300 text-sm truncate">${formatUsername(d.id, u.username)}</div>
                                     <div class="text-[10px] text-red-500 uppercase tracking-wider">${getRank(u.credits)}</div>
                                 </div>
                             `;
@@ -1628,11 +1721,11 @@
                         el.className = 'glass p-3 rounded flex items-center gap-3 cursor-pointer hover:bg-white/5 transition-colors border-l-2 border-gray-700/30 hover:border-white';
                         el.onclick = () => profile.open(d.id);
                         el.innerHTML = `
-                            <div class="w-8 h-8 rounded-full border border-gray-800 overflow-hidden">
+                            <div class="w-8 h-8 rounded-full border border-gray-800 overflow-hidden flex-shrink-0">
                                 <img src="${u.avatar}" class="w-full h-full object-cover">
                             </div>
-                            <div>
-                                <div class="font-bold text-gray-300 text-sm">${formatUsername(d.id, u.username)}</div>
+                            <div class="overflow-hidden">
+                                <div class="font-bold text-gray-300 text-sm truncate">${formatUsername(d.id, u.username)}</div>
                                 <div class="text-[10px] text-gray-500">${getRank(u.credits)} • ${u.joined ? timeAgo(u.joined) : 'Just now'}</div>
                             </div>
                         `;
@@ -2190,14 +2283,14 @@
                 contentDiv.innerHTML = `
                     <div class="bg-[#0a0a0a] p-5 rounded-lg border border-white/10 shadow-lg">
                         <div class="flex items-center gap-3 mb-4">
-                            <img src="${author.avatar}" class="w-10 h-10 rounded-full border border-gray-700">
+                            <img src="${author.avatar}" class="w-10 h-10 rounded-full border border-gray-700 flex-shrink-0">
                             <div>
                                 <div class="font-bold text-red-400 text-sm">${formatUsername(author.id, author.username)}${verifiedBadge}</div>
                                 <div class="text-[10px] text-gray-600">${postedTime}</div>
                             </div>
                         </div>
-                        <h2 class="text-3xl font-bold text-white mb-4 font-story leading-tight">${data.title}</h2>
-                        <div class="text-gray-300 text-lg leading-loose font-story">${data.content}</div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-4 font-story leading-tight">${data.title}</h2>
+                        <div class="text-gray-300 text-base md:text-lg leading-loose font-story">${data.content}</div>
                         
                         <div class="flex gap-4 text-xs font-bold pt-4 mt-4 border-t border-white/5">
                              <button onclick="reader.toggleLike()" class="flex items-center gap-2 hover:text-red-500 transition-colors group">
@@ -2257,13 +2350,13 @@
                     <div class="flex-shrink-0">
                         <img src="${comment.authorAvatar || `https://ui-avatars.com/api/?name=${comment.author.replace(/\s/g, '+')}&background=random`}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
                     </div>
-                    <div class="flex-grow">
+                    <div class="flex-grow min-w-0">
                         <div class="bg-gray-900/50 p-3 rounded-lg border border-white/5">
                             <div class="flex items-center gap-2 text-xs mb-2">
                                 <span class="font-bold text-red-400">${formattedCommentAuthor}</span>
                                 <span class="text-gray-600">• ${commentTime}</span>
                             </div>
-                            <p class="text-sm text-gray-300 leading-relaxed font-story">${comment.text}</p>
+                            <p class="text-sm text-gray-300 leading-relaxed font-story break-words">${comment.text}</p>
                         </div>
                         <div class="mt-2 text-xs">
                             <button class="font-bold text-gray-500 hover:text-white" onclick="threadView.showReplyBox('${comment.id}', '${comment.author}')">Reply</button>
@@ -2650,7 +2743,7 @@
                     el.innerHTML = `
                         <div class="flex justify-between items-start mb-4 relative z-10">
                             <div class="flex items-center gap-3">
-                                <img src="${author.avatar}" class="w-8 h-8 rounded-full bg-gray-800 border border-white/10">
+                                <img src="${author.avatar}" class="w-8 h-8 rounded-full bg-gray-800 border border-white/10 flex-shrink-0">
                                 <div>
                                     <div class="text-xs font-bold text-gray-400 group-hover:text-red-500 transition-colors">${formattedAuthorName}${verifiedBadge}</div>
                                     <div class="text-[10px] text-gray-600 font-mono">THREAD • ${postedTime}</div>
@@ -2893,14 +2986,47 @@
         // --- PROFILE SYSTEM ---
         window.profile = {
             save: async () => { 
-                const newName = document.getElementById('edit-username').value;
-                const newBio = document.getElementById('edit-bio').value;
-                const newLink = document.getElementById('edit-link').value;
+                const newName = document.getElementById('edit-username').value.trim();
+                const newBio = document.getElementById('edit-bio').value.trim();
+                const newLink = document.getElementById('edit-link').value.trim();
+                
+                // Check if changes were made
+                const isNameSame = newName === state.profile.username;
+                const isBioSame = newBio === (state.profile.bio || '');
+                const isLinkSame = newLink === (state.profile.link || '');
+                const isAvatarSame = !state.profileEditAvatarBlob;
+
+                if (isNameSame && isBioSame && isLinkSame && isAvatarSame) {
+                    return ui.alert("Stagnation", "No changes were made to your identity.");
+                }
+
+                // If name changed, check availability again to be safe
+                if (!isNameSame) {
+                    const check = await checkUsername(newName);
+                    if (!check.valid) return ui.alert("Invalid Name", check.message);
+                }
+
+                ui.loading(true);
+
+                let avatarUrl = state.profile.avatar;
+                if (state.profileEditAvatarBlob) {
+                     const uploadedUrl = await creator.upload(state.profileEditAvatarBlob);
+                     if (uploadedUrl) avatarUrl = uploadedUrl;
+                }
+
                 await updateDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid), {
-                    username: newName, bio: newBio, link: newLink
+                    username: newName, bio: newBio, link: newLink, avatar: avatarUrl
                 });
+                
+                // Update Firebase Auth profile display name too
+                if (!isNameSame) {
+                     await updateProfile(authService.currentUser, { displayName: newName });
+                }
+
+                state.profileEditAvatarBlob = null;
                 ui.closeProfileEditor();
                 ui.alert("Identity", "Your mask has been adjusted.");
+                ui.loading(false);
             },
             viewSelf: () => profile.open(state.user.uid),
             openFromReader: () => {
@@ -3544,7 +3670,7 @@
                     list.innerHTML += `
                         <div class="bg-white/5 p-4 rounded border-l-2 border-red-900">
                             <div class="text-xs text-red-400 font-bold mb-1">${formatUsername(c.authorId, c.author)} • ${commentTime}</div>
-                            <div class="text-sm text-gray-300 font-story">${c.text}</div>
+                            <div class="text-sm text-gray-300 font-story break-words">${c.text}</div>
                         </div>
                     `;
                 });
@@ -3577,15 +3703,9 @@
             if (e.target.files && e.target.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    ui.initCropper(event.target.result, async (blob) => {
-                        ui.loading(true);
-                        const url = await creator.upload(blob);
-                        if(url) {
-                            document.getElementById('edit-profile-avatar').src = url;
-                            await updateDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid), { avatar: url });
-                            state.userCache[state.user.uid] = null;
-                        }
-                        ui.loading(false);
+                    ui.initCropper(event.target.result, (blob) => {
+                        state.profileEditAvatarBlob = blob;
+                        document.getElementById('edit-profile-avatar').src = URL.createObjectURL(blob);
                     });
                 };
                 reader.readAsDataURL(e.target.files[0]);
@@ -3616,6 +3736,15 @@
                 state.draft.images++; creator.recalc();
             }
         });
+        
+        // --- VALIDATION LISTENERS ---
+        document.getElementById('signup-name').addEventListener('input', debounce(() => {
+            handleUsernameInput('signup-name', 'signup-username-feedback');
+        }, 500));
+
+        document.getElementById('edit-username').addEventListener('input', debounce(() => {
+            handleUsernameInput('edit-username', 'edit-username-feedback', state.profile.username);
+        }, 500));
         
         function setupSearchClear(inputId, clearId, searchIconClass, onClear) {
             const input = document.getElementById(inputId);
@@ -3685,7 +3814,8 @@
                         state.profile = profileData;
                         state.userCache[user.uid] = { id: user.uid, ...profileData };
 
-                        document.getElementById('nav-user').innerText = state.profile.username;
+                        const navUser = document.getElementById('nav-user');
+                        if(navUser) navUser.innerText = state.profile.username;
                         document.getElementById('nav-credits').innerText = state.profile.credits;
                         document.getElementById('view-auth').classList.add('hidden');
                         document.getElementById('app-shell').classList.remove('hidden');
