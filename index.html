@@ -8,9 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Diff Library (kept for potential future use, but not for display) -->
+    <!-- Diff Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
-    <!-- Cropper.js for Avatar Cropping -->
+    <!-- Cropper.js -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <style>
@@ -46,6 +46,32 @@
         .font-horror { font-family: 'Creepster', cursive; letter-spacing: 0.1em; }
         .font-story { font-family: 'Merriweather', serif; }
 
+		/* --- CREATOR ANIMATION --- */
+		@keyframes flowRight {
+			0% { background-position: 0% 50%; }
+			100% { background-position: 200% 50%; }
+		}
+
+		.text-creator {
+			background: linear-gradient(
+				90deg,
+				#5c0000,  /* very dark red */
+				#8a0000,  /* dark red */
+				#cc0000,  /* deep red */
+				#ff1a1a,  /* bright red */
+				#5c0000   /* very dark red again */
+			);
+			background-size: 200% 100%;
+			color: transparent;
+			-webkit-background-clip: text;
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
+			animation: flowRight 3s linear infinite;
+			font-weight: 900;
+			display: inline-block;
+			letter-spacing: 0.5px;
+		}
+		
         /* --- TEXTURE & ATMOSPHERE --- */
         .noise-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -209,7 +235,6 @@
             border-bottom: 1px solid transparent;
             background: rgba(10,10,10,0.8);
             position: relative;
-            /* Transition properties explicitly */
             transition: transform 0.3s ease-out, border-color 0.3s ease, background-color 0.3s ease;
         }
         .thread-card:hover { 
@@ -346,7 +371,7 @@
     <div id="modal-coven-members" class="fixed inset-0 z-[110] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
         <div class="glass w-full max-w-md p-6 rounded-lg border border-white/10 relative">
             <button onclick="ui.closeModal('modal-coven-members')" class="absolute top-3 right-3 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
-            <h3 class="font-horror text-2xl text-red-500 mb-4">Coven Members</h3>
+            <h3 class="font-horror text-2xl text-red-500 mb-4">Coven Coveneers</h3>
             <div id="coven-members-list" class="max-h-80 overflow-y-auto space-y-3 pr-2">
                 <!-- Member list populated by JS -->
             </div>
@@ -391,10 +416,10 @@
                     <h4 class="font-bold text-lg text-white mb-2">Coven Rewards</h4>
                     <p>Being part of an active Coven provides unique opportunities to earn credits:</p>
                     <ul class="list-disc pl-5 mt-2 space-y-1 text-gray-300">
-                        <li><b class="text-purple-400">Join Fee Payouts:</b> When a new member pays a fee to join, the credits are distributed among the Coven's leadership. The Founder receives the largest share, with Elders also receiving a portion.</li>
-                        <li><b class="text-purple-400">Featured Posts:</b> Coven founders can feature a member's post, granting the author a <span class="font-mono text-yellow-400">25 CR</span> bonus.</li>
-                        <li><b class="text-purple-400">Coven Milestones:</b> When your Coven reaches milestones (e.g., 25 members), all active members may receive a bonus.</li>
-                        <li><b class="text-purple-400">Weekly Activity:</b> The most active Covens each week (based on new posts, comments, and members) grant a passive <span class="font-mono text-yellow-400">CR</span> bonus to all their members.</li>
+                        <li><b class="text-purple-400">Join Fee Payouts:</b> When a new coveneer pays a fee to join, the credits are distributed among the Coven's leadership. The Founder receives the largest share, with Elders also receiving a portion.</li>
+                        <li><b class="text-purple-400">Featured Posts:</b> Coven founders can feature a coveneer's post, granting the author a <span class="font-mono text-yellow-400">25 CR</span> bonus.</li>
+                        <li><b class="text-purple-400">Coven Milestones:</b> When your Coven reaches milestones (e.g., 25 coveneers), all active coveneers may receive a bonus.</li>
+                        <li><b class="text-purple-400">Weekly Activity:</b> The most active Covens each week (based on new posts, comments, and coveneers) grant a passive <span class="font-mono text-yellow-400">CR</span> bonus to all their coveneers.</li>
                     </ul>
                 </div>
                  <div>
@@ -854,7 +879,7 @@
                                 <h1 id="coven-hero-name" class="font-horror text-5xl text-red-500 drop-shadow-lg mb-2">Coven Name</h1>
                                 <p id="coven-hero-desc" class="text-gray-300 max-w-2xl text-sm">Description...</p>
                                 <div class="flex items-center gap-4 mt-4 text-xs text-gray-500 font-mono">
-                                    <span class="cursor-pointer hover:text-white" onclick="communities.showMembers()"><i class="fas fa-users mr-2"></i><span id="coven-member-count">0</span> Members</span>
+                                    <span class="cursor-pointer hover:text-white" onclick="communities.showMembers()"><i class="fas fa-users mr-2"></i><span id="coven-member-count">0</span> Coveneers</span>
                                     <span><i class="fas fa-crown mr-2"></i><span id="coven-creator">Creator</span></span>
                                 </div>
                             </div>
@@ -947,9 +972,9 @@
                         <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Coven Post Options</h4>
                         <label class="flex items-center gap-3 cursor-pointer" for="create-members-only">
                             <input type="checkbox" id="create-members-only" class="appearance-none w-4 h-4 border-2 border-gray-600 rounded bg-black/40 checked:bg-red-800 checked:border-red-600 transition-colors">
-                            <span class="text-sm text-gray-400">Members-Only Access</span>
+                            <span class="text-sm text-gray-400">Coveneers-Only Access</span>
                         </label>
-                        <p class="text-xs text-gray-600 -mt-2 ml-7">If checked, only members of the coven can view this story.</p>
+                        <p class="text-xs text-gray-600 -mt-2 ml-7">If checked, only coveneers of the coven can view this story.</p>
                         <!-- Placeholder for future collab feature -->
                         <label class="flex items-center gap-3 cursor-not-allowed opacity-50" for="create-collab">
                             <input type="checkbox" id="create-collab" disabled class="appearance-none w-4 h-4 border-2 border-gray-600 rounded bg-black/40">
@@ -1027,7 +1052,7 @@
                             </div>
                             <div class="flex gap-4">
                                 <button id="btn-reader-edit" onclick="reader.startEdit()" class="hidden text-green-500 hover:text-green-400 transition-colors" title="Edit Story"><i class="fas fa-pen"></i></button>
-                                <button onclick="reader.startSuggestion()" class="text-gray-500 hover:text-red-400 transition-colors" title="Suggest Edit"><i class="fas fa-edit"></i></button>
+                                <button id="btn-reader-suggest" onclick="reader.startSuggestion()" class="text-gray-500 hover:text-red-400 transition-colors" title="Suggest Edit"><i class="fas fa-edit"></i></button>
                                 <button onclick="reader.share()" class="text-gray-500 hover:text-white transition-colors" title="Share URL"><i class="fas fa-share-alt"></i></button>
                                 <button onclick="reader.toggleLike()" class="group flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors cursor-pointer" id="btn-like">
                                     <i class="fas fa-heart text-xl group-hover:scale-110 transition-transform" id="like-icon"></i>
@@ -1042,7 +1067,7 @@
                         <div id="reader-access-denied" class="hidden p-8 md:p-12 text-center bg-[#0c0c0c]">
                             <i class="fas fa-lock text-5xl text-red-800 mb-4"></i>
                             <h3 class="font-horror text-3xl text-gray-400">Forbidden Scripture</h3>
-                            <p class="text-gray-500 mt-2">This story is for Coven members only. Join the Coven to unlock its secrets.</p>
+                            <p class="text-gray-500 mt-2">This story is for Coven coveneers only. Join the Coven to unlock its secrets.</p>
                         </div>
 
                         <div class="px-8 py-6 bg-black/40 border-t border-white/5 flex justify-between items-center flex-wrap gap-4">
@@ -1160,7 +1185,6 @@
 
         // --- CONFIG ---
         const firebaseConfig = {
-            // IMPORTANT: REPLACE WITH YOUR FIREBASE CONFIGURATION
             apiKey: "AIzaSyCf869FUD-h2AUwLeXQtxpCFBNm9BYOIEM", 
             authDomain: "storedstorablestories.firebaseapp.com",
             projectId: "storedstorablestories",
@@ -1173,8 +1197,9 @@
         const app = initializeApp(firebaseConfig);
         const authService = getAuth(app);
         const db = getFirestore(app);
-        const IMGBB_KEY = "b7e9ce509e0ce673e002f8afd73fb71b"; // Replace with your ImgBB key if you have one
-        const APP_ID_PATH = "1:329819137762:web:6fd48985a42f07368a60bb"; // This is okay to be public
+        const IMGBB_KEY = "b7e9ce509e0ce673e002f8afd73fb71b"; 
+        const APP_ID_PATH = "1:329819137762:web:6fd48985a42f07368a60bb"; 
+        const CREATOR_ID = "bXFA3reA4veXpQ0tmMDbwSq9oF23";
 
         // --- STATE ---
         const state = {
@@ -1213,6 +1238,14 @@
             if(credits < 1500) return "Cultist";
             if(credits < 5000) return "Warlock";
             return "Elder God";
+        };
+
+        // Helper to format username with special creator style
+        const formatUsername = (uid, username) => {
+             if(uid === CREATOR_ID) {
+                 return `<span class="text-creator">${username}</span>`;
+             }
+             return username;
         };
 
         const timeAgo = (timestamp) => {
@@ -1405,9 +1438,8 @@
             go: (view, params = {}) => {
                 const currentView = router.getCurrentView();
                 
-                // ✅ FIX: Add cleanup logic when navigating AWAY from the create view if it's in a special state.
                 if (currentView === 'create' && (state.draft.isEdit || state.draft.isSuggestion)) {
-                    if (view !== 'create') { // Only reset if we are actually leaving the create page.
+                    if (view !== 'create') {
                         creator.reset();
                     }
                 }
@@ -1475,7 +1507,6 @@
                 }
             },
             handlePopState: (event) => {
-                 // ✅ FIX: Add cleanup logic for back/forward browser navigation.
                  if (router.getCurrentView() === 'create' && (state.draft.isEdit || state.draft.isSuggestion)) {
                     creator.reset();
                  }
@@ -1574,7 +1605,7 @@
                                     <img src="${u.avatar}" class="w-full h-full object-cover">
                                 </div>
                                 <div>
-                                    <div class="font-bold text-gray-300 text-sm">${u.username}</div>
+                                    <div class="font-bold text-gray-300 text-sm">${formatUsername(d.id, u.username)}</div>
                                     <div class="text-[10px] text-red-500 uppercase tracking-wider">${getRank(u.credits)}</div>
                                 </div>
                             `;
@@ -1601,7 +1632,7 @@
                                 <img src="${u.avatar}" class="w-full h-full object-cover">
                             </div>
                             <div>
-                                <div class="font-bold text-gray-300 text-sm">${u.username}</div>
+                                <div class="font-bold text-gray-300 text-sm">${formatUsername(d.id, u.username)}</div>
                                 <div class="text-[10px] text-gray-500">${getRank(u.credits)} • ${u.joined ? timeAgo(u.joined) : 'Just now'}</div>
                             </div>
                         `;
@@ -1636,7 +1667,7 @@
                                 </div>
                                 <h3 class="font-bold text-red-400 text-sm mb-1 truncate">${c.name}</h3>
                                 <div class="text-[10px] text-gray-600 font-mono">
-                                    <i class="fas fa-users mr-1"></i> ${c.memberCount} Members
+                                    <i class="fas fa-users mr-1"></i> ${c.memberCount} Coveneers
                                 </div>
                             </div>
                         `;
@@ -1685,7 +1716,7 @@
                                 </div>
                                 <h3 class="font-bold text-red-400 text-sm mb-1 truncate">${c.name}</h3>
                                 <div class="text-[10px] text-gray-600 font-mono">
-                                    <i class="fas fa-users mr-1"></i> ${c.memberCount} Members
+                                    <i class="fas fa-users mr-1"></i> ${c.memberCount} Coveneers
                                 </div>
                             </div>
                         `;
@@ -1758,7 +1789,7 @@
                     if (creator) {
                         const isVerified = (creator.followerCount || 0) >= 100;
                         const verifiedBadge = isVerified ? ` <span class="text-red-600 text-xs" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
-                        document.getElementById('coven-creator').innerHTML = creator.username + verifiedBadge;
+                        document.getElementById('coven-creator').innerHTML = formatUsername(data.creatorId, creator.username) + verifiedBadge;
                     } else {
                         document.getElementById('coven-creator').innerText = 'Unknown';
                     }
@@ -1927,12 +1958,14 @@
 
                 const commonClickHandler = () => {
                     if (isMembersOnly && !communities.isMember()) {
-                        ui.alert('Access Denied', 'This content is for Coven members only.');
+                        ui.alert('Access Denied', 'This content is for Coven coveneers only.');
                         return;
                     }
                     if (isThread) threadView.open(data.id, data);
                     else reader.open(data.id, data);
                 };
+
+                const formattedAuthorName = formatUsername(author.id, author.username);
 
                 if (isThread) {
                     el.className = 'glass rounded-lg p-3 thread-card flex flex-col coven-post-card cursor-pointer'; 
@@ -1942,11 +1975,11 @@
                             <div class="flex items-center gap-3 mb-3">
                                 <img src="${author.avatar}" class="w-8 h-8 rounded-full bg-gray-800 border border-white/10">
                                 <div>
-                                    <div class="text-xs font-bold text-gray-400">${author.username}${verifiedBadge}</div>
+                                    <div class="text-xs font-bold text-gray-400">${formattedAuthorName}${verifiedBadge}</div>
                                     <div class="text-[10px] text-gray-600 font-mono">THREAD • ${postedTime}</div>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3 text-gray-500">${isMembersOnly ? `<i class="fas fa-lock text-xs text-yellow-600" title="Members Only"></i>` : ''} ${managementControls}</div>
+                            <div class="flex items-center gap-3 text-gray-500">${isMembersOnly ? `<i class="fas fa-lock text-xs text-yellow-600" title="Coveneers Only"></i>` : ''} ${managementControls}</div>
                         </div>
                         <h4 class="font-bold text-lg text-gray-200 mb-2 hover:text-red-400">${data.title}</h4>
                         <p class="text-sm text-gray-500 line-clamp-3 mb-4 font-story">${data.description}</p>
@@ -1972,12 +2005,12 @@
                                     <div class="bg-red-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg uppercase tracking-widest">
                                         ${data.category || 'Unknown'}
                                     </div>
-                                    ${isMembersOnly ? `<div class="text-yellow-600 mt-1 text-right" title="Members Only"><i class="fas fa-lock text-xs"></i></div>` : ''}
+                                    ${isMembersOnly ? `<div class="text-yellow-600 mt-1 text-right" title="Coveneers Only"><i class="fas fa-lock text-xs"></i></div>` : ''}
                                 </div>
                             </div>
                             <p class="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">${data.description}</p>
                             <div class="flex justify-between items-center text-xs text-gray-600 border-t border-white/5 pt-3">
-                                <span class="flex items-center gap-1"><img src="${author.avatar}" class="w-4 h-4 rounded-full"> ${author.username}${verifiedBadge}</span>
+                                <span class="flex items-center gap-1"><img src="${author.avatar}" class="w-4 h-4 rounded-full"> ${formattedAuthorName}${verifiedBadge}</span>
                                 <div class="flex items-center gap-3">
                                     ${managementControls}
                                     <span class="flex items-center gap-1">
@@ -2004,7 +2037,7 @@
             showMembers: async () => {
                 if (!state.activeCommunity) return;
                 const listEl = document.getElementById('coven-members-list');
-                listEl.innerHTML = '<div class="text-center text-gray-600 text-xs py-4"><i class="fas fa-spinner fa-spin"></i> Loading members...</div>';
+                listEl.innerHTML = '<div class="text-center text-gray-600 text-xs py-4"><i class="fas fa-spinner fa-spin"></i> Loading coveneers...</div>';
                 ui.openModal('modal-coven-members');
 
                 const memberIds = state.activeCommunity.members || [];
@@ -2028,7 +2061,7 @@
                         if (userRole === 'Member') {
                             actionsHtml += `<button onclick="communities.manageRole('${user.id}', 'Elder')" class="text-[10px] font-bold uppercase border border-yellow-800 text-yellow-500 px-2 py-0.5 rounded hover:bg-yellow-900/40">Make Elder</button>`;
                         } else if (userRole === 'Elder') {
-                            actionsHtml += `<button onclick="communities.manageRole('${user.id}', 'Member')" class="text-[10px] font-bold uppercase border border-gray-600 text-gray-400 px-2 py-0.5 rounded hover:bg-gray-700/40">Make Member</button>`;
+                            actionsHtml += `<button onclick="communities.manageRole('${user.id}', 'Member')" class="text-[10px] font-bold uppercase border border-gray-600 text-gray-400 px-2 py-0.5 rounded hover:bg-gray-700/40">Make Coveneer</button>`;
                         }
                         
                         // Kick button for anyone who isn't the founder.
@@ -2041,7 +2074,7 @@
                         <div class="flex items-center gap-3 cursor-pointer" onclick="ui.closeModal('modal-coven-members'); profile.open('${user.id}')">
                             <img src="${user.avatar}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
                             <div>
-                                <span class="font-bold text-sm text-gray-300">${user.username}</span>
+                                <span class="font-bold text-sm text-gray-300">${formatUsername(user.id, user.username)}</span>
                                 <div class="text-[10px] font-bold uppercase tracking-wider ${userRole === 'Founder' ? 'text-red-500' : userRole === 'Elder' ? 'text-yellow-500' : 'text-gray-500'}">${userRole} (${getRank(user.credits)})</div>
                             </div>
                         </div>
@@ -2049,7 +2082,7 @@
                     `;
                     listEl.appendChild(el);
                 });
-                if (memberProfiles.length === 0) listEl.innerHTML = '<div class="text-center text-gray-600 text-xs py-4">No members yet.</div>';
+                if (memberProfiles.length === 0) listEl.innerHTML = '<div class="text-center text-gray-600 text-xs py-4">No coveneers yet.</div>';
             },
             manageRole: async (targetUid, action) => {
                 const covenRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', state.activeCommunity.id);
@@ -2159,7 +2192,7 @@
                         <div class="flex items-center gap-3 mb-4">
                             <img src="${author.avatar}" class="w-10 h-10 rounded-full border border-gray-700">
                             <div>
-                                <div class="font-bold text-red-400 text-sm">${author.username}${verifiedBadge}</div>
+                                <div class="font-bold text-red-400 text-sm">${formatUsername(author.id, author.username)}${verifiedBadge}</div>
                                 <div class="text-[10px] text-gray-600">${postedTime}</div>
                             </div>
                         </div>
@@ -2218,6 +2251,7 @@
                 const el = document.createElement('div');
                 el.className = 'flex gap-3';
                 const commentTime = comment.createdAt ? timeAgo(comment.createdAt) : 'Just now';
+                const formattedCommentAuthor = formatUsername(comment.authorId, comment.author);
 
                 el.innerHTML = `
                     <div class="flex-shrink-0">
@@ -2226,7 +2260,7 @@
                     <div class="flex-grow">
                         <div class="bg-gray-900/50 p-3 rounded-lg border border-white/5">
                             <div class="flex items-center gap-2 text-xs mb-2">
-                                <span class="font-bold text-red-400">${comment.author}</span>
+                                <span class="font-bold text-red-400">${formattedCommentAuthor}</span>
                                 <span class="text-gray-600">• ${commentTime}</span>
                             </div>
                             <p class="text-sm text-gray-300 leading-relaxed font-story">${comment.text}</p>
@@ -2321,7 +2355,6 @@
                 document.getElementById('cat-selected').innerText = 'Select Realm';
                 document.getElementById('cat-selected').classList.remove('select-active');
                 
-                // ✅ FIX: Explicitly reset headers and button visibility to the default state.
                 document.getElementById('create-header-title').innerText = "Manifest Nightmare";
                 document.getElementById('create-header-sub').innerText = "Authentic Horror Only. No AI.";
                 document.getElementById('btn-publish').classList.remove('hidden');
@@ -2608,6 +2641,7 @@
                 const postedTime = data.createdAt ? timeAgo(data.createdAt) : 'Just now';
                 const isVerified = (author.followerCount || 0) >= 100;
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
+                const formattedAuthorName = formatUsername(author.id, author.username);
 
 
                 if (isThread) {
@@ -2618,7 +2652,7 @@
                             <div class="flex items-center gap-3">
                                 <img src="${author.avatar}" class="w-8 h-8 rounded-full bg-gray-800 border border-white/10">
                                 <div>
-                                    <div class="text-xs font-bold text-gray-400 group-hover:text-red-500 transition-colors">${author.username}${verifiedBadge}</div>
+                                    <div class="text-xs font-bold text-gray-400 group-hover:text-red-500 transition-colors">${formattedAuthorName}${verifiedBadge}</div>
                                     <div class="text-[10px] text-gray-600 font-mono">THREAD • ${postedTime}</div>
                                 </div>
                             </div>
@@ -2647,7 +2681,7 @@
                             <h3 class="font-bold text-lg text-gray-100 mb-2 truncate font-story group-hover:text-red-500 transition-colors">${data.title}</h3>
                             <p class="text-xs text-gray-500 line-clamp-2 mb-4 leading-relaxed">${data.description}</p>
                             <div class="flex justify-between items-center text-xs text-gray-600 border-t border-white/5 pt-3">
-                                <span class="flex items-center gap-1"><img src="${author.avatar}" class="w-4 h-4 rounded-full"> ${author.username}${verifiedBadge}</span>
+                                <span class="flex items-center gap-1"><img src="${author.avatar}" class="w-4 h-4 rounded-full"> ${formattedAuthorName}${verifiedBadge}</span>
                                 <span class="flex items-center gap-1">
                                     <i class="fas fa-heart ${likeIconClass}" id="feed-story-like-icon-${data.id}"></i> 
                                     <span id="feed-story-likes-${data.id}">${data.likes || 0}</span>
@@ -2664,7 +2698,7 @@
                 el.onclick = () => profile.open(userData.id);
                 el.innerHTML = `
                     <img src="${userData.avatar}" class="w-20 h-20 rounded-full mb-4 border-2 border-gray-700">
-                    <h4 class="font-bold text-lg text-white font-story">${userData.username}</h4>
+                    <h4 class="font-bold text-lg text-white font-story">${formatUsername(userData.id, userData.username)}</h4>
                     <span class="text-xs text-red-500 uppercase tracking-widest">${getRank(userData.credits)}</span>
                     <p class="text-xs text-gray-500 mt-3 line-clamp-2">${userData.bio || 'Staring into the abyss...'}</p>
                     <div class="flex items-center gap-2 text-xs text-gray-600 font-mono mt-3">
@@ -2703,7 +2737,7 @@
                     el.className = 'flex-shrink-0 w-40 glass p-4 rounded-lg flex flex-col items-center text-center';
                     el.innerHTML = `
                         <img src="${u.avatar}" class="w-16 h-16 rounded-full mb-3 border-2 border-gray-800 cursor-pointer" onclick="profile.open('${u.id}')">
-                        <h5 class="font-bold text-sm text-white truncate w-full cursor-pointer" onclick="profile.open('${u.id}')">${u.username}</h5>
+                        <h5 class="font-bold text-sm text-white truncate w-full cursor-pointer" onclick="profile.open('${u.id}')">${formatUsername(u.id, u.username)}</h5>
                         <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-3">${getRank(u.credits)}</div>
                         <button id="suggest-follow-${u.id}" onclick="profile.toggleFollow('${u.id}', true)" class="btn-secondary py-1 px-4 text-xs w-full">Follow</button>
                     `;
@@ -2882,7 +2916,9 @@
 
                 const isVerified = (p.followerCount || 0) >= 100;
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
-                document.getElementById('profile-view-name').innerHTML = p.username + verifiedBadge;
+                
+                // Use formatUsername for profile title
+                document.getElementById('profile-view-name').innerHTML = formatUsername(uid, p.username) + verifiedBadge;
                 document.getElementById('profile-view-bio').innerText = p.bio || "Staring into the abyss...";
                 document.getElementById('profile-view-img').src = p.avatar;
                 document.getElementById('profile-view-followers').innerText = abbreviateNumber((p.followers || []).length);
@@ -2910,6 +2946,12 @@
 
                 const badgesContainer = document.getElementById('profile-badges');
                 badgesContainer.innerHTML = '';
+                
+                // Creator Badge Check
+                if(uid === CREATOR_ID) {
+                     badgesContainer.innerHTML += `<span title="The Architect: Creator of Grimoire" class="text-red-600 animate-pulse"><i class="fas fa-code"></i></span>`;
+                }
+                
                 if ((p.covenCreatedCount || 0) > 0) badgesContainer.innerHTML += `<span title="Genesis Coven: Founded a Coven"><i class="fas fa-crown"></i></span>`;
                 if ((p.postCount || 0) >= 10) badgesContainer.innerHTML += `<span title="Prolific Scribe: Published 10+ stories"><i class="fas fa-feather-alt"></i></span>`;
                 if ((p.totalTipped || 0) >= 1000) badgesContainer.innerHTML += `<span title="Patron of Horrors: Tipped over 1000 CR"><i class="fas fa-hand-holding-heart"></i></span>`;
@@ -3018,7 +3060,7 @@
                         el.innerHTML = `
                             <div class="flex items-center gap-3 cursor-pointer" onclick="ui.closeModal('modal-follow-list'); profile.open('${snap.id}')">
                                 <img src="${user.avatar}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
-                                <span class="font-bold text-sm text-gray-300">${user.username}</span>
+                                <span class="font-bold text-sm text-gray-300">${formatUsername(snap.id, user.username)}</span>
                             </div>
                         `;
                         contentEl.appendChild(el);
@@ -3112,7 +3154,7 @@
                         el.innerHTML = `
                             <img src="${u.avatar}" class="w-10 h-10 rounded-full border border-gray-700">
                             <div>
-                                <div class="font-bold text-gray-300 text-sm">${u.username}</div>
+                                <div class="font-bold text-gray-300 text-sm">${formatUsername(snap.id, u.username)}</div>
                                 <div class="text-[10px] text-gray-500">${getRank(u.credits)}</div>
                             </div>
                         `;
@@ -3188,7 +3230,7 @@
                 
                 const isVerified = (author.followerCount || 0) >= 100;
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
-                document.getElementById('reader-author').innerHTML = author.username + verifiedBadge;
+                document.getElementById('reader-author').innerHTML = formatUsername(author.id, author.username) + verifiedBadge;
 
                 document.getElementById('reader-avatar').src = author.avatar;
                 document.getElementById('reader-cat-tag').innerText = data.category;
@@ -3200,7 +3242,15 @@
 
                 const isOwner = state.user.uid === data.authorId;
                 const editBtn = document.getElementById('btn-reader-edit');
-                if (isOwner) editBtn.classList.remove('hidden'); else editBtn.classList.add('hidden');
+                const suggestBtn = document.getElementById('btn-reader-suggest');
+                
+                if (isOwner) {
+                    editBtn.classList.remove('hidden');
+                    suggestBtn.classList.add('hidden'); // Hide suggest edit for owner
+                } else {
+                    editBtn.classList.add('hidden');
+                    suggestBtn.classList.remove('hidden');
+                }
 
                 loadComments(id);
                 if(push) router.go('reader', { post: id }); else router.render('reader', { post: id });
@@ -3493,7 +3543,7 @@
                     const commentTime = c.createdAt ? timeAgo(c.createdAt) : 'Just now';
                     list.innerHTML += `
                         <div class="bg-white/5 p-4 rounded border-l-2 border-red-900">
-                            <div class="text-xs text-red-400 font-bold mb-1">${c.author} • ${commentTime}</div>
+                            <div class="text-xs text-red-400 font-bold mb-1">${formatUsername(c.authorId, c.author)} • ${commentTime}</div>
                             <div class="text-sm text-gray-300 font-story">${c.text}</div>
                         </div>
                     `;
