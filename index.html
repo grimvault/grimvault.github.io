@@ -4258,7 +4258,8 @@
                     }
                 });
             } else {
-                // ... existing else code ...
+                document.getElementById('app-shell').classList.add('hidden');
+                document.getElementById('view-auth').classList.remove('hidden');
             }
             ui.loading(false);
         });
