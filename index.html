@@ -319,6 +319,13 @@
         #editor-content ol, #reader-body ol, #diff-original ol, #diff-new ol { list-style-type: decimal; padding-left: 20px; margin: 10px 0; }
         #reader-body blockquote, #diff-original blockquote, #diff-new blockquote { border-left: 3px solid var(--blood-red); padding-left: 1rem; font-style: italic; color: #888; }
         #editor-content img, #reader-body img, #diff-original img, #diff-new img { max-width: 100%; height: auto; margin: 1rem 0; display: block; }
+        
+        /* Active format state for toolbar buttons */
+        .btn-fmt-active {
+            background: rgba(138, 3, 3, 0.3) !important;
+            color: #ff0f0f !important;
+            border-color: #8a0303 !important;
+        }
 
 		.toolbar-layer { 
 			position: relative; 
@@ -945,7 +952,7 @@
                              <div class="grid grid-cols-3 gap-3 mb-4 w-full md:w-auto">
                                  <div onclick="profile.showFollowList('followers')" class="stats-card group clickable">
                                      <div id="profile-view-followers" class="font-bold text-white text-xl font-mono group-hover:text-red-500 transition-colors">0</div>
-                                     <div class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Followers</div>
+                                     <div id="profile-view-followers-label" class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Followers</div>
                                  </div>
                                  <div onclick="profile.showFollowList('following')" class="stats-card group clickable">
                                      <div id="profile-view-following" class="font-bold text-white text-xl font-mono group-hover:text-red-500 transition-colors">0</div>
@@ -953,7 +960,7 @@
                                  </div>
                                  <div class="stats-card group">
                                      <div id="profile-view-likes" class="font-bold text-white text-xl font-mono group-hover:text-red-500 transition-colors">0</div>
-                                     <div class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Likes</div>
+                                     <div id="profile-view-likes-label" class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Likes</div>
                                  </div>
                              </div>
 
@@ -1053,10 +1060,11 @@
                         
                         <div class="absolute inset-0 p-6 md:p-8 flex flex-col md:flex-row justify-end items-start md:items-end gap-4 z-10">
                             <div class="w-full">
+                                <div id="coven-hero-rank" class="mb-2 hidden"></div>
                                 <h1 id="coven-hero-name" class="font-horror text-3xl md:text-5xl text-red-500 drop-shadow-lg mb-2 leading-none break-words">Coven Name</h1>
                                 <p id="coven-hero-desc" class="text-gray-300 max-w-2xl text-xs md:text-sm line-clamp-3">Description...</p>
                                 <div class="flex flex-wrap items-center gap-4 mt-4 text-xs text-gray-400 font-mono">
-                                    <span class="cursor-pointer hover:text-white" onclick="communities.showMembers()"><i class="fas fa-users mr-2"></i><span id="coven-member-count">0</span> Coveneers</span>
+                                    <span class="cursor-pointer hover:text-white" onclick="communities.showMembers()"><i class="fas fa-users mr-2"></i><span id="coven-member-count">0</span></span>
                                     <span><i class="fas fa-crown mr-2"></i><span id="coven-creator">Creator</span></span>
                                 </div>
                             </div>
@@ -1161,14 +1169,14 @@
 
 
                     <div class="glass border-b-0 rounded-t-lg p-3 flex gap-2 items-center flex-wrap toolbar-layer">
-                        <button onclick="document.execCommand('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0" title="Bold"><i class="fas fa-bold"></i></button>
-                        <button onclick="document.execCommand('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0" title="Italic"><i class="fas fa-italic"></i></button>
-                        <button onclick="document.execCommand('insertOrderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0" title="Ordered List"><i class="fas fa-list-ol"></i></button>
-                        <button onclick="document.execCommand('insertUnorderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0" title="Unordered List"><i class="fas fa-list-ul"></i></button>
+                        <button id="btn-fmt-bold" onmousedown="event.preventDefault()" onclick="editor.format('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Bold"><i class="fas fa-bold"></i></button>
+                        <button id="btn-fmt-italic" onmousedown="event.preventDefault()" onclick="editor.format('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Italic"><i class="fas fa-italic"></i></button>
+                        <button id="btn-fmt-olist" onmousedown="event.preventDefault()" onclick="editor.format('insertOrderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Ordered List"><i class="fas fa-list-ol"></i></button>
+                        <button id="btn-fmt-ulist" onmousedown="event.preventDefault()" onclick="editor.format('insertUnorderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Unordered List"><i class="fas fa-list-ul"></i></button>
                         <div class="w-px h-5 bg-white/10 mx-2 flex-shrink-0"></div>
-                        <button onclick="document.execCommand('justifyLeft')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0"><i class="fas fa-align-left"></i></button>
-                        <button onclick="document.execCommand('justifyCenter')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0"><i class="fas fa-align-center"></i></button>
-                        <button onclick="document.execCommand('justifyRight')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0"><i class="fas fa-align-right"></i></button>
+                        <button id="btn-fmt-justifyLeft" onmousedown="event.preventDefault()" onclick="editor.format('justifyLeft')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-left"></i></button>
+                        <button id="btn-fmt-justifyCenter" onmousedown="event.preventDefault()" onclick="editor.format('justifyCenter')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-center"></i></button>
+                        <button id="btn-fmt-justifyRight" onmousedown="event.preventDefault()" onclick="editor.format('justifyRight')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-right"></i></button>
                         <div class="w-px h-5 bg-white/10 mx-2 flex-shrink-0"></div>
                         
                         <div class="flex items-center bg-black/40 rounded border border-white/10 flex-shrink-0">
@@ -1446,6 +1454,10 @@
             }
         });
 
+        // --- PLURALIZATION HELPER ---
+        const pluralize = (count, noun) => {
+            return count === 1 ? noun : noun + 's';
+        };
 
         // --- STATE ---
         const state = {
@@ -1474,7 +1486,8 @@
             profileEditAvatarBlob: null,
             userCache: {},
             leaderboard: [],
-            usernameValid: false
+            usernameValid: false,
+            covenRankings: {}
         };
 
         // --- HELPERS ---
@@ -1718,6 +1731,40 @@
             }
         }
 
+        // --- EDITOR CONTROLLER ---
+        window.editor = {
+            format: (command) => {
+                document.execCommand(command, false, null);
+                // Immediately refocus editor to allow typing
+                const editorDiv = document.getElementById('editor-content');
+                editorDiv.focus();
+                // Check state immediately after click
+                editor.checkState();
+            },
+            checkState: () => {
+                if (document.activeElement !== document.getElementById('editor-content')) return;
+
+                const commands = {
+                    'btn-fmt-bold': 'bold',
+                    'btn-fmt-italic': 'italic',
+                    'btn-fmt-olist': 'insertOrderedList',
+                    'btn-fmt-ulist': 'insertUnorderedList',
+                    'btn-fmt-justifyLeft': 'justifyLeft',
+                    'btn-fmt-justifyCenter': 'justifyCenter',
+                    'btn-fmt-justifyRight': 'justifyRight'
+                };
+
+                for (const [btnId, cmd] of Object.entries(commands)) {
+                    const btn = document.getElementById(btnId);
+                    if (document.queryCommandState(cmd)) {
+                        btn.classList.add('btn-fmt-active');
+                    } else {
+                        btn.classList.remove('btn-fmt-active');
+                    }
+                }
+            }
+        };
+
         // --- ROUTER ---
         window.router = {
             getCurrentView: () => {
@@ -1793,6 +1840,21 @@
                         state.draft.type = 'story';
                         creator.setType('story');
                     }
+                    
+                    // Default to left alignment visual state
+                    document.querySelectorAll('.btn-fmt-active').forEach(b => b.classList.remove('btn-fmt-active'));
+                    document.getElementById('btn-fmt-justifyLeft').classList.add('btn-fmt-active');
+                    
+                    // Add listeners for editor state updates
+                    const editorDiv = document.getElementById('editor-content');
+                    // Add specific listeners for selection changes inside the editor
+                    document.addEventListener('selectionchange', editor.checkState);
+                    editorDiv.addEventListener('keyup', editor.checkState);
+                    editorDiv.addEventListener('mouseup', editor.checkState);
+                    editorDiv.addEventListener('click', editor.checkState);
+                } else {
+                     // Clean up listeners when leaving create view to avoid overhead
+                    document.removeEventListener('selectionchange', editor.checkState);
                 }
             },
             handlePopState: (event) => {
@@ -1992,14 +2054,28 @@
                 let found = false;
                 const lowerTerm = normalize(term);
 
-                snap.forEach(d => {
-                    const c = d.data();
+                let covens = [];
+                snap.forEach(d => covens.push({id: d.id, ...d.data()}));
+                // Sort by members just to have rank context if needed, though search is primary
+                covens.sort((a,b) => (b.memberCount || 0) - (a.memberCount || 0));
+
+                covens.forEach((c, index) => {
                     if (normalize(c.name).includes(lowerTerm) || normalize(c.description).includes(lowerTerm)) {
                         found = true;
+                        // Calculate rank based on current sort
+                        const rank = index + 1;
+                        let rankHTML = '';
+                        if(rank <= 3) {
+                             rankHTML = `<div class="absolute top-2 left-2 bg-black/80 border border-yellow-900/50 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded z-20"><i class="fas fa-crown mr-1"></i>#${rank}</div>`;
+                        } else {
+                             rankHTML = `<div class="absolute top-2 left-2 bg-black/60 border border-white/10 text-gray-400 text-[10px] font-bold px-2 py-1 rounded z-20">${rank}</div>`;
+                        }
+
                         const el = document.createElement('div');
-                        el.className = 'glass p-0 rounded-lg overflow-hidden cursor-pointer hover:border-red-900 transition-colors group';
-                        el.onclick = () => communities.open(d.id, c);
+                        el.className = 'glass p-0 rounded-lg overflow-hidden cursor-pointer hover:border-red-900 transition-colors group relative';
+                        el.onclick = () => communities.open(c.id, c);
                         el.innerHTML = `
+                            ${rankHTML}
                             <div class="h-20 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('${c.coverImage}')"></div>
                             <div class="p-3 relative">
                                 <div class="absolute -top-5 right-3 w-8 h-8 rounded-full border-2 border-black overflow-hidden bg-black">
@@ -2007,7 +2083,7 @@
                                 </div>
                                 <h3 class="font-bold text-red-400 text-sm mb-1 truncate">${c.name}</h3>
                                 <div class="text-[10px] text-gray-600 font-mono">
-                                    <i class="fas fa-users mr-1"></i> ${c.memberCount} Coveneers
+                                    <i class="fas fa-users mr-1"></i> ${c.memberCount} ${pluralize(c.memberCount, 'Coveneer')}
                                 </div>
                             </div>
                         `;
@@ -2044,11 +2120,26 @@
                     snap.forEach(d => covens.push({id: d.id, ...d.data()}));
                     covens.sort((a,b) => (b.memberCount || 0) - (a.memberCount || 0));
 
-                    covens.forEach(c => {
+                    // Cache Rankings
+                    state.covenRankings = {};
+                    covens.forEach((c, index) => {
+                        state.covenRankings[c.id] = index + 1;
+                    });
+
+                    covens.forEach((c, index) => {
+                        const rank = index + 1;
+                        let rankHTML = '';
+                        if(rank <= 3) {
+                             rankHTML = `<div class="absolute top-2 left-2 bg-black/80 border border-yellow-900/50 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded z-20"><i class="fas fa-crown mr-1"></i>#${rank}</div>`;
+                        } else {
+                             rankHTML = `<div class="absolute top-2 left-2 bg-black/60 border border-white/10 text-gray-400 text-[10px] font-bold px-2 py-1 rounded z-20">${rank}</div>`;
+                        }
+
                         const el = document.createElement('div');
-                        el.className = 'glass p-0 rounded-lg overflow-hidden cursor-pointer hover:border-red-900 transition-colors group';
+                        el.className = 'glass p-0 rounded-lg overflow-hidden cursor-pointer hover:border-red-900 transition-colors group relative';
                         el.onclick = () => communities.open(c.id, c);
                         el.innerHTML = `
+                            ${rankHTML}
                             <div class="h-20 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('${c.coverImage}')"></div>
                             <div class="p-3 relative">
                                 <div class="absolute -top-5 right-3 w-8 h-8 rounded-full border-2 border-black overflow-hidden bg-black">
@@ -2056,7 +2147,7 @@
                                 </div>
                                 <h3 class="font-bold text-red-400 text-sm mb-1 truncate">${c.name}</h3>
                                 <div class="text-[10px] text-gray-600 font-mono">
-                                    <i class="fas fa-users mr-1"></i> ${c.memberCount} Coveneers
+                                    <i class="fas fa-users mr-1"></i> ${c.memberCount} ${pluralize(c.memberCount, 'Coveneer')}
                                 </div>
                             </div>
                         `;
@@ -2123,8 +2214,26 @@
                 document.getElementById('coven-hero-name').innerText = data.name;
                 document.getElementById('coven-hero-desc').innerText = data.description;
                 document.getElementById('coven-hero-img').src = data.coverImage;
-                document.getElementById('coven-member-count').innerText = data.memberCount;
+                document.getElementById('coven-member-count').innerText = `${data.memberCount} ${pluralize(data.memberCount, 'Coveneer')}`;
                 
+                // Set Rank in Hero
+                const rankEl = document.getElementById('coven-hero-rank');
+                const rank = state.covenRankings[id];
+                
+                if (rank) {
+                    if (rank <= 3) {
+                         rankEl.innerHTML = `<i class="fas fa-crown mr-2"></i>#${rank}`;
+                         rankEl.classList.remove('hidden');
+                    } else {
+                         // Hide rank if > 3 in hero or just show number. Request said "others have the ranking, but without the crown".
+                         // However, typically hero ranks are special. Let's just show the number without crown/hash in a simpler style.
+                         rankEl.innerHTML = `<span class="text-gray-500 font-mono tracking-widest text-sm">Rank ${rank}</span>`;
+                         rankEl.classList.remove('hidden');
+                    }
+                } else {
+                    rankEl.classList.add('hidden');
+                }
+
                 getUserProfile(data.creatorId).then(creator => {
                     if (creator) {
                         const isVerified = (creator.followerCount || 0) >= 100;
@@ -2234,7 +2343,7 @@
                             state.activeCommunity.roles = newRoles;
                         }
                         
-                        document.getElementById('coven-member-count').innerText = state.activeCommunity.memberCount;
+                        document.getElementById('coven-member-count').innerText = `${state.activeCommunity.memberCount} ${pluralize(state.activeCommunity.memberCount, 'Coveneer')}`;
                         const btn = document.getElementById('btn-coven-join');
                         btn.innerText = !isMember ? "Leave Coven" : "Join Coven";
                         btn.className = !isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20 justify-center" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center";
@@ -2535,6 +2644,7 @@
                 const postedTime = data.createdAt ? timeAgo(data.createdAt) : 'Just now';
                 const isVerified = (author.followerCount || 0) >= 100;
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
+                const likes = data.likes || 0;
 
 
                 contentDiv.innerHTML = `
@@ -2552,7 +2662,7 @@
                         <div class="flex gap-4 text-xs font-bold pt-4 mt-4 border-t border-white/5">
                              <button onclick="reader.toggleLike()" class="flex items-center gap-2 hover:text-red-500 transition-colors group">
                                 <i class="fas fa-heart text-lg ${likeIconClass}" id="like-icon-thread"></i> 
-                                <span id="reader-likes-thread">${data.likes || 0} Likes</span>
+                                <span id="reader-likes-thread">${likes} ${pluralize(likes, 'Like')}</span>
                              </button>
                              <button onclick="reader.share()" class="flex items-center gap-2 text-gray-500 hover:text-white transition-colors">
                                 <i class="fas fa-share-alt text-lg"></i><span>Share</span>
@@ -3062,7 +3172,7 @@
                     <span class="text-xs text-red-500 uppercase tracking-widest">${getRank(userData.credits)}</span>
                     <p class="text-xs text-gray-500 mt-3 line-clamp-2">${userData.bio || 'Staring into the abyss...'}</p>
                     <div class="flex items-center gap-2 text-xs text-gray-600 font-mono mt-3">
-                        <i class="fas fa-users"></i> ${userData.followerCount || 0} Followers
+                        <i class="fas fa-users"></i> ${userData.followerCount || 0} ${pluralize(userData.followerCount || 0, 'Follower')}
                     </div>
                 `;
                 return el;
@@ -3315,6 +3425,8 @@
                 document.getElementById('profile-view-bio').innerText = p.bio || "Staring into the abyss...";
                 document.getElementById('profile-view-img').src = p.avatar;
                 document.getElementById('profile-view-followers').innerText = abbreviateNumber((p.followers || []).length);
+                document.getElementById('profile-view-followers-label').innerText = pluralize((p.followers || []).length, 'Follower');
+                
                 document.getElementById('profile-view-following').innerText = abbreviateNumber((p.following || []).length);
                 document.getElementById('profile-rank').innerText = getRank(p.credits || 0);
                 
@@ -3486,6 +3598,7 @@
                             <p class="text-sm">This soul has yet to manifest any artifacts.</p>
                         </div>`;
                         document.getElementById('profile-view-likes').innerText = '0';
+                        document.getElementById('profile-view-likes-label').innerText = 'Likes';
                         return;
                      }
 
@@ -3514,6 +3627,7 @@
                      });
                      
                      document.getElementById('profile-view-likes').innerText = abbreviateNumber(totalLikes);
+                     document.getElementById('profile-view-likes-label').innerText = pluralize(totalLikes, 'Like');
                 }, (error) => {
                     console.error("Error loading artifacts:", error);
                     grid.innerHTML = `<div class="col-span-3 text-center text-red-500 py-16">Failed to load artifacts. The void is disturbed.</div>`;
