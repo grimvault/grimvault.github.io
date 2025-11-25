@@ -351,6 +351,15 @@
         .scrolling-enabled .scrolling-wrapper {
             animation: ping-pong-scroll 100s linear infinite alternate;
         }
+
+        /* <!-- ADDED MOBILE ANIMATION FIX --> */
+        #user-suggestions-scroller {
+            pointer-events: none; /* Prevents touch-scroll from interfering with the animation */
+        }
+        #user-suggestions-scroller .glass {
+            pointer-events: auto;  /* Re-enables taps and clicks on the individual user cards */
+        }
+        /* <!-- END OF FIX --> */
         
         /* Tabs */
         .profile-tab {
