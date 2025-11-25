@@ -2942,14 +2942,16 @@
                     return d.success ? d.data.url : null;
                 } catch { return null; }
             },
-            recalc: () => {
-                const text = document.getElementById('editor-content').innerText;
-                const len = text.length;
-                const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-                
-                document.getElementById('char-count').innerText = `${len} chars | ${wordCount} words`;
-                document.getElementById('img-count').innerText = state.draft.images;
-                
+			recalc: () => {
+				const text = document.getElementById('editor-content').innerText;
+				const len = text.length;
+				const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+				
+				const readTime = Math.ceil(wordCount / 200); 
+
+				document.getElementById('char-count').innerText = `${len} chars | ${wordCount} words | ~${readTime} min read`;
+				document.getElementById('img-count').innerText = state.draft.images;
+				
                 let cost = 0;
                 if (!state.draft.isEdit && !state.draft.isSuggestion) {
                     if(state.draft.type === 'story') {
