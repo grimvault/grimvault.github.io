@@ -3255,195 +3255,216 @@
         };
 
 		// --- NOTIFICATIONS ---
-        window.notifications = { 
-            init: () => {
-                const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
-                
-                notifications.cleanExpired();
+		window.notifications = { 
+			init: () => {
+				const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
+				
+				notifications.cleanExpired();
 
-                onSnapshot(q, (snap) => {
-                    const list = document.getElementById('notif-list');
-                    const badge = document.getElementById('notif-badge');
-                    const empty = document.getElementById('notif-empty');
-                    
-                    list.innerHTML = '';
-                    let unreadCount = 0;
-                    
-                    if(snap.empty) {
-                        empty.classList.remove('hidden');
-                        badge.classList.add('hidden');
-                        return;
-                    }
-                    empty.classList.add('hidden');
+				onSnapshot(q, (snap) => {
+					const list = document.getElementById('notif-list');
+					const badge = document.getElementById('notif-badge');
+					const empty = document.getElementById('notif-empty');
+					
+					list.innerHTML = '';
+					let unreadCount = 0;
+					
+					if(snap.empty) {
+						empty.classList.remove('hidden');
+						badge.classList.add('hidden');
+						return;
+					}
+					empty.classList.add('hidden');
 
-                    snap.forEach(d => {
-                        const n = d.data();
-                        if(!n.read) unreadCount++;
-                        
-                        let icon = 'fa-bell';
-                        let color = 'text-gray-400';
-                        
-                        // --- ICON LOGIC ---
-                        if(n.type === 'credit') { icon = 'fa-coins'; color = 'text-yellow-500'; }
-                        // New Icon for Daily Reward
-                        if(n.type === 'daily_reward') { icon = 'fa-gift'; color = 'text-green-500'; } 
-                        if(n.type === 'suggestion') { icon = 'fa-code-branch'; color = 'text-blue-500'; }
-                        if(n.type === 'follow') { icon = 'fa-user-plus'; color = 'text-purple-500'; }
-                        if(n.type === 'coven_role') { icon = 'fa-chess-king'; color = 'text-red-500'; }
+					snap.forEach(d => {
+						const n = d.data();
+						if(!n.read) unreadCount++;
+						
+						let icon = 'fa-bell';
+						let color = 'text-gray-400';
+						
+						// --- ICON LOGIC ---
+						if(n.type === 'credit') { icon = 'fa-coins'; color = 'text-yellow-500'; }
+						if(n.type === 'daily_reward') { icon = 'fa-gift'; color = 'text-green-500'; } 
+						if(n.type === 'suggestion') { icon = 'fa-code-branch'; color = 'text-blue-500'; }
+						if(n.type === 'follow') { icon = 'fa-user-plus'; color = 'text-purple-500'; }
+						if(n.type === 'coven_role') { icon = 'fa-chess-king'; color = 'text-red-500'; }
 
-                        const el = document.createElement('div');
-                        el.className = `p-3 border-b border-white/5 hover:bg-white/5 cursor-pointer ${!n.read ? 'bg-red-900/10' : ''} flex justify-between items-start`;
-                        el.innerHTML = `
-                            <div class="flex gap-3 items-start flex-1">
-                                <i class="fas ${icon} ${color} mt-1"></i>
-                                <div>
-                                    <div class="text-sm text-gray-300">${n.message}</div>
-                                    <div class="text-[10px] text-gray-600 mt-1">${n.createdAt ? timeAgo(n.createdAt) : 'Just now'}</div>
-                                </div>
-                            </div>
-                            <button class="text-gray-600 hover:text-red-500 px-2" title="Delete"><i class="fas fa-times"></i></button>
-                        `;
-                        
-                        el.onclick = async (e) => {
-                            if(e.target.closest('.fa-times') || e.target.closest('button')) {
-                                e.stopPropagation();
-                                await deleteDoc(d.ref); 
-                                return;
-                            }
-                            
-                            if(!n.read) updateDoc(d.ref, { read: true });
+						const el = document.createElement('div');
+						el.className = `p-3 border-b border-white/5 hover:bg-white/5 cursor-pointer ${!n.read ? 'bg-red-900/10' : ''} flex justify-between items-start`;
+						
+						// Note: Added 'group' class to help targeting
+						el.innerHTML = `
+							<div class="flex gap-3 items-start flex-1 group">
+								<i class="fas ${icon} ${color} mt-1"></i>
+								<div>
+									<div class="text-sm text-gray-300">${n.message}</div>
+									<div class="text-[10px] text-gray-600 mt-1">${n.createdAt ? timeAgo(n.createdAt) : 'Just now'}</div>
+								</div>
+							</div>
+							<button class="text-gray-600 hover:text-red-500 px-2 transition-colors" title="Delete"><i class="fas fa-times"></i></button>
+						`;
+						
+						el.onclick = async (e) => {
+							// FIX 1: Manually hide tooltip on any click inside notification
+							// because the element might disappear
+							const tooltip = document.getElementById('custom-tooltip');
+							tooltip.classList.remove('visible');
 
-                            if(n.type === 'suggestion' && n.payload) suggestions.openReview(n.payload.suggestionId, d.id);
-                            
-                            // Claim reward on click
-                            if(n.type === 'daily_reward') {
-                                rewards.claim(d.id);
-                                notifications.toggle();
-                            }
-                        };
-                        list.appendChild(el);
-                    });
-                    
-                    if(unreadCount > 0) badge.classList.remove('hidden');
-                    else badge.classList.add('hidden');
-                });
-            },
-            toggle: () => {
-                document.getElementById('notif-dropdown').classList.toggle('hidden');
-            },
-            send: async (targetUid, msg, type, payload = {}) => {
-                await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'users', targetUid, 'notifications'), {
-                    message: msg, type, createdAt: serverTimestamp(), read: false, payload
-                });
-            },
-            clearAll: async () => {
-                 ui.loading(true);
-                 try {
-                    const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'));
-                    const snap = await getDocs(q);
-                    const batch = writeBatch(db);
-                    snap.forEach(doc => batch.delete(doc.ref));
-                    await batch.commit();
-                 } catch (e) { ui.alert("Error", e.message); } finally { ui.loading(false); }
-            },
-            cleanExpired: async () => {
-                if(!state.user) return;
-                const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-                const q = query(
-                    collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
-                    where('type', '==', 'daily_reward')
-                );
-                
-                try {
-                    const snap = await getDocs(q);
-                    const batch = writeBatch(db);
-                    let deleteCount = 0;
-                    snap.forEach(doc => {
-                        const data = doc.data();
-                        if (!data.createdAt || data.createdAt.toDate() < yesterday) {
-                            batch.delete(doc.ref);
-                            deleteCount++;
-                        }
-                    });
-                    if(deleteCount > 0) await batch.commit();
-                } catch(e) { console.error("Cleanup error", e); }
-            }
-        };
+							// Handle Delete
+							if(e.target.closest('.fa-times') || e.target.closest('button')) {
+								e.stopPropagation();
+								await deleteDoc(d.ref); 
+								return;
+							}
+							
+							if(!n.read) updateDoc(d.ref, { read: true });
+
+							if(n.type === 'suggestion' && n.payload) suggestions.openReview(n.payload.suggestionId, d.id);
+							
+							// Claim reward on click
+							if(n.type === 'daily_reward') {
+								// Pass the specific ID (d.id)
+								await rewards.claim(d.id);
+								notifications.toggle();
+							}
+						};
+						list.appendChild(el);
+					});
+					
+					if(unreadCount > 0) badge.classList.remove('hidden');
+					else badge.classList.add('hidden');
+				});
+			},
+			toggle: () => {
+				document.getElementById('notif-dropdown').classList.toggle('hidden');
+			},
+			send: async (targetUid, msg, type, payload = {}) => {
+				await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'users', targetUid, 'notifications'), {
+					message: msg, type, createdAt: serverTimestamp(), read: false, payload
+				});
+			},
+			clearAll: async () => {
+					ui.loading(true);
+					try {
+					const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'));
+					const snap = await getDocs(q);
+					const batch = writeBatch(db);
+					snap.forEach(doc => batch.delete(doc.ref));
+					await batch.commit();
+					// Force tooltip hide here too
+					document.getElementById('custom-tooltip').classList.remove('visible');
+					} catch (e) { ui.alert("Error", e.message); } finally { ui.loading(false); }
+			},
+			cleanExpired: async () => {
+				if(!state.user) return;
+				const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+				const q = query(
+					collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
+					where('type', '==', 'daily_reward')
+				);
+				
+				try {
+					const snap = await getDocs(q);
+					const batch = writeBatch(db);
+					let deleteCount = 0;
+					snap.forEach(doc => {
+						const data = doc.data();
+						// Check if older than 24h
+						if (!data.createdAt || data.createdAt.toDate() < yesterday) {
+							batch.delete(doc.ref);
+							deleteCount++;
+						}
+					});
+					if(deleteCount > 0) await batch.commit();
+				} catch(e) { console.error("Cleanup error", e); }
+			}
+		};
 
 		// --- REWARDS ---
-        window.rewards = { 
-            checkEligibility: async () => {
-                if(!state.profile) return;
-                const now = new Date();
-                const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
-                const diff = now - last;
-                const hours = diff / (1000 * 60 * 60);
+		window.rewards = { 
+			checkEligibility: async () => {
+				if(!state.profile) return;
+				const now = new Date();
+				const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
+				const diff = now - last;
+				const hours = diff / (1000 * 60 * 60);
 
-                if (hours >= 24) {
-                    // Check DB to ensure we don't spam the notification
-                    const q = query(
-                        collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
-                        where('type', '==', 'daily_reward')
-                    );
-                    
-                    const snap = await getDocs(q);
-                    
-                    if(snap.empty) {
-                        await notifications.send(
-                            state.user.uid, 
-                            "Daily Tribute Available. Click to claim 50 CR.", 
-                            "daily_reward"
-                        );
-                    }
-                }
-            },
-            claim: async (notificationId = null) => {
-                if(!state.profile) return;
-                const now = new Date();
-                const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
-                const diff = now - last;
-                const hours = diff / (1000 * 60 * 60);
+				if (hours >= 24) {
+					// Check DB to ensure we don't spam the notification
+					const q = query(
+						collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
+						where('type', '==', 'daily_reward')
+					);
+					
+					const snap = await getDocs(q);
+					
+					if(snap.empty) {
+						await notifications.send(
+							state.user.uid, 
+							"Daily Tribute Available. Click to claim 50 CR.", 
+							"daily_reward"
+						);
+					}
+				}
+			},
+			claim: async (notificationId = null) => {
+				if(!state.profile) return;
+				const now = new Date();
+				const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
+				const diff = now - last;
+				const hours = diff / (1000 * 60 * 60);
 
-                if(hours >= 24) {
-                    ui.loading(true);
-                    try {
-                        const batch = writeBatch(db);
-                        const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
-                        
-                        batch.update(userRef, {
-                            credits: increment(50),
-                            lastDaily: serverTimestamp()
-                        });
+				// Allow claim if it's been 24 hours OR if the user is clicking a specific notification
+				// (If a notification exists, we assume the user was eligible when it was sent)
+				if(hours >= 24 || notificationId) {
+					ui.loading(true);
+					try {
+						const batch = writeBatch(db);
+						const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
+						
+						// Only give credits if time has passed
+						if (hours >= 24) {
+							batch.update(userRef, {
+								credits: increment(50),
+								lastDaily: serverTimestamp()
+							});
+						}
 
-                        // Delete the notification(s)
-                        if(notificationId) {
-                            const notifRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications', notificationId);
-                            batch.delete(notifRef);
-                        } else {
-                            // Fallback cleanup if triggered manually (via chest icon click)
-                             const q = query(
-                                collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
-                                where('type', '==', 'daily_reward')
-                            );
-                            const snap = await getDocs(q);
-                            snap.forEach(d => batch.delete(d.ref));
-                        }
+						// FIX 2: Explicitly handle the notification deletion in the batch
+						if(notificationId) {
+							const notifRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications', notificationId);
+							batch.delete(notifRef);
+						} else {
+							// Cleanup any other daily rewards if claimed via chest
+								const q = query(
+								collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
+								where('type', '==', 'daily_reward')
+							);
+							const snap = await getDocs(q);
+							snap.forEach(d => batch.delete(d.ref));
+						}
 
-                        await batch.commit();
-                        
-                        ui.loading(false);
-                        ui.alert("Fortune", "The Void grants you 50 credits.");
-                        
-                    } catch(e) { 
-                        ui.loading(false); 
-                        ui.alert("Error", e.message); 
-                    }
-                } else {
-                    const wait = Math.ceil(24 - hours);
-                    ui.alert("Greed", `Wait ${wait} more hours, mortal.`);
-                }
-            }
-        };
+						await batch.commit();
+						
+						ui.loading(false);
+						if (hours >= 24) {
+							ui.alert("Fortune", "The Void grants you 50 credits.");
+						} else {
+							// Notification was stale but we deleted it, so no credit, but cleanup done.
+							// Usually this branch won't hit if logic is perfect, but good for safety.
+						}
+						
+					} catch(e) { 
+						ui.loading(false); 
+						ui.alert("Error", e.message); 
+					}
+				} else {
+					const wait = Math.ceil(24 - hours);
+					ui.alert("Greed", `Wait ${wait} more hours, mortal.`);
+				}
+			}
+		};
 
         // --- PROFILE SYSTEM ---
         window.profile = {
