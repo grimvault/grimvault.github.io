@@ -1098,14 +1098,16 @@
                         </div>
                     </div>
 
-                    <div>
-                         <div class="flex justify-between items-end mb-6">
-                            <h3 class="font-horror text-2xl text-gray-500">Whispers & Threads</h3>
-                            <div class="relative w-full max-w-[200px] md:max-w-xs group">
+						<div>
+                         <!-- MODIFIED: Responsive layout for Header and Search -->
+                         <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-4 mb-6">
+                            <h3 class="font-horror text-2xl text-gray-500 w-full md:w-auto text-left">Whispers & Threads</h3>
+                            <div class="relative w-full md:max-w-xs group">
                                 <input type="text" id="coven-search" placeholder="Search this coven..." class="w-full bg-black/40 border border-white/10 rounded py-2 px-3 pl-8 text-xs focus:outline-none focus:border-red-900 transition-colors">
                                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs pointer-events-none"></i>
                             </div>
                         </div>
+                        
                         <div id="coven-feed-grid" class="space-y-4"></div>
                          <div id="coven-feed-empty" class="hidden text-center text-gray-600 py-12">
                             <i class="fas fa-spider text-4xl mb-3"></i>
@@ -2548,7 +2550,7 @@
                 document.getElementById('coven-options').classList.remove('hidden');
                 document.getElementById('post-type-toggle-container').classList.remove('hidden');
             },
-            showMembers: async () => {
+			showMembers: async () => {
                 if (!state.activeCommunity) return;
                 const listEl = document.getElementById('coven-members-list');
                 listEl.innerHTML = '<div class="text-center text-gray-600 text-xs py-4"><i class="fas fa-spinner fa-spin"></i> Loading coveneers...</div>';
@@ -2565,31 +2567,33 @@
 
                 memberProfiles.filter(p => p).forEach(user => {
                     const el = document.createElement('div');
-                    el.className = 'flex items-center justify-between p-2 rounded';
+                    // MODIFIED: Added overflow-hidden to parent
+                    el.className = 'flex items-center justify-between p-2 rounded overflow-hidden';
                     const userRole = roles[user.id] || 'Member';
 
                     let actionsHtml = '';
-                    // Only the Founder can manage roles, and not on themselves.
                     if (selfRole === 'Founder' && user.id !== state.user.uid) {
-                        actionsHtml = '<div class="flex items-center gap-2">';
+                        // MODIFIED: flex-shrink-0 ensures buttons don't get squashed, margin left for spacing
+                        actionsHtml = '<div class="flex items-center gap-2 flex-shrink-0 ml-2">';
                         if (userRole === 'Member') {
                             actionsHtml += `<button onclick="communities.manageRole('${user.id}', 'Elder')" class="text-[10px] font-bold uppercase border border-yellow-800 text-yellow-500 px-2 py-0.5 rounded hover:bg-yellow-900/40">Make Elder</button>`;
                         } else if (userRole === 'Elder') {
                             actionsHtml += `<button onclick="communities.manageRole('${user.id}', 'Member')" class="text-[10px] font-bold uppercase border border-gray-600 text-gray-400 px-2 py-0.5 rounded hover:bg-gray-700/40">Make Coveneer</button>`;
                         }
                         
-                        // Kick button for anyone who isn't the founder.
                         actionsHtml += `<button onclick="communities.manageRole('${user.id}', 'Kick')" class="text-[10px] font-bold uppercase border border-red-800 text-red-500 px-2 py-0.5 rounded hover:bg-red-900/40">Kick</button>`;
-                        
                         actionsHtml += '</div>';
                     }
 
+                    // MODIFIED: Structure for text truncation
+                    // 1. "flex-1 min-w-0" allows this container to shrink
+                    // 2. "truncate" class on the name container adds the ellipsis (...)
                     el.innerHTML = `
-                        <div class="flex items-center gap-3 cursor-pointer" onclick="ui.closeModal('modal-coven-members'); profile.open('${user.id}')">
-                            <img src="${user.avatar}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
-                            <div>
-                                <span class="font-bold text-sm text-gray-300">${formatUsername(user.id, user.username)}</span>
-                                <div class="text-[10px] font-bold uppercase tracking-wider ${userRole === 'Founder' ? 'text-red-500' : userRole === 'Elder' ? 'text-yellow-500' : 'text-gray-500'}">${userRole} (${getRank(user.credits)})</div>
+                        <div class="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onclick="ui.closeModal('modal-coven-members'); profile.open('${user.id}')">
+                            <img src="${user.avatar}" class="w-8 h-8 rounded-full object-cover border border-gray-700 flex-shrink-0">
+                            <div class="min-w-0 flex-1">
+                                <div class="font-bold text-sm text-gray-300 truncate pr-2" title="${user.username}">${formatUsername(user.id, user.username)}</div>
+                                <div class="text-[10px] font-bold uppercase tracking-wider truncate ${userRole === 'Founder' ? 'text-red-500' : userRole === 'Elder' ? 'text-yellow-500' : 'text-gray-500'}">${userRole} (${getRank(user.credits)})</div>
                             </div>
                         </div>
                         ${actionsHtml}
