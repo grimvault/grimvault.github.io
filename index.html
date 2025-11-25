@@ -89,21 +89,27 @@
 			letter-spacing: 0.5px;
 		}
 		
-        .vignette {
-            position: fixed; 
-            /* Oversize the overlay to account for mobile address bar resizing/retracting */
-            top: -10vh;
-            left: -10vw;
-            width: 120vw;
-            height: 120vh;
-            pointer-events: none; 
-            z-index: 40;
-            background: radial-gradient(circle at center, transparent 0%, rgba(5,5,5,0.4) 60%, rgba(0,0,0,0.95) 100%);
-            /* Force GPU rendering to prevent glitching on scroll */
-            transform: translateZ(0);
-            will-change: transform;
-        }
-		
+		.vignette {
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		  width: 100vw; /* use viewport width explicitly */
+		  height: calc(var(--vh, 1vh) * 100); /* use JS-set --vh for stable height on mobile */
+		  pointer-events: none;
+		  z-index: 40;
+		  background: radial-gradient(circle at center,
+			transparent 0%,
+			rgba(5,5,5,0.4) 60%,
+			rgba(0,0,0,0.95) 100%);
+		  /* Force compositing / hardware acceleration so mobile won't treat it as part of scroll layer */
+		  transform: translateZ(0);
+		  will-change: transform;
+		  -webkit-transform: translate3d(0,0,0);
+		  backface-visibility: hidden;
+		  -webkit-backface-visibility: hidden;
+		  touch-action: none;
+		}
+
         /* --- UI COMPONENTS --- */
         .glass {
             background: rgba(12, 12, 12, 0.9);
@@ -397,7 +403,36 @@
             .view-section { padding-bottom: 120px; } /* Added Extra padding for mobile */
             .font-horror { letter-spacing: 0.05em; }
         }
+		
+		(function() {
+		  function setVh() {
+			// set --vh to 1% of the *current* innerHeight so height calc is stable
+			document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+		  }
 
+		  // initial
+		  setVh();
+
+		  // update on resize/orientation changes, and visualViewport if available (more accurate on mobile)
+		  window.addEventListener('resize', setVh);
+		  window.addEventListener('orientationchange', setVh);
+
+		  if (window.visualViewport) {
+			window.visualViewport.addEventListener('resize', setVh);
+			window.visualViewport.addEventListener('scroll', setVh);
+		  }
+
+		  // Optional: ensure the vignette is always re-painted after touchend (works around odd Android edge-cases)
+		  window.addEventListener('touchend', () => {
+			const el = document.querySelector('.vignette');
+			if (!el) return;
+			// quick no-op reflow -> force repaint
+			el.style.display = 'none';
+			requestAnimationFrame(() => {
+			  el.style.display = '';
+			});
+		  }, {passive: true});
+		})();
     </style>
 </head>
 <body>
