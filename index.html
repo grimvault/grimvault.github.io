@@ -2690,9 +2690,37 @@
         };
 
         // --- THREAD VIEW ---
-        window.threadView = {
+		window.threadView = {
             open: async (id, data) => { 
                 state.activeStory = { id, ...data }; 
+                
+                // --- SECURITY CHECK START ---
+                if (data.membersOnly && data.communityId) {
+                    ui.loading(true);
+                    try {
+                        // Fetch coven to verify membership (since we might be coming from Profile/Feed)
+                        const covenRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', data.communityId);
+                        const covenSnap = await getDoc(covenRef);
+                        
+                        if(covenSnap.exists()) {
+                            // Update state temporarily for isMember check
+                            state.activeCommunity = { id: covenSnap.id, ...covenSnap.data() };
+                            
+                            if (!communities.isMember()) {
+                                ui.loading(false);
+                                ui.alert("Forbidden", "This thread is for Coven coveneers only. Join the Coven to view.");
+                                return; // Stop execution, do not open modal
+                            }
+                        }
+                    } catch(e) {
+                        console.error(e);
+                        ui.loading(false);
+                        return;
+                    }
+                    ui.loading(false);
+                }
+                // --- SECURITY CHECK END ---
+
                 const author = await getUserProfile(data.authorId);
                 if (!author) return;
 
@@ -2704,7 +2732,6 @@
                 const isVerified = (author.followerCount || 0) >= 100;
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
                 const likes = data.likes || 0;
-
 
                 contentDiv.innerHTML = `
                     <div class="bg-[#0a0a0a] p-5 rounded-lg border border-white/10 shadow-lg">
@@ -2733,6 +2760,7 @@
                 threadView.loadComments(id);
                 ui.openModal('modal-thread');
             },
+            // ... (keep close, loadComments, etc. as is)
             close: () => {
                 ui.closeModal('modal-thread');
                 state.activeStory = null;
@@ -3986,36 +4014,50 @@
 
         // --- READER ---
         window.reader = { 
-            open: async (id, data, push = true) => {
+		open: async (id, data, push = true) => {
                 state.activeStory = { id, ...data };
+                // If it's a thread, delegate to threadView (which now has checks)
                 if(data.type === 'thread') { threadView.open(id, data); return; }
 
                 const readerBody = document.getElementById('reader-body');
                 const deniedBody = document.getElementById('reader-access-denied');
+                
+                // Clear previous content to prevent flashing or leak
+                readerBody.innerHTML = '';
+                
+                let hasAccess = true;
+
+                // --- SECURITY CHECK ---
                 if (data.membersOnly && data.communityId) {
-                    const covenSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', data.communityId));
-                    if(covenSnap.exists()){
-                        state.activeCommunity = {id: covenSnap.id, ...covenSnap.data()}; 
-                        if (!communities.isMember()) {
-                            readerBody.classList.add('hidden');
-                            deniedBody.classList.remove('hidden');
-                        } else {
-                            readerBody.classList.remove('hidden');
-                            deniedBody.classList.add('hidden');
+                    ui.loading(true);
+                    try {
+                        const covenSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', data.communityId));
+                        if(covenSnap.exists()){
+                            state.activeCommunity = {id: covenSnap.id, ...covenSnap.data()}; 
+                            if (!communities.isMember()) {
+                                hasAccess = false;
+                            }
                         }
-                    }
+                        ui.loading(false);
+                    } catch(e) { ui.loading(false); }
+                }
+
+                if (!hasAccess) {
+                    readerBody.classList.add('hidden');
+                    deniedBody.classList.remove('hidden');
                 } else {
                     readerBody.classList.remove('hidden');
                     deniedBody.classList.add('hidden');
+                    // ONLY Render content if access is granted
+                    readerBody.innerHTML = data.content;
                 }
-
+                // --- END SECURITY CHECK ---
 
                 const author = await getUserProfile(data.authorId);
                 if (!author) return;
 
                 document.getElementById('reader-title').innerText = data.title;
                 document.getElementById('reader-cover').src = data.coverImage;
-                readerBody.innerHTML = data.content;
                 
                 const isVerified = (author.followerCount || 0) >= 100;
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
@@ -4035,7 +4077,7 @@
                 
                 if (isOwner) {
                     editBtn.classList.remove('hidden');
-                    suggestBtn.classList.add('hidden'); // Hide suggest edit for owner
+                    suggestBtn.classList.add('hidden'); 
                 } else {
                     editBtn.classList.add('hidden');
                     suggestBtn.classList.remove('hidden');
