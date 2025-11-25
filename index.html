@@ -3334,25 +3334,12 @@
             }
         };
 
-		// --- REWARDS ---
+        // --- REWARDS ---
         window.rewards = { 
             claim: async () => {
                 if(!state.profile) return;
-                
                 const now = new Date();
-                let last = new Date(0);
-
-                // Robust Date Parsing to prevent crashes
-                if (state.profile.lastDaily) {
-                    if (typeof state.profile.lastDaily.toDate === 'function') {
-                        last = state.profile.lastDaily.toDate(); // Handle Firestore Timestamp
-                    } else if (state.profile.lastDaily instanceof Date) {
-                        last = state.profile.lastDaily; // Handle native JS Date
-                    } else if (state.profile.lastDaily.seconds) {
-                        last = new Date(state.profile.lastDaily.seconds * 1000); // Handle raw object
-                    }
-                }
-
+                const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
                 const diff = now - last;
                 const hours = diff / (1000 * 60 * 60);
 
@@ -3364,42 +3351,11 @@
                             lastDaily: serverTimestamp()
                         });
                         ui.alert("Fortune", "The Void grants you 50 credits.");
-                        // Hide the dot immediately upon claim
-                        document.getElementById('reward-dot').classList.add('hidden');
-                    } catch(e) { 
-                        ui.alert("Error", e.message); 
-                    } finally {
                         ui.loading(false);
-                    }
+                    } catch(e) { ui.loading(false); ui.alert("Error", e.message); }
                 } else {
                     const wait = Math.ceil(24 - hours);
                     ui.alert("Greed", `Wait ${wait} more hours, mortal.`);
-                }
-            },
-            // Helper to check status for UI
-            checkStatus: () => {
-                if(!state.profile) return;
-                
-                const now = new Date();
-                let last = new Date(0);
-                
-                if (state.profile.lastDaily) {
-                    if (typeof state.profile.lastDaily.toDate === 'function') {
-                        last = state.profile.lastDaily.toDate();
-                    } else {
-                        last = new Date(state.profile.lastDaily);
-                    }
-                }
-
-                const diff = now - last;
-                const hours = diff / (1000 * 60 * 60);
-                
-                // Toggle the green notification dot
-                const dot = document.getElementById('reward-dot');
-                if(hours >= 24) {
-                    dot.classList.remove('hidden');
-                } else {
-                    dot.classList.add('hidden');
                 }
             }
         };
@@ -4230,7 +4186,7 @@
 
 
         // --- INIT ---
-		onAuthStateChanged(authService, (user) => {
+        onAuthStateChanged(authService, (user) => {
             if(user) {
                 state.user = user;
                 onSnapshot(doc(db, 'artifacts', APP_ID_PATH, 'users', user.uid), d => {
@@ -4242,11 +4198,6 @@
                         const navUser = document.getElementById('nav-user');
                         if(navUser) navUser.innerText = state.profile.username;
                         document.getElementById('nav-credits').innerText = state.profile.credits;
-                        
-                        // --- ADD THIS LINE HERE ---
-                        rewards.checkStatus(); 
-                        // --------------------------
-
                         document.getElementById('view-auth').classList.add('hidden');
                         document.getElementById('app-shell').classList.remove('hidden');
                         
