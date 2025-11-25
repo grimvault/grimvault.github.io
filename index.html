@@ -90,9 +90,24 @@
 		}
 		
 
-        .vignette {
-            position: fixed; inset: 0; pointer-events: none; z-index: 40;
+		.vignette {
+            position: fixed;
+            /* Oversize the height to account for mobile address bars resizing */
+            top: -10vh;
+            left: 0;
+            width: 100vw;
+            height: 120vh; 
+            pointer-events: none;
+            z-index: 40;
             background: radial-gradient(circle at center, transparent 0%, rgba(5,5,5,0.4) 60%, rgba(0,0,0,0.95) 100%);
+            
+            /* Force GPU acceleration to prevent flickering/cutting during scroll */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            
+            /* Ensure it stays on top of the mobile overscroll area */
+            will-change: transform;
         }
 
         /* --- UI COMPONENTS --- */
