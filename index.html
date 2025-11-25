@@ -351,15 +351,6 @@
         .scrolling-enabled .scrolling-wrapper {
             animation: ping-pong-scroll 100s linear infinite alternate;
         }
-
-        /* <!-- ADDED MOBILE ANIMATION FIX --> */
-        #user-suggestions-scroller {
-            pointer-events: none; /* Prevents touch-scroll from interfering with the animation */
-        }
-        #user-suggestions-scroller .glass {
-            pointer-events: auto;  /* Re-enables taps and clicks on the individual user cards */
-        }
-        /* <!-- END OF FIX --> */
         
         /* Tabs */
         .profile-tab {
@@ -428,6 +419,20 @@
         @media (max-width: 640px) {
             .view-section { padding-bottom: 120px; } /* Added Extra padding for mobile */
             .font-horror { letter-spacing: 0.05em; }
+            
+            /* --- USER SUGGESTIONS SCROLLER FIX --- */
+            /* 1. Enable native horizontal scrolling on the scroller container */
+            #user-suggestions-scroller {
+                overflow-x: auto;
+            }
+            /* 2. Disable the ping-pong animation on the wrapper */
+            .scrolling-enabled .scrolling-wrapper {
+                animation: none;
+            }
+            /* 3. Hide the clone element used for the infinite scroll illusion */
+            #user-suggestions-grid-clone {
+                display: none;
+            }
         }
 		
 		(function() {
