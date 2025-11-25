@@ -37,8 +37,8 @@
             margin: 0;
             width: 100%;
             height: 100%;
-            /* Prevents the 'rubber band' effect on mobile that reveals the background */
-            overscroll-behavior-y: none; 
+            /* Fix for Mobile Overlay Scroll/Shift */
+            overscroll-behavior: none; 
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -48,7 +48,13 @@
             overflow-y: auto;
         }
 
-        body.modal-open { overflow: hidden; }
+        /* Fix: Lock body on mobile when modal is open to prevent background scroll */
+        body.modal-open { 
+            overflow: hidden; 
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
         
         input, textarea, button { outline: none; appearance: none; -webkit-appearance: none; font-family: inherit; }
         img { border-radius: 4px; }
@@ -388,7 +394,7 @@
         }
 
         @media (max-width: 640px) {
-            .view-section { padding-bottom: 100px; } /* Added Extra padding for mobile */
+            .view-section { padding-bottom: 120px; } /* Added Extra padding for mobile */
             .font-horror { letter-spacing: 0.05em; }
         }
 
@@ -736,7 +742,7 @@
                     <div class="relative group cursor-pointer" onclick="notifications.toggle()">
                         <i class="fas fa-bell text-gray-400 hover:text-white transition-colors"></i>
                         <div id="notif-badge" class="hidden absolute -top-1 -right-1 w-2 h-2 bg-red-600 rounded-full"></div>
-                        <div id="notif-dropdown" class="hidden absolute top-full right-0 mt-4 w-80 glass rounded-lg border border-white/10 p-0 overflow-hidden shadow-2xl">
+                        <div id="notif-dropdown" class="hidden absolute top-full right-0 mt-4 w-[90vw] max-w-sm md:w-80 glass rounded-lg border border-white/10 p-0 overflow-hidden shadow-2xl">
                             <div class="p-3 bg-black/90 border-b border-white/5 flex justify-between items-center">
                                 <span class="font-bold text-xs text-gray-400 tracking-wider">NOTIFICATIONS</span>
                                 <button onclick="event.stopPropagation(); notifications.clearAll()" class="text-[10px] text-red-500 hover:text-red-300 uppercase font-bold tracking-wide border border-red-900/50 px-2 py-0.5 rounded bg-red-900/10 hover:bg-red-900/30 transition-all">Clear</button>
@@ -943,22 +949,24 @@
                 <div class="max-w-5xl mx-auto">
                     <button onclick="router.back()" class="mb-6 text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-white flex items-center gap-2 transition-colors"><i class="fas fa-arrow-left"></i> Return to Abyss</button>
                     
-                    <div class="relative rounded-xl overflow-hidden h-64 mb-8 group">
-                        <img id="coven-hero-img" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0">
+                    <!-- MOBILE FIX: Updated Layout to flex-col for mobile, flex-row for desktop to prevent text overflow -->
+                    <div class="relative rounded-xl overflow-hidden min-h-[350px] md:h-64 mb-8 group bg-black">
+                        <img id="coven-hero-img" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0 absolute inset-0 opacity-60">
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 p-8 w-full flex flex-col md:flex-row justify-between items-end gap-4">
-                            <div>
-                                <h1 id="coven-hero-name" class="font-horror text-5xl text-red-500 drop-shadow-lg mb-2">Coven Name</h1>
-                                <p id="coven-hero-desc" class="text-gray-300 max-w-2xl text-sm">Description...</p>
-                                <div class="flex items-center gap-4 mt-4 text-xs text-gray-500 font-mono">
+                        
+                        <div class="absolute inset-0 p-6 md:p-8 flex flex-col md:flex-row justify-end items-start md:items-end gap-4 z-10">
+                            <div class="w-full">
+                                <h1 id="coven-hero-name" class="font-horror text-3xl md:text-5xl text-red-500 drop-shadow-lg mb-2 leading-none break-words">Coven Name</h1>
+                                <p id="coven-hero-desc" class="text-gray-300 max-w-2xl text-xs md:text-sm line-clamp-3">Description...</p>
+                                <div class="flex flex-wrap items-center gap-4 mt-4 text-xs text-gray-400 font-mono">
                                     <span class="cursor-pointer hover:text-white" onclick="communities.showMembers()"><i class="fas fa-users mr-2"></i><span id="coven-member-count">0</span> Coveneers</span>
                                     <span><i class="fas fa-crown mr-2"></i><span id="coven-creator">Creator</span></span>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <button id="btn-coven-sponsor" onclick="communities.sponsor()" class="btn-main hidden border-yellow-600 text-yellow-400 hover:bg-yellow-900/30 text-xs">Sponsor (100 CR)</button>
-                                <button id="btn-coven-join" onclick="communities.toggleJoin()" class="btn-main border-red-600 text-red-400 hover:bg-red-900/30">Join Coven</button>
-                                <button onclick="communities.triggerPost()" class="btn-main">Whisper to Coven</button>
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                                <button id="btn-coven-sponsor" onclick="communities.sponsor()" class="btn-main hidden border-yellow-600 text-yellow-400 hover:bg-yellow-900/30 text-xs justify-center">Sponsor (100 CR)</button>
+                                <button id="btn-coven-join" onclick="communities.toggleJoin()" class="btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center">Join Coven</button>
+                                <button onclick="communities.triggerPost()" class="btn-main justify-center">Whisper to Coven</button>
                             </div>
                         </div>
                     </div>
@@ -986,7 +994,7 @@
                 <div class="max-w-4xl mx-auto">
                     <header class="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
                         <div>
-                            <h2 class="font-horror text-3xl text-white" id="create-header-title">Manifest Nightmare</h2>
+                            <h2 class="font-horror text-2xl md:text-3xl text-white" id="create-header-title">Manifest Nightmare</h2>
                             <p class="text-xs text-gray-500 mt-1" id="create-header-sub">Authentic Horror Only. No AI.</p>
                         </div>
                         <div class="text-right bg-black/40 p-3 rounded border border-white/5">
@@ -1083,19 +1091,21 @@
 
                     <div id="editor-content" contenteditable="true" class="glass rounded-b-lg p-4 md:p-8 border-t-0 min-h-[500px] focus:outline-none focus:bg-black/60 transition-colors text-gray-300 font-story leading-loose text-base md:text-lg relative z-0"></div>
 
-                    <div class="flex justify-between items-center mt-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center mt-8 gap-4">
                         <div class="text-xs text-gray-500 font-mono">
                             <span id="char-count">0</span> chars | <span id="img-count">0</span> images
                         </div>
-                        <button id="btn-publish" onclick="creator.publish()" class="btn-main px-10">
-                            <span>Manifest</span> <i class="fas fa-skull"></i>
-                        </button>
-                        <button id="btn-suggest" onclick="creator.submitSuggestion()" class="btn-main px-10 hidden bg-gray-900 border-gray-600 text-gray-400 hover:bg-gray-800 hover:text-white hover:border-white">
-                            <span>Submit Suggestion</span> <i class="fas fa-code-branch"></i>
-                        </button>
-                        <button id="btn-update-story" onclick="creator.update()" class="btn-main px-10 hidden border-green-700 text-green-500 hover:bg-green-900/20">
-                            <span>Update</span> <i class="fas fa-save"></i>
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <button id="btn-publish" onclick="creator.publish()" class="btn-main px-10 w-full md:w-auto">
+                                <span>Manifest</span> <i class="fas fa-skull"></i>
+                            </button>
+                            <button id="btn-suggest" onclick="creator.submitSuggestion()" class="btn-main px-10 hidden bg-gray-900 border-gray-600 text-gray-400 hover:bg-gray-800 hover:text-white hover:border-white w-full md:w-auto">
+                                <span>Submit Suggestion</span> <i class="fas fa-code-branch"></i>
+                            </button>
+                            <button id="btn-update-story" onclick="creator.update()" class="btn-main px-10 hidden border-green-700 text-green-500 hover:bg-green-900/20 w-full md:w-auto">
+                                <span>Update</span> <i class="fas fa-save"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1147,7 +1157,7 @@
                                 <h4 class="font-bold text-gray-400 text-sm">Enjoyed the terror?</h4>
                                 <p class="text-xs text-gray-600 mt-1">Reward the creator with credits.</p>
                             </div>
-                            <div class="flex items-center gap-4">
+                            <div class="flex flex-wrap items-center justify-center gap-4">
                                 <div class="flex gap-2">
                                     <button onclick="reader.creshare(10)" class="btn-secondary text-xs border-green-900 text-green-700 hover:text-green-400 hover:border-green-500"><i class="fas fa-coins mr-1"></i> 10</button>
                                     <button onclick="reader.creshare(50)" class="btn-secondary text-xs border-green-900 text-green-700 hover:text-green-400 hover:border-green-500"><i class="fas fa-coins mr-1"></i> 50</button>
@@ -1302,6 +1312,9 @@
         };
 
         document.body.addEventListener('mouseover', (e) => {
+            // MOBILE FIX: Disable tooltip on touch devices
+            if (window.matchMedia("(pointer: coarse)").matches) return;
+
             const target = e.target.closest('[title]');
             if (target) {
                 const text = target.getAttribute('title');
@@ -2028,7 +2041,7 @@
                 const isMember = (data.members || []).includes(state.user.uid);
                 const btn = document.getElementById('btn-coven-join');
                 btn.innerText = isMember ? "Leave Coven" : "Join Coven";
-                btn.className = isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30";
+                btn.className = isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20 justify-center" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center";
 
                 const sponsorBtn = document.getElementById('btn-coven-sponsor');
                 const isCreator = state.user.uid === data.creatorId;
@@ -2127,7 +2140,7 @@
                         document.getElementById('coven-member-count').innerText = state.activeCommunity.memberCount;
                         const btn = document.getElementById('btn-coven-join');
                         btn.innerText = !isMember ? "Leave Coven" : "Join Coven";
-                        btn.className = !isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30";
+                        btn.className = !isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20 justify-center" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center";
                         ui.loading(false);
                     } catch(e) { 
                         ui.loading(false); 
