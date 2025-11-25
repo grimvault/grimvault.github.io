@@ -2750,8 +2750,11 @@
                 } catch { return null; }
             },
             recalc: () => {
-                const len = document.getElementById('editor-content').innerText.length;
-                document.getElementById('char-count').innerText = len;
+                const text = document.getElementById('editor-content').innerText;
+                const len = text.length;
+                const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+                
+                document.getElementById('char-count').innerText = `${len} chars | ${wordCount} words`;
                 document.getElementById('img-count').innerText = state.draft.images;
                 
                 let cost = 0;
@@ -2772,8 +2775,15 @@
                 const content = document.getElementById('editor-content').innerHTML;
                 const text = document.getElementById('editor-content').innerText;
                 const isMembersOnly = document.getElementById('create-members-only').checked;
+                const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 
-                if(!title || text.length < 10) return ui.alert("Incomplete", "Your nightmare needs a title and some content.");
+                if(!title || text.trim().length === 0) return ui.alert("Incomplete", "Your nightmare needs a title and some content.");
+                
+                // Story specific check: Minimum 50 words
+                if (state.draft.type === 'story' && wordCount < 50) {
+                    return ui.alert("Too Short", `A story must be at least 50 words. Current count: ${wordCount}.`);
+                }
+
                 if(state.draft.type === 'story' && !state.draft.cover) return ui.alert("Missing", "A story requires a cover image. Please upload one.");
                 if(state.draft.type === 'story' && !state.draft.category) return ui.alert("Missing", "Please select a Realm (category) for your story.");
                 if(state.profile.credits < state.draft.cost) return ui.alert("Insufficient Funds", "You need more credits.");
