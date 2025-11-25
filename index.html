@@ -30,14 +30,24 @@
 
         /* --- RESET & BASE --- */
         * { scrollbar-width: thin; scrollbar-color: var(--blood-red) var(--void); }
-        body {
-            font-family: 'Inter', sans-serif;
+        
+        html, body {
             background-color: var(--void);
             color: #e5e5e5;
-            overflow-x: hidden;
             margin: 0;
+            width: 100%;
+            height: 100%;
+            /* Prevents the 'rubber band' effect on mobile that reveals the background */
+            overscroll-behavior-y: none; 
             -webkit-tap-highlight-color: transparent;
         }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
         body.modal-open { overflow: hidden; }
         
         input, textarea, button { outline: none; appearance: none; -webkit-appearance: none; font-family: inherit; }
@@ -350,8 +360,35 @@
             margin-bottom: 1.5rem;
         }
 
+        /* --- CUSTOM TOOLTIP --- */
+        #custom-tooltip {
+            position: fixed;
+            z-index: 10000;
+            background: rgba(5, 5, 5, 0.95);
+            border: 1px solid var(--blood-red);
+            color: #e5e5e5;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            pointer-events: none; /* Mouse passes through it */
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+            white-space: normal;
+            max-width: 250px;
+            backdrop-filter: blur(4px);
+        }
+        #custom-tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         @media (max-width: 640px) {
-            .view-section { padding-bottom: 80px; }
+            .view-section { padding-bottom: 100px; } /* Added Extra padding for mobile */
             .font-horror { letter-spacing: 0.05em; }
         }
 
@@ -362,6 +399,9 @@
     <!-- FX -->
     <div class="noise-layer"></div>
     <div class="vignette"></div>
+
+    <!-- CUSTOM TOOLTIP CONTAINER -->
+    <div id="custom-tooltip"></div>
 
     <!-- GLOBAL LOADER -->
     <div id="global-loader" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center transition-opacity duration-500">
@@ -376,6 +416,19 @@
             <p id="alert-msg" class="text-gray-400 mb-8 text-sm leading-relaxed">Message</p>
             <div id="alert-actions">
                 <button onclick="ui.closeAlert()" class="btn-main w-full">Acknowledged</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION MODAL (NEW) -->
+    <div id="modal-confirm" class="fixed inset-0 z-[115] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="glass w-[90%] max-w-sm p-8 rounded-lg text-center border border-yellow-900/40 shadow-[0_0_30px_rgba(255,165,0,0.1)]">
+            <i class="fas fa-exclamation-triangle text-3xl text-yellow-500 mb-4"></i>
+            <h3 id="confirm-title" class="font-horror text-2xl text-yellow-500 mb-2">Confirm</h3>
+            <p id="confirm-msg" class="text-gray-400 mb-8 text-sm leading-relaxed">Are you sure?</p>
+            <div class="flex gap-3">
+                <button id="btn-confirm-cancel" class="btn-secondary w-full">Cancel</button>
+                <button id="btn-confirm-yes" class="btn-main w-full border-yellow-700 text-yellow-500 hover:bg-yellow-900/20">Proceed</button>
             </div>
         </div>
     </div>
@@ -765,18 +818,21 @@
                         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(138,3,3,0.3)_0%,_rgba(0,0,0,1)_80%)] animate-pulse-slow"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                      </div>
-                     <div class="px-8 pb-8 relative">
-                         <div class="flex flex-col md:flex-row gap-6 items-end -mt-16">
-                             <div id="profile-img-container" class="w-32 h-32 rounded-full border-4 border-[#050505] overflow-hidden bg-black shadow-xl relative group flex-shrink-0 mx-auto md:mx-0">
+                     <div class="px-4 md:px-8 pb-8 relative">
+                         <!-- Improved Mobile Layout Structure -->
+                         <div class="flex flex-col md:flex-row gap-6 items-center md:items-end -mt-16 md:-mt-16">
+                             <div id="profile-img-container" class="w-32 h-32 rounded-full border-4 border-[#050505] overflow-hidden bg-black shadow-xl relative group flex-shrink-0">
                                  <img id="profile-view-img" class="w-full h-full object-cover">
                                  <div id="profile-img-edit-overlay" class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center cursor-pointer text-white/80 text-xs uppercase font-bold" onclick="document.getElementById('btn-edit-profile').click()">Edit</div>
                              </div>
-                             <div class="flex-1 mb-2 text-center md:text-left">
-                                 <div class="flex items-center justify-center md:justify-start gap-3 flex-wrap">
+                             <div class="flex-1 mb-2 text-center md:text-left w-full">
+                                 <div class="flex flex-col md:flex-row items-center md:justify-start gap-2 md:gap-3">
                                     <h2 id="profile-view-name" class="text-3xl font-bold text-white font-story tracking-tight">Username</h2>
-                                    <span id="profile-leaderboard-rank" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-yellow-900 text-yellow-500 tracking-widest bg-yellow-900/10 hidden">#0</span>
-                                    <span id="profile-rank" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-red-900 text-red-500 tracking-widest bg-red-900/10">Neophyte</span>
-                                    <div id="profile-badges" class="flex items-center gap-2 text-yellow-400"></div>
+                                    <div class="flex items-center gap-2">
+                                        <span id="profile-leaderboard-rank" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-yellow-900 text-yellow-500 tracking-widest bg-yellow-900/10 hidden">#0</span>
+                                        <span id="profile-rank" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-red-900 text-red-500 tracking-widest bg-red-900/10">Neophyte</span>
+                                        <div id="profile-badges" class="flex items-center gap-2 text-yellow-400"></div>
+                                    </div>
                                  </div>
                                  <p id="profile-view-bio" class="text-gray-400 text-sm mt-2 max-w-lg leading-relaxed mx-auto md:mx-0">Bio goes here...</p>
                                  <div id="profile-view-joined" class="text-xs text-gray-600 mt-3 font-mono hidden"><i class="fas fa-clock mr-1"></i></div>
@@ -799,8 +855,8 @@
                              </div>
 
                              <div class="mb-4 flex flex-col items-center justify-center gap-2 w-full md:w-auto">
-                                 <button id="btn-follow" class="btn-main py-2 px-8 text-xs hidden shadow-lg" onclick="profile.toggleFollow()">Follow</button>
-                                 <button id="btn-edit-profile" class="btn-secondary py-2 px-6 text-xs hidden border-white/20 hover:bg-white/10 text-gray-300" onclick="ui.openProfileEditor()">Edit Profile</button>
+                                 <button id="btn-follow" class="btn-main py-2 px-8 text-xs hidden shadow-lg w-full md:w-auto" onclick="profile.toggleFollow()">Follow</button>
+                                 <button id="btn-edit-profile" class="btn-secondary py-2 px-6 text-xs hidden border-white/20 hover:bg-white/10 text-gray-300 w-full md:w-auto" onclick="ui.openProfileEditor()">Edit Profile</button>
                                  <button onclick="ui.openModal('modal-how-it-works')" class="text-gray-600 hover:text-white transition-colors text-xs flex items-center gap-1"><i class="fas fa-question-circle"></i> How It Works</button>
                              </div>
                          </div>
@@ -1218,6 +1274,69 @@
         const APP_ID_PATH = "1:329819137762:web:6fd48985a42f07368a60bb"; 
         const CREATOR_ID = "bXFA3reA4veXpQ0tmMDbwSq9oF23";
 
+        // --- CUSTOM TOOLTIP LOGIC ---
+        let tooltipTimer;
+        const tooltipEl = document.getElementById('custom-tooltip');
+
+        const updateTooltipPos = (e) => {
+            const padding = 15;
+            const rect = tooltipEl.getBoundingClientRect();
+            const winW = window.innerWidth;
+            const winH = window.innerHeight;
+
+            let left = e.clientX + padding;
+            let top = e.clientY + padding;
+
+            // Check Right Edge
+            if (left + rect.width > winW) {
+                left = e.clientX - rect.width - padding;
+            }
+
+            // Check Bottom Edge
+            if (top + rect.height > winH) {
+                top = e.clientY - rect.height - padding;
+            }
+
+            tooltipEl.style.left = `${left}px`;
+            tooltipEl.style.top = `${top}px`;
+        };
+
+        document.body.addEventListener('mouseover', (e) => {
+            const target = e.target.closest('[title]');
+            if (target) {
+                const text = target.getAttribute('title');
+                if (text) {
+                    target.setAttribute('data-original-title', text);
+                    target.removeAttribute('title');
+                    
+                    tooltipTimer = setTimeout(() => {
+                        tooltipEl.innerHTML = text;
+                        tooltipEl.classList.add('visible');
+                        updateTooltipPos(e); // Set initial position
+                    }, 1000); // 1 second delay
+                }
+            }
+        });
+
+        document.body.addEventListener('mousemove', (e) => {
+            if (tooltipEl.classList.contains('visible')) {
+                updateTooltipPos(e);
+            }
+        });
+
+        document.body.addEventListener('mouseout', (e) => {
+            const target = e.target.closest('[data-original-title]');
+            if (target) {
+                const text = target.getAttribute('data-original-title');
+                target.setAttribute('title', text);
+                target.removeAttribute('data-original-title');
+                
+                clearTimeout(tooltipTimer);
+                tooltipEl.classList.remove('visible');
+            }
+        });
+
+
         // --- STATE ---
         const state = {
             user: null,
@@ -1340,6 +1459,21 @@
                 document.getElementById('modal-alert').classList.remove('hidden');
             },
             closeAlert: () => document.getElementById('modal-alert').classList.add('hidden'),
+            confirm: (title, msg, onYes) => {
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-msg').innerText = msg;
+                const modal = document.getElementById('modal-confirm');
+                modal.classList.remove('hidden');
+                
+                document.getElementById('btn-confirm-yes').onclick = () => {
+                    modal.classList.add('hidden');
+                    if(onYes) onYes();
+                };
+                
+                document.getElementById('btn-confirm-cancel').onclick = () => {
+                    modal.classList.add('hidden');
+                };
+            },
             loading: (show) => {
                 const l = document.getElementById('global-loader');
                 l.style.opacity = show ? '1' : '0';
@@ -1468,6 +1602,9 @@
             }
             if (!e.target.closest('#notif-dropdown') && !e.target.closest('.fa-bell')) {
                 document.getElementById('notif-dropdown').classList.add('hidden');
+            }
+            if (e.target.id === 'modal-confirm') {
+                document.getElementById('modal-confirm').classList.add('hidden');
             }
         }
 
@@ -1920,28 +2057,32 @@
                 if (state.profile.credits < 100) {
                     return ui.alert("Insufficient Credits", "You need 100 CR to sponsor this Coven.");
                 }
-                const confirmed = confirm("Sponsoring your Coven costs 100 CR and will feature it on the main feed for 12 hours. Proceed?");
-                if (!confirmed) return;
+                
+                ui.confirm(
+                    "Sponsor Coven",
+                    "Sponsoring your Coven costs 100 CR and will feature it on the main feed for 12 hours. Proceed?",
+                    async () => {
+                        ui.loading(true);
+                        try {
+                            const twelveHoursFromNow = new Date(Date.now() + 12 * 60 * 60 * 1000);
+                            const batch = writeBatch(db);
+                            const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
+                            const covenRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', state.activeCommunity.id);
 
-                ui.loading(true);
-                try {
-                    const twelveHoursFromNow = new Date(Date.now() + 12 * 60 * 60 * 1000);
-                    const batch = writeBatch(db);
-                    const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
-                    const covenRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', state.activeCommunity.id);
+                            batch.update(userRef, { credits: increment(-100) });
+                            batch.update(covenRef, { sponsoredUntil: twelveHoursFromNow });
+                            await batch.commit();
 
-                    batch.update(userRef, { credits: increment(-100) });
-                    batch.update(covenRef, { sponsoredUntil: twelveHoursFromNow });
-                    await batch.commit();
-
-                    document.getElementById('btn-coven-sponsor').disabled = true;
-                    document.getElementById('btn-coven-sponsor').innerText = 'Sponsored';
-                    ui.alert("Success", "Your Coven is now sponsored!");
-                } catch (e) {
-                    ui.alert("Error", e.message);
-                } finally {
-                    ui.loading(false);
-                }
+                            document.getElementById('btn-coven-sponsor').disabled = true;
+                            document.getElementById('btn-coven-sponsor').innerText = 'Sponsored';
+                            ui.alert("Success", "Your Coven is now sponsored!");
+                        } catch (e) {
+                            ui.alert("Error", e.message);
+                        } finally {
+                            ui.loading(false);
+                        }
+                    }
+                );
             },
             toggleJoin: async () => { 
                 if(!state.activeCommunity) return;
@@ -1949,56 +2090,62 @@
                 const isMember = (state.activeCommunity.members || []).includes(state.user.uid);
                 const joinFee = state.activeCommunity.joinFee || 0;
                 
-                ui.loading(true);
-                try {
-                    if (isMember) { // Leaving Coven
-                        const newRoles = { ...(state.activeCommunity.roles || {}) };
-                        delete newRoles[state.user.uid];
-                        await updateDoc(ref, { members: arrayRemove(state.user.uid), memberCount: increment(-1), roles: newRoles });
-                        state.activeCommunity.members = state.activeCommunity.members.filter(id => id !== state.user.uid);
-                        state.activeCommunity.memberCount--;
-                        state.activeCommunity.roles = newRoles;
-                    } else { // Joining Coven
-                        const batch = writeBatch(db);
-                        const newRoles = { ...(state.activeCommunity.roles || {}) };
-                        newRoles[state.user.uid] = 'Member';
-                        
-                        if (joinFee > 0) {
-                            if (state.profile.credits < joinFee) {
-                                ui.loading(false);
-                                return ui.alert("Insufficient Credits", `You need ${joinFee} CR to join this Coven.`);
-                            }
-                            const confirmed = confirm(`This Coven requires a payment of ${joinFee} CR to join. The funds will be sent to the Coven's creator. Do you agree?`);
-                            if (!confirmed) {
-                                ui.loading(false);
-                                return;
+                const performToggle = async () => {
+                    ui.loading(true);
+                    try {
+                        if (isMember) { // Leaving Coven
+                            const newRoles = { ...(state.activeCommunity.roles || {}) };
+                            delete newRoles[state.user.uid];
+                            await updateDoc(ref, { members: arrayRemove(state.user.uid), memberCount: increment(-1), roles: newRoles });
+                            state.activeCommunity.members = state.activeCommunity.members.filter(id => id !== state.user.uid);
+                            state.activeCommunity.memberCount--;
+                            state.activeCommunity.roles = newRoles;
+                        } else { // Joining Coven
+                            const batch = writeBatch(db);
+                            const newRoles = { ...(state.activeCommunity.roles || {}) };
+                            newRoles[state.user.uid] = 'Member';
+                            
+                            if (joinFee > 0) {
+                                // Logic handled in confirm block below, but we double check balance here
+                                const selfRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
+                                const creatorRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.activeCommunity.creatorId);
+                                
+                                batch.update(selfRef, { credits: increment(-joinFee) });
+                                batch.update(creatorRef, { credits: increment(joinFee) });
+                                notifications.send(state.activeCommunity.creatorId, `${state.profile.username} joined your coven and paid ${joinFee} CR.`, 'credit');
                             }
                             
-                            const selfRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
-                            const creatorRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.activeCommunity.creatorId);
+                            batch.update(ref, { members: arrayUnion(state.user.uid), memberCount: increment(1), roles: newRoles });
+                            await batch.commit();
                             
-                            batch.update(selfRef, { credits: increment(-joinFee) });
-                            batch.update(creatorRef, { credits: increment(joinFee) });
-                            notifications.send(state.activeCommunity.creatorId, `${state.profile.username} joined your coven and paid ${joinFee} CR.`, 'credit');
+                            if(!state.activeCommunity.members) state.activeCommunity.members = [];
+                            state.activeCommunity.members.push(state.user.uid);
+                            state.activeCommunity.memberCount++;
+                            state.activeCommunity.roles = newRoles;
                         }
                         
-                        batch.update(ref, { members: arrayUnion(state.user.uid), memberCount: increment(1), roles: newRoles });
-                        await batch.commit();
-                        
-                        if(!state.activeCommunity.members) state.activeCommunity.members = [];
-                        state.activeCommunity.members.push(state.user.uid);
-                        state.activeCommunity.memberCount++;
-                        state.activeCommunity.roles = newRoles;
+                        document.getElementById('coven-member-count').innerText = state.activeCommunity.memberCount;
+                        const btn = document.getElementById('btn-coven-join');
+                        btn.innerText = !isMember ? "Leave Coven" : "Join Coven";
+                        btn.className = !isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30";
+                        ui.loading(false);
+                    } catch(e) { 
+                        ui.loading(false); 
+                        ui.alert("Error Joining", e.message); 
                     }
-                    
-                    document.getElementById('coven-member-count').innerText = state.activeCommunity.memberCount;
-                    const btn = document.getElementById('btn-coven-join');
-                    btn.innerText = !isMember ? "Leave Coven" : "Join Coven";
-                    btn.className = !isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30";
-                    ui.loading(false);
-                } catch(e) { 
-                    ui.loading(false); 
-                    ui.alert("Error Joining", e.message); 
+                };
+
+                if (!isMember && joinFee > 0) {
+                     if (state.profile.credits < joinFee) {
+                        return ui.alert("Insufficient Credits", `You need ${joinFee} CR to join this Coven.`);
+                    }
+                    ui.confirm(
+                        "Join Fee Required",
+                        `This Coven requires a payment of ${joinFee} CR to join. The funds will be sent to the Coven's creator. Do you agree?`,
+                        performToggle
+                    );
+                } else {
+                    performToggle();
                 }
             },
             loadFeed: (covenId) => {
