@@ -315,8 +315,13 @@
         #reader-body blockquote, #diff-original blockquote, #diff-new blockquote { border-left: 3px solid var(--blood-red); padding-left: 1rem; font-style: italic; color: #888; }
         #editor-content img, #reader-body img, #diff-original img, #diff-new img { max-width: 100%; height: auto; margin: 1rem 0; display: block; }
 
-        .toolbar-layer { position: relative; z-index: 50; overflow-x: auto; whitespace: nowrap; scrollbar-width: none; }
-        .toolbar-layer::-webkit-scrollbar { display: none; }
+		.toolbar-layer { 
+			position: relative; 
+			z-index: 50; 
+			overflow: visible; /* Changed from overflow-x: auto */
+			white-space: normal; /* Changed from nowrap */
+			flex-wrap: wrap; /* Ensures buttons wrap on mobile instead of scrolling */
+		}
         
         /* Horizontal Scroll */
         .scroller {
