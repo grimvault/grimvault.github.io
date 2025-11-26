@@ -2794,34 +2794,35 @@
                     });
                 });
             },
-            createCommentElement: (comment, allComments) => { 
-                const el = document.createElement('div');
-                el.className = 'flex gap-3';
-                const commentTime = comment.createdAt ? timeAgo(comment.createdAt) : 'Just now';
-                const formattedCommentAuthor = formatUsername(comment.authorId, comment.author);
+			createCommentElement: (comment, allComments) => { 
+				const el = document.createElement('div');
+				el.className = 'flex gap-3';
+				const commentTime = comment.createdAt ? timeAgo(comment.createdAt) : 'Just now';
+				const formattedCommentAuthor = formatUsername(comment.authorId, comment.author);
 
-                el.innerHTML = `
-                    <div class="flex-shrink-0">
-                        <img src="${comment.authorAvatar || `https://ui-avatars.com/api/?name=${comment.author.replace(/\s/g, '+')}&background=random`}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
-                    </div>
-                    <div class="flex-grow min-w-0">
-                        <div class="bg-gray-900/50 p-3 rounded-lg border border-white/5">
-                            <div class="flex items-center gap-2 text-xs mb-2">
-                                <span class="font-bold text-red-400">${formattedCommentAuthor}</span>
-                                <span class="text-gray-600">• ${commentTime}</span>
-                            </div>
-                            <p class="text-sm text-gray-300 leading-relaxed font-story break-words">${comment.text}</p>
-                        </div>
-                        <div class="mt-2 text-xs flex items-center gap-4">
-                            <button class="font-bold text-gray-500 hover:text-white" onclick="threadView.showReplyBox('${comment.id}', '${comment.author}')">Reply</button>
-                            <button class="font-bold text-gray-500 hover:text-red-500 flex items-center gap-1" onclick="threadView.toggleCommentLike('${comment.id}')">
-                                <i class="fas fa-heart"></i>
-                                <span id="comment-likes-${comment.id}">${comment.likes || 0}</span>
-                            </button>
-                        </div>
-                        <div id="reply-box-${comment.id}" class="hidden mt-3 ml-4"></div>
-                        <div id="children-${comment.id}" class="mt-4 space-y-4 border-l-2 border-white/10 pl-4"></div>
-                    </div>
+				el.innerHTML = `
+					<div class="flex-shrink-0">
+						<img src="${comment.authorAvatar || `https://ui-avatars.com/api/?name=${comment.author.replace(/\s/g, '+')}&background=random`}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
+					</div>
+					<div class="flex-grow min-w-0">
+						<div class="bg-gray-900/50 p-3 rounded-lg border border-white/5">
+							<div class="flex items-center gap-2 text-xs mb-2">
+								<span class="font-bold text-red-400">${formattedCommentAuthor}</span>
+								<span class="text-gray-600">• ${commentTime}</span>
+							</div>
+							<!-- ADDED whitespace-pre-wrap HERE -->
+							<p class="text-sm text-gray-300 leading-relaxed font-story break-words whitespace-pre-wrap">${comment.text}</p>
+						</div>
+						<div class="mt-2 text-xs flex items-center gap-4">
+							<button class="font-bold text-gray-500 hover:text-white" onclick="threadView.showReplyBox('${comment.id}', '${comment.author}')">Reply</button>
+							<button class="font-bold text-gray-500 hover:text-red-500 flex items-center gap-1" onclick="threadView.toggleCommentLike('${comment.id}')">
+								<i class="fas fa-heart"></i>
+								<span id="comment-likes-${comment.id}">${comment.likes || 0}</span>
+							</button>
+						</div>
+						<div id="reply-box-${comment.id}" class="hidden mt-3 ml-4"></div>
+						<div id="children-${comment.id}" class="mt-4 space-y-4 border-l-2 border-white/10 pl-4"></div>
+					</div>
                 `;
 
                 const childrenContainer = el.querySelector(`#children-${comment.id}`);
@@ -4387,29 +4388,31 @@
             }
         }
 
-        function loadComments(storyId) { 
-            const list = document.getElementById('comments-list');
-            list.innerHTML = ''; 
-            const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', storyId, 'comments'), orderBy('createdAt', 'desc'));
-            onSnapshot(q, snap => {
-                list.innerHTML = '';
-                if(snap.empty) {
-                    document.getElementById('comments-empty').classList.remove('hidden');
-                } else {
-                    document.getElementById('comments-empty').classList.add('hidden');
-                }
-                snap.forEach(d => {
-                    const c = d.data();
-                    const commentTime = c.createdAt ? timeAgo(c.createdAt) : 'Just now';
-                    list.innerHTML += `
-                        <div class="bg-white/5 p-4 rounded border-l-2 border-red-900">
-                            <div class="text-xs text-red-400 font-bold mb-1">${formatUsername(c.authorId, c.author)} • ${commentTime}</div>
-                            <div class="text-sm text-gray-300 font-story break-words">${c.text}</div>
-                        </div>
-                    `;
-                });
-            });
-        }
+		function loadComments(storyId) { 
+			const list = document.getElementById('comments-list');
+			list.innerHTML = ''; 
+			const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', storyId, 'comments'), orderBy('createdAt', 'desc'));
+			onSnapshot(q, snap => {
+				list.innerHTML = '';
+				if(snap.empty) {
+					document.getElementById('comments-empty').classList.remove('hidden');
+				} else {
+					document.getElementById('comments-empty').classList.add('hidden');
+				}
+				snap.forEach(d => {
+					const c = d.data();
+					const commentTime = c.createdAt ? timeAgo(c.createdAt) : 'Just now';
+					
+					// ADDED whitespace-pre-wrap HERE to the div with font-story
+					list.innerHTML += `
+						<div class="bg-white/5 p-4 rounded border-l-2 border-red-900">
+							<div class="text-xs text-red-400 font-bold mb-1">${formatUsername(c.authorId, c.author)} • ${commentTime}</div>
+							<div class="text-sm text-gray-300 font-story break-words whitespace-pre-wrap">${c.text}</div>
+						</div>
+					`;
+				});
+			});
+		}
 
         // --- LISTENERS ---
         document.getElementById('editor-content').addEventListener('input', creator.recalc);
