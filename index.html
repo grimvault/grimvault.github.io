@@ -2977,10 +2977,10 @@
             },
 			recalc: () => {
 				const text = document.getElementById('editor-content').innerText;
-				const len = text.length;
 				const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-				
-				const readTime = Math.ceil(wordCount / 200); 
+				const readTime = Math.ceil(wordCount / 200);
+
+				readTime: readTime,
 
 				document.getElementById('char-count').innerText = `${len} chars | ${wordCount} words | ~${readTime} min read`;
 				document.getElementById('img-count').innerText = state.draft.images;
@@ -3232,7 +3232,7 @@
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
                 const formattedAuthorName = formatUsername(author.id, author.username);
 
-                const readTime = data.type !== 'thread' ? Math.ceil(data.content.split(' ').length / 200) : null;
+                const readTime = data.type !== 'thread' ? Math.ceil(data.content.replace(/<[^>]*>?/gm, '').trim().split(/\s+/).length / 200) : null;
 
 
                 if (isThread) {
