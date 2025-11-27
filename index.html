@@ -2065,8 +2065,13 @@
         // --- AUTH & USERNAME VALIDATION ---
 
         // Expanded lists for username generation, moved to global scope
-        const usernameAdjectives = ["Crimson", "Shadow", "Silent", "Fading", "Whispering", "Forgotten", "Hollow", "Pale", "Twisted", "Wailing", "Weeping", "Broken", "Ashen", "Bleeding", "Ghostly", "Sunken", "Dread", "Eldritch", "Corrupted", "Nocturnal", "Veiled", "Somber", "Mourning", "Scarlet", "Gilded", "Rusted", "Feral", "Cursed", "Abyssal", "Profane", "Grave", "Shattered", "Frozen", "Burning"];
-        const usernameNouns = ["Soul", "Specter", "Revenant", "Echo", "Sorrow", "Lament", "Ritual", "Vessel", "Curse", "Oracle", "Heretic", "Wraith", "Pilgrim", "Wanderer", "Key", "Veil", "Thorn", "Grave", "Cultist", "Warlock", "Relic", "Grimoire", "Serpent", "Martyr", "Apparition", "Omen", "Obelisk", "Heresy", "Requiem", "Sigil", "Cipher", "Idol", "Harbinger", "Dirge"];
+		const usernameAdjectives = [
+		  "Crimson","Shadow","Silent","Fading","Whispering","Forgotten","Hollow","Pale","Twisted","Wailing","Weeping","Broken","Ashen","Bleeding","Ghostly","Sunken","Dread","Eldritch","Corrupted","Nocturnal","Veiled","Somber","Mourning","Scarlet","Gilded","Rusted","Feral","Cursed","Abyssal","Profane","Grave","Shattered","Frozen","Burning","Obscure","Doomed","Blighted","Morbid","Eternal","Vengeful","Withered","Forsaken","Blackened","Tormented","Bitter","Mournful","Skeletal","Grim","Haunted","Perished","Ominous","Rotting","Sundered","Infernal","Tainted","Vile","Lurking","Livid","Dying","Arcane","Spectral","Ravenous","Severed","Damned","Nameless","Buried","Torn","Gloomborne","Stormbound","Nightbound","Bloodless","Harrowed","Sorrowbound","Chained","Wretched","Hushed"
+		];
+		const usernameNouns = [
+		  "Soul","Specter","Revenant","Echo","Sorrow","Lament","Ritual","Vessel","Curse","Oracle","Heretic","Wraith","Pilgrim","Wanderer","Key","Veil","Thorn","Grave","Cultist","Warlock","Relic","Grimoire","Serpent","Martyr","Apparition","Omen","Obelisk","Heresy","Requiem","Sigil","Cipher","Idol","Harbinger","Dirge","Shrine","Burden","Ash","Fang","Shadowling","Prophet","Whisper","Catacomb","Famine","Nightmare","Shade","Spectre","Ghoul","Mire","Coffin","Funeral","Tomb","Crown","Pact","Eclipse","Chant","Ruin","Fragment","Husk","Talon","Mausoleum","Brand","Scar","Weaver","Scribe","Daemon","Pillar","Rune","Ember","Inferno","Hollowling","Ravener","Dreadling","Shard","Token","Haunt"
+		];
+
 
         window.checkUsername = async (username, currentUsername = null) => {
             if (!username) return { valid: false, message: "Username cannot be empty." };
