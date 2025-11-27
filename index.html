@@ -898,7 +898,10 @@
                     <input type="file" id="signup-avatar-input" class="hidden" accept="image/*">
                 </div>
                 <div>
-                    <input type="text" id="signup-name" placeholder="Chosen Name" class="input-void" required autocomplete="off">
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="signup-name" placeholder="Chosen Name" class="input-void" required autocomplete="off">
+                        <button type="button" onclick="auth.suggestUsername()" class="btn-secondary py-3 px-4 flex-shrink-0" title="Suggest a Name"><i class="fas fa-wand-sparkles"></i></button>
+                    </div>
                     <p id="signup-username-feedback" class="hidden text-xs font-bold mt-1"></p>
                 </div>
                 <input type="email" id="signup-email" placeholder="Email Address" class="input-void" required>
@@ -1472,7 +1475,10 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-xs text-gray-500 uppercase">Username</label>
-                    <input type="text" id="edit-username" class="input-void" autocomplete="off">
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="edit-username" class="input-void" autocomplete="off">
+                        <button type="button" onclick="profile.suggestUsername()" class="btn-secondary py-3 px-4 flex-shrink-0" title="Suggest a Name"><i class="fas fa-wand-sparkles"></i></button>
+                    </div>
                     <p id="edit-username-feedback" class="hidden text-xs font-bold mt-1"></p>
                 </div>
                 <div>
@@ -1530,7 +1536,7 @@
             apiKey: "AIzaSyCf869FUD-h2AUwLeXQtxpCFBNm9BYOIEM", 
             authDomain: "storedstorablestories.firebaseapp.com",
             projectId: "storedstorablestories",
-            storageBucket: "storedstorablestories.firebasestorage.app",
+            storageBucket: "storedstorablestorage.app",
             messagingSenderId: "329819137762",
             appId: "1:329819137762:web:6fd48985a42f07368a60bb",
             measurementId: "G-BRGC6T806R"
@@ -2057,6 +2063,11 @@
         window.onpopstate = router.handlePopState;
 
         // --- AUTH & USERNAME VALIDATION ---
+
+        // Expanded lists for username generation, moved to global scope
+        const usernameAdjectives = ["Crimson", "Shadow", "Silent", "Fading", "Whispering", "Forgotten", "Hollow", "Pale", "Twisted", "Wailing", "Weeping", "Broken", "Ashen", "Bleeding", "Ghostly", "Sunken", "Dread", "Eldritch", "Corrupted", "Nocturnal", "Veiled", "Somber", "Mourning", "Scarlet", "Gilded", "Rusted", "Feral", "Cursed", "Abyssal", "Profane", "Grave", "Shattered", "Frozen", "Burning"];
+        const usernameNouns = ["Soul", "Specter", "Revenant", "Echo", "Sorrow", "Lament", "Ritual", "Vessel", "Curse", "Oracle", "Heretic", "Wraith", "Pilgrim", "Wanderer", "Key", "Veil", "Thorn", "Grave", "Cultist", "Warlock", "Relic", "Grimoire", "Serpent", "Martyr", "Apparition", "Omen", "Obelisk", "Heresy", "Requiem", "Sigil", "Cipher", "Idol", "Harbinger", "Dirge"];
+
         window.checkUsername = async (username, currentUsername = null) => {
             if (!username) return { valid: false, message: "Username cannot be empty." };
             if (username.length < 3) return { valid: false, message: "Username is too short (min 3)." };
@@ -2153,6 +2164,35 @@
                     await updateProfile(cred.user, { displayName: n });
                     state.signupAvatarBlob = null;
                 } catch(err) { ui.loading(false); ui.alert('Signup Failed', err.message); }
+            },
+            suggestUsername: async () => {
+                const input = document.getElementById('signup-name');
+                const feedback = document.getElementById('signup-username-feedback');
+                input.disabled = true;
+                feedback.classList.remove('hidden');
+                feedback.className = "text-xs font-bold mt-1 text-gray-500";
+                feedback.innerText = "Conjuring a name...";
+
+                let suggestedName = '';
+                let isAvailable = false;
+                let attempts = 0;
+
+                while (!isAvailable && attempts < 20) {
+                    const adj = usernameAdjectives[Math.floor(Math.random() * usernameAdjectives.length)];
+                    const noun = usernameNouns[Math.floor(Math.random() * usernameNouns.length)];
+                    const num = Math.random() > 0.5 ? Math.floor(Math.random() * 999) : '';
+                    suggestedName = `${adj}${noun}${num}`;
+
+                    const result = await window.checkUsername(suggestedName);
+                    isAvailable = result.valid;
+                    attempts++;
+                }
+
+                input.value = suggestedName;
+                input.disabled = false;
+                
+                // Trigger validation UI update
+                await handleUsernameInput('signup-name', 'signup-username-feedback');
             },
             logout: async () => {
                 await signOut(authService);
@@ -3901,6 +3941,36 @@
                 ui.alert("Identity", "Your mask has been adjusted.");
                 ui.loading(false);
             },
+            suggestUsername: async () => {
+                const input = document.getElementById('edit-username');
+                const feedback = document.getElementById('edit-username-feedback');
+                input.disabled = true;
+                feedback.classList.remove('hidden');
+                feedback.className = "text-xs font-bold mt-1 text-gray-500";
+                feedback.innerText = "Reimagining your name...";
+
+                let suggestedName = '';
+                let isAvailable = false;
+                let attempts = 0;
+
+                while (!isAvailable && attempts < 20) {
+                    const adj = usernameAdjectives[Math.floor(Math.random() * usernameAdjectives.length)];
+                    const noun = usernameNouns[Math.floor(Math.random() * usernameNouns.length)];
+                    const num = Math.random() > 0.5 ? Math.floor(Math.random() * 999) : '';
+                    suggestedName = `${adj}${noun}${num}`;
+                    
+                    // Pass current username to allow it if generated again
+                    const result = await window.checkUsername(suggestedName, state.profile.username);
+                    isAvailable = result.valid;
+                    attempts++;
+                }
+
+                input.value = suggestedName;
+                input.disabled = false;
+                
+                // Trigger validation UI update, passing current name
+                await handleUsernameInput('edit-username', 'edit-username-feedback', state.profile.username);
+            },
             viewSelf: () => profile.open(state.user.uid),
             openFromReader: () => {
                 if(state.activeStory) profile.open(state.activeStory.authorId);
@@ -4211,6 +4281,42 @@
                 const followingIds = profileSnap.data().following || [];
                 
                 if (followingIds.length === 0) {
+                    container.innerHTML = `<div class="col-span-full text-center text-gray-600 py-16">
+                        <i class="fas fa-street-view text-5xl mb-4"></i>
+                        <h3 class="font-bold text-lg text-gray-400">A Solitary Path</h3>
+                        <p class="text-sm">This soul walks the void alone, for now.</p>
+                    </div>`;
+                    return;
+                }
+                
+                container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="allies-grid"></div>';
+                const grid = document.getElementById('allies-grid');
+                
+                const promises = followingIds.map(id => getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', id)));
+                const results = await Promise.all(promises);
+                
+                results.forEach(snap => {
+                    if(snap.exists()) {
+                        const u = snap.data();
+                        const el = document.createElement('div');
+                        el.className = 'glass p-3 rounded flex items-center gap-3 cursor-pointer hover:bg-white/5';
+                        el.onclick = () => profile.open(snap.id);
+                        el.innerHTML = `
+                            <img src="${u.avatar}" class="w-10 h-10 rounded-full border border-gray-700">
+                            <div>
+                                <div class="font-bold text-gray-300 text-sm">${formatUsername(snap.id, u.username)}</div>
+                                <div class="text-[10px] text-gray-500">${getRank(u.credits)}</div>
+                            </div>
+                        `;
+                        grid.appendChild(el);
+                    }
+                });
+            },
+            loadCovens: async (container) => {
+                 const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities'), where('members', 'array-contains', state.activeProfileId), limit(20));
+                 const snap = await getDocs(q);
+                 
+                 if(snap.empty) {
                     container.innerHTML = `<div class="col-span-full text-center text-gray-600 py-16">
                         <i class="fas fa-street-view text-5xl mb-4"></i>
                         <h3 class="font-bold text-lg text-gray-400">A Solitary Path</h3>
@@ -4607,46 +4713,91 @@
             });
         }
         
-        async function searchUsersAndContent(term) { 
+		async function searchUsersAndContent(term) { 
             const lowerTerm = normalize(term);
-            const results = [];
-            
             const contentGrid = document.getElementById('feed-grid');
-            contentGrid.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Scouring the archives...</div>';
+            
+            // Loading State
+            contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Scouring the archives...</div>';
 
             try {
+                // 1. SEARCH USERS
+                const userResults = [];
                 const userQuery = query(collection(db, 'artifacts', APP_ID_PATH, 'users'), limit(50));
                 const userSnap = await getDocs(userQuery);
                 userSnap.forEach(doc => {
                      const u = doc.data();
+                     // Simple search logic
                      if(normalize(u.username).includes(lowerTerm) || normalize(u.bio).includes(lowerTerm)){
-                        results.push({ type: 'user-profile', data: { id: doc.id, ...u } });
+                        userResults.push({ id: doc.id, ...u });
                      }
                 });
 
+                // 2. SEARCH POSTS
+                const postResults = [];
                 const contentQuery = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories'), limit(100));
                 const contentSnap = await getDocs(contentQuery);
                 
                 contentSnap.forEach(doc => {
                     const d = doc.data();
-                    if (d.communityId) return; 
+                    if (d.communityId) return; // Optional: filter out community posts if desired
                     
                     const titleMatch = normalize(d.title).includes(lowerTerm);
                     const descMatch = normalize(d.description).includes(lowerTerm);
                     const tagMatch = (d.tags || []).some(t => normalize(t).includes(lowerTerm));
                     
                     if (titleMatch || descMatch || tagMatch) {
-                        results.push({id: doc.id, ...d});
+                        postResults.push({id: doc.id, ...d});
                     }
                 });
 
-                const authorIds = [...new Set(results.filter(r => r.type !== 'user-profile').map(s => s.authorId))];
+                // Prepare Author Profiles for Posts
+                const authorIds = [...new Set(postResults.map(s => s.authorId))];
                 await Promise.all(authorIds.map(id => getUserProfile(id)));
-                
-                feed.render(results);
+
+                // 3. RENDER SECTIONED RESULTS
+                contentGrid.innerHTML = '';
+
+                // -- RENDER USERS --
+                if (userResults.length > 0) {
+                    // Section Header (col-span-full ensures it takes full width of grid)
+                    const userHeader = document.createElement('div');
+                    userHeader.className = "col-span-1 md:col-span-2 lg:col-span-3 pb-2 border-b border-white/10 mb-2 mt-2";
+                    userHeader.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fas fa-users mr-2"></i>Souls Found (${userResults.length})</h3>`;
+                    contentGrid.appendChild(userHeader);
+
+                    userResults.forEach(u => {
+                        contentGrid.appendChild(feed.createUserCard(u));
+                    });
+                }
+
+                // -- RENDER POSTS --
+                if (postResults.length > 0) {
+                    // Section Header
+                    const postHeader = document.createElement('div');
+                    postHeader.className = "col-span-1 md:col-span-2 lg:col-span-3 pb-2 border-b border-white/10 mb-2 mt-6";
+                    postHeader.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fas fa-book-open mr-2"></i>Echoes Found (${postResults.length})</h3>`;
+                    contentGrid.appendChild(postHeader);
+
+                    postResults.forEach(d => {
+                         const card = feed.createStoryCard(d);
+                         if (card) contentGrid.appendChild(card);
+                    });
+                }
+
+                // -- EMPTY STATE --
+                if (userResults.length === 0 && postResults.length === 0) {
+                     contentGrid.innerHTML = `
+                        <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16 opacity-50">
+                            <i class="fas fa-search text-4xl mb-4 text-red-900"></i>
+                            <p class="text-gray-500">The void reveals nothing for "${term}".</p>
+                        </div>
+                     `;
+                }
+
             } catch(e) {
                 console.error(e);
-                contentGrid.innerHTML = '<div class="col-span-3 text-center text-red-500">The void rejected your query.</div>';
+                contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-red-500 py-10">The void rejected your query.</div>';
             }
         }
 
@@ -4746,24 +4897,34 @@
             handleUsernameInput('edit-username', 'edit-username-feedback', state.profile.username);
         }, 500));
         
-        function setupSearchClear(inputId, clearId, searchIconClass, onClear) {
+		function setupSearchClear(inputId, clearId, searchIconClass, onClear) {
             const input = document.getElementById(inputId);
             const clearBtn = document.getElementById(clearId);
+            // We select the icon but we won't hide it anymore
             const searchIcon = input.parentElement.querySelector(searchIconClass);
 
             input.addEventListener('input', () => {
                 const hasValue = input.value.trim().length > 0;
+                // Only toggle the Clear (X) button
                 clearBtn.classList.toggle('hidden', !hasValue);
+                
+                // FIX: We keep the search icon visible to maintain UI stability
+                // The icon sits on the left, the text has padding, so they don't overlap.
                 if (searchIcon) {
-                    searchIcon.classList.toggle('hidden', hasValue);
+                    searchIcon.classList.remove('hidden'); 
+                    // Optional: Make it glow slightly when active
+                    if(hasValue) searchIcon.classList.add('text-red-500');
+                    else searchIcon.classList.remove('text-red-500');
                 }
             });
 
             clearBtn.addEventListener('click', () => {
                 input.value = '';
                 clearBtn.classList.add('hidden');
+                // Ensure icon is visible and reset color
                 if (searchIcon) {
                     searchIcon.classList.remove('hidden');
+                    searchIcon.classList.remove('text-red-500');
                 }
                 onClear();
                 input.focus();
