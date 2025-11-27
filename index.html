@@ -4808,6 +4808,7 @@
         onAuthStateChanged(authService, (user) => {
             if(user) {
                 state.user = user;
+                // This onSnapshot listens for changes to the user's profile data
                 onSnapshot(doc(db, 'artifacts', APP_ID_PATH, 'users', user.uid), d => {
                     if(d.exists()) {
                         const profileData = d.data();
@@ -4820,16 +4821,20 @@
                         document.getElementById('view-auth').classList.add('hidden');
                         document.getElementById('app-shell').classList.remove('hidden');
                         
-                        notifications.init();console.error("Error loading liked posts:", error);
+                        notifications.init();
                         explore.loadTrending(); 
                         explore.loadFresh();
-
-                        // NEW: Check for daily rewards automatically on load/update
                         rewards.checkEligibility();
 
-                        router.handlePopState();
+                        // THIS IS THE CORRECT PLACE FOR THIS FUNCTION CALL
+                        // It ensures the app only tries to load content AFTER the user's profile is ready.
+                        router.handlePopState(); 
                     }
                 });
+                
+                // THIS LINE WAS THE PROBLEM. It was running before the user profile was loaded.
+                // router.handlePopState(); // REMOVE THIS LINE
+
             } else {
                 document.getElementById('app-shell').classList.add('hidden');
                 document.getElementById('view-auth').classList.remove('hidden');
