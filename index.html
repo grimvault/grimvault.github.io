@@ -129,6 +129,21 @@
             box-shadow: 0 0 60px rgba(0,0,0,1);
         }
 
+        /* Bottom Nav Glass */
+        .glass-nav {
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.8);
+        }
+
+        /* Sticky Toolbar Glass */
+        .glass-toolbar {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-dim);
+        }
+
         .input-void {
             background: rgba(0,0,0,0.4);
             border: 1px solid #333;
@@ -328,11 +343,12 @@
         }
 
 		.toolbar-layer { 
-			position: relative; 
-			z-index: 50; 
-			overflow: visible; /* Changed from overflow-x: auto */
-			white-space: normal; /* Changed from nowrap */
-			flex-wrap: wrap; /* Ensures buttons wrap on mobile instead of scrolling */
+			position: sticky; 
+            top: 64px; /* Matches navbar height */
+			z-index: 30; 
+			overflow: visible; 
+			white-space: normal; 
+			flex-wrap: wrap; 
 		}
         
         /* Horizontal Scroll */
@@ -415,6 +431,76 @@
             opacity: 1;
             transform: translateY(0);
         }
+
+		/* --- UPDATED MOBILE NAV STYLES --- */
+		.glass-nav {
+			background: rgba(3, 3, 3, 0.95); /* Darker, more solid background */
+			backdrop-filter: blur(16px);
+			border-top: 1px solid rgba(138, 3, 3, 0.2); /* Subtle red border top */
+			box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9);
+			padding-bottom: env(safe-area-inset-bottom); /* iOS Home Bar Safe Area */
+			height: calc(64px + env(safe-area-inset-bottom)); /* Adjust height for safe area */
+		}
+
+		.nav-btn-mobile {
+			color: #4a4a4a; /* Darker gray for inactive state */
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			position: relative;
+			height: 100%;
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		/* Hover state for non-touch devices or tap feedback */
+		.nav-btn-mobile:active {
+			background: rgba(255, 255, 255, 0.03);
+		}
+
+		.nav-btn-mobile i {
+			font-size: 1.25rem; /* Standardized size (text-xl) */
+			margin-bottom: 4px;
+			transition: transform 0.3s;
+		}
+
+		.nav-btn-mobile span {
+			font-size: 0.6rem;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+			opacity: 0.7;
+		}
+
+		/* Active State Styling */
+		.nav-btn-mobile.active {
+			color: var(--blood-bright); /* Bright red */
+		}
+
+		.nav-btn-mobile.active i {
+			transform: translateY(-2px);
+			text-shadow: 0 0 12px rgba(255, 15, 15, 0.6); /* Blood glow */
+		}
+
+		.nav-btn-mobile.active span {
+			opacity: 1;
+			color: white;
+		}
+
+		/* The "Blood Drip" Active Indicator line */
+		.nav-btn-mobile.active::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 25%;
+			right: 25%;
+			height: 2px;
+			background: var(--blood-bright);
+			box-shadow: 0 2px 10px var(--blood-bright);
+			border-radius: 0 0 4px 4px;
+			animation: fadeIn 0.3s ease;
+		}
 
         @media (max-width: 640px) {
             .view-section { padding-bottom: 120px; } /* Added Extra padding for mobile */
@@ -838,15 +924,16 @@
 				<span class="font-horror text-xl hidden md:block grimoire-text">Grimoire</span>
 			</div>
 
-                <div class="flex items-center gap-2 bg-black/40 p-1 rounded-lg border border-white/5">
+                <!-- Desktop Nav Items (Hidden on Mobile) -->
+                <div class="hidden md:flex items-center gap-2 bg-black/40 p-1 rounded-lg border border-white/5">
                     <button onclick="router.go('home')" title="Feed" class="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2">
-                        <i class="fas fa-stream"></i> <span class="hidden md:inline">Feed</span>
+                        <i class="fas fa-stream"></i> <span>Feed</span>
                     </button>
                     <button onclick="router.go('explore')" title="Abyss" class="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2">
-                        <i class="fas fa-compass"></i> <span class="hidden md:inline">Abyss</span>
+                        <i class="fas fa-compass"></i> <span>Abyss</span>
                     </button>
                     <button onclick="creator.startNewStory()" title="Create" class="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-widest text-red-700 hover:text-red-500 hover:bg-red-900/10 transition-all flex items-center gap-2">
-                        <i class="fas fa-pen-fancy"></i> <span class="hidden md:inline">Create</span>
+                        <i class="fas fa-pen-fancy"></i> <span>Create</span>
                     </button>
                 </div>
 
@@ -927,8 +1014,15 @@
                 
                 <div id="feed-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                 <div id="feed-empty" class="hidden text-center py-24 opacity-50">
-                    <i class="fas fa-spider text-4xl mb-4 text-gray-600"></i>
+                    <i class="fa-solid fa-wind text-4xl mb-4 text-gray-600"></i>
                     <p>The void is empty.</p>
+                </div>
+                
+                <!-- Pagination Button -->
+                <div id="feed-load-more" class="hidden text-center mt-12 mb-8">
+                     <button onclick="feed.loadFeed(true)" class="btn-secondary px-8 py-2 text-xs uppercase tracking-widest border-white/10 hover:bg-white/5 transition-all">
+                        Load More Echoes <i class="fas fa-chevron-down ml-2"></i>
+                     </button>
                 </div>
             </section>
 
@@ -1112,7 +1206,7 @@
                         
                         <div id="coven-feed-grid" class="space-y-4"></div>
                          <div id="coven-feed-empty" class="hidden text-center text-gray-600 py-12">
-                            <i class="fas fa-spider text-4xl mb-3"></i>
+                            <i class="fa-solid fa-wind text-4xl mb-3"></i>
                             <p class="italic">Echoes are silent here... be the first to whisper.</p>
                         </div>
                     </div>
@@ -1195,17 +1289,24 @@
                         </label>
                     </div>
 
-
-                    <div class="glass border-b-0 rounded-t-lg p-3 flex gap-2 items-center flex-wrap toolbar-layer">
-                        <button id="btn-fmt-bold" onmousedown="event.preventDefault()" onclick="editor.format('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Bold"><i class="fas fa-bold"></i></button>
-                        <button id="btn-fmt-italic" onmousedown="event.preventDefault()" onclick="editor.format('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Italic"><i class="fas fa-italic"></i></button>
-                        <button id="btn-fmt-olist" onmousedown="event.preventDefault()" onclick="editor.format('insertOrderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Ordered List"><i class="fas fa-list-ol"></i></button>
-                        <button id="btn-fmt-ulist" onmousedown="event.preventDefault()" onclick="editor.format('insertUnorderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Unordered List"><i class="fas fa-list-ul"></i></button>
-                        <div class="w-px h-5 bg-white/10 mx-2 flex-shrink-0"></div>
-                        <button id="btn-fmt-justifyLeft" onmousedown="event.preventDefault()" onclick="editor.format('justifyLeft')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-left"></i></button>
-                        <button id="btn-fmt-justifyCenter" onmousedown="event.preventDefault()" onclick="editor.format('justifyCenter')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-center"></i></button>
-                        <button id="btn-fmt-justifyRight" onmousedown="event.preventDefault()" onclick="editor.format('justifyRight')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-right"></i></button>
-                        <div class="w-px h-5 bg-white/10 mx-2 flex-shrink-0"></div>
+					<div class="glass glass-toolbar border-b-0 rounded-t-lg p-3 flex justify-center gap-2 items-center flex-wrap toolbar-layer">
+						<button id="btn-fmt-bold" onmousedown="event.preventDefault()" onclick="editor.format('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Bold"><i class="fas fa-bold"></i></button>
+						
+						<button id="btn-fmt-italic" onmousedown="event.preventDefault()" onclick="editor.format('italic')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Italic"><i class="fas fa-italic"></i></button>
+						
+						<button id="btn-fmt-olist" onmousedown="event.preventDefault()" onclick="editor.format('insertOrderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Ordered List"><i class="fas fa-list-ol"></i></button>
+						
+						<button id="btn-fmt-ulist" onmousedown="event.preventDefault()" onclick="editor.format('insertUnorderedList')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Unordered List"><i class="fas fa-list-ul"></i></button>
+						
+						<div class="w-px h-5 bg-white/10 mx-2 flex-shrink-0"></div>
+						
+						<button id="btn-fmt-justifyLeft" onmousedown="event.preventDefault()" onclick="editor.format('justifyLeft')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-left"></i></button>
+						
+						<button id="btn-fmt-justifyCenter" onmousedown="event.preventDefault()" onclick="editor.format('justifyCenter')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-center"></i></button>
+						
+						<button id="btn-fmt-justifyRight" onmousedown="event.preventDefault()" onclick="editor.format('justifyRight')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors"><i class="fas fa-align-right"></i></button>
+						
+						<div class="w-px h-5 bg-white/10 mx-2 flex-shrink-0"></div>
                         
                         <div class="flex items-center bg-black/40 rounded border border-white/10 flex-shrink-0">
                              <div class="custom-select" id="img-scale-select" style="min-width: 80px; border: none;" onclick="ui.toggleSelect('img-scale-select')">
@@ -1327,6 +1428,31 @@
             </section>
 
         </main>
+
+        <!-- Bottom Navigation (Mobile Only) -->
+		<nav id="mobile-nav" class="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-nav grid grid-cols-4 items-center">
+			
+			<button onclick="router.go('home')" class="nav-btn-mobile" id="nav-mobile-home">
+				<i class="fas fa-stream"></i>
+				<span>Feed</span>
+			</button>
+			
+			<button onclick="router.go('explore')" class="nav-btn-mobile" id="nav-mobile-explore">
+				<i class="fas fa-compass"></i>
+				<span>Abyss</span>
+			</button>
+			
+			<button onclick="creator.startNewStory()" class="nav-btn-mobile" id="nav-mobile-create">
+				<i class="fas fa-pen-fancy"></i>
+				<span>Create</span>
+			</button>
+			
+			<button onclick="profile.viewSelf()" class="nav-btn-mobile" id="nav-mobile-profile">
+				<i class="fas fa-user"></i>
+				<span>Profile</span>
+			</button>
+
+		</nav>
     </div>
 
     <!-- PROFILE EDITOR MODAL -->
@@ -1397,7 +1523,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, increment, serverTimestamp, arrayUnion, arrayRemove, where, writeBatch, getDocs, startAt, endAt } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, increment, serverTimestamp, arrayUnion, arrayRemove, where, writeBatch, getDocs, startAt, endAt, startAfter } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
         // --- CONFIG ---
         const firebaseConfig = {
@@ -1508,6 +1634,7 @@
             isLiking: false,
             followLock: false,
             feedData: [],
+            lastFeedDoc: null, // For pagination
             covenFeedCache: [],
             listeners: [],
             cropper: null,
@@ -1824,6 +1951,13 @@
                 });
                 window.history.pushState({view, params}, '', url);
                 router.render(view, params);
+
+                // Update Mobile Nav Active State
+                document.querySelectorAll('.nav-btn-mobile').forEach(btn => btn.classList.remove('active', 'text-white'));
+                if (view === 'home') document.getElementById('nav-mobile-home').classList.add('active', 'text-white');
+                if (view === 'explore') document.getElementById('nav-mobile-explore').classList.add('active', 'text-white');
+                if (view === 'create') document.getElementById('nav-mobile-create').classList.add('active', 'text-white');
+                if (view === 'profile' && (!params.user || params.user === state.user?.uid)) document.getElementById('nav-mobile-profile').classList.add('active', 'text-white');
             },
             back: () => {
                  if(window.history.length > 1) {
@@ -1847,7 +1981,7 @@
                         if(document.getElementById('feed-search').value.trim() === '') {
                              state.filter = null;
                              document.getElementById('feed-title').innerText = "Chronicles";
-                             loadFeed();
+                             feed.loadFeed(false); // Reload fresh
                         }
                     }
                     feed.loadUserSuggestions();
@@ -2446,7 +2580,7 @@
                 if (filtered.length === 0) {
                     emptyEl.classList.remove('hidden');
                     if(term) emptyEl.innerHTML = '<p class="text-gray-500 italic">No whispers match your query.</p>';
-                    else emptyEl.innerHTML = '<i class="fas fa-spider text-4xl mb-3"></i><p class="italic">Echoes are silent here... be the first to whisper.</p>';
+                    else emptyEl.innerHTML = '<i class="fa-solid fa-wind text-4xl mb-3"></i><p class="italic">Echoes are silent here... be the first to whisper.</p>';
                 } else {
                     emptyEl.classList.add('hidden');
                     filtered.forEach(data => {
@@ -2978,27 +3112,34 @@
                 } catch { return null; }
             },
 			recalc: () => {
-				const text = document.getElementById('editor-content').innerText;
+				const editorEl = document.getElementById('editor-content');
+				const text = editorEl.innerText;
+				const imageCount = editorEl.getElementsByTagName('img').length; // Actively count images
+				
+				// Update the state with the correct count
+				state.draft.images = imageCount;
+
 				const len = text.length;
 				const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 				
 				const readTime = Math.ceil(wordCount / 200); 
 
 				document.getElementById('char-count').innerText = `${len} chars | ${wordCount} words | ~${readTime} min read`;
-				document.getElementById('img-count').innerText = state.draft.images;
+				document.getElementById('img-count').innerText = state.draft.images; // Display the correct count
 				
-                let cost = 0;
-                if (!state.draft.isEdit && !state.draft.isSuggestion) {
-                    if(state.draft.type === 'story') {
-                        cost = len < 50 ? 0 : 25 + Math.ceil(len / 20) + (state.draft.images * 10);
-                    } else {
-                        cost = len < 10 ? 0 : 5 + Math.ceil(len / 50);
-                    }
-                }
-                
-                state.draft.cost = cost;
-                document.getElementById('create-cost').innerText = cost + " CR";
-            },
+				let cost = 0;
+				if (!state.draft.isEdit && !state.draft.isSuggestion) {
+					if(state.draft.type === 'story') {
+						// Use the correct count for cost calculation
+						cost = len < 50 ? 0 : 25 + Math.ceil(len / 20) + (state.draft.images * 10);
+					} else {
+						cost = len < 10 ? 0 : 5 + Math.ceil(len / 50);
+					}
+				}
+				
+				state.draft.cost = cost;
+				document.getElementById('create-cost').innerText = cost + " CR";
+			},
             publish: async () => { 
                 const title = document.getElementById('create-title').value;
                 const desc = document.getElementById('create-desc').value;
@@ -3181,32 +3322,35 @@
             }
         };
 
-        // --- FEED & SEARCH REWRITE ---
+        // --- FEED & SEARCH REWRITE (PAGINATION) ---
         window.feed = { 
             sort: (type) => {
                 state.sortBy = type;
                 state.filter = null; 
+                state.lastFeedDoc = null; // Reset pagination
                 document.getElementById('sort-new').classList.toggle('bg-white/5', type === 'new');
                 document.getElementById('sort-hot').classList.toggle('bg-white/5', type === 'hot');
                 document.getElementById('sort-top').classList.toggle('bg-white/5', type === 'top');
                 document.getElementById('sort-following').classList.toggle('bg-white/5', type === 'following');
-                loadFeed();
+                feed.loadFeed(false);
             },
             filter: (cat, updateRouter = true) => {
                 state.filter = cat;
+                state.lastFeedDoc = null; // Reset pagination
                 document.getElementById('feed-title').innerText = `Realm: ${cat}`;
                 if(updateRouter) router.go('home', { category: cat });
-                loadFeed();
+                feed.loadFeed(false);
             },
-            render: (list) => {
+            render: (list, append = false) => {
                 const container = document.getElementById('feed-grid');
                 const emptyEl = document.getElementById('feed-empty');
                 
-                container.innerHTML = '';
+                if (!append) container.innerHTML = '';
                 
-                if(list.length === 0) {
+                if(list.length === 0 && !append) {
                    container.classList.add('hidden');
                    emptyEl.classList.remove('hidden');
+                   document.getElementById('feed-load-more').classList.add('hidden');
                 } else {
                    container.classList.remove('hidden');
                    emptyEl.classList.add('hidden');
@@ -3386,6 +3530,107 @@
                         grid.appendChild(el);
                     });
                 });
+            },
+            // NEW: Main Feed Loading with Pagination (getDocs instead of onSnapshot for load more)
+            loadFeed: async (isPagination = false) => {
+                const container = document.getElementById('feed-grid');
+                const emptyEl = document.getElementById('feed-empty');
+                const loadMoreBtn = document.getElementById('feed-load-more');
+                
+                if (!isPagination) {
+                    container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Summoning...</div>';
+                    emptyEl.classList.add('hidden');
+                    container.classList.remove('hidden');
+                    loadMoreBtn.classList.add('hidden');
+                    state.lastFeedDoc = null;
+                } else {
+                     // Loading state for button
+                     loadMoreBtn.querySelector('button').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                }
+
+                let q;
+                const ref = collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories');
+                
+                // Build Query
+                let constraints = [];
+                
+                if(state.sortBy === 'following') {
+                    if (state.profile.following && state.profile.following.length > 0) {
+                        constraints.push(where('authorId', 'in', state.profile.following));
+                    } else {
+                        // Following no one
+                        feed.render([], false);
+                        return;
+                    }
+                }
+                else if(state.filter) {
+                    constraints.push(where("category", "==", state.filter));
+                }
+                else if(state.sortBy === 'hot') {
+                    constraints.push(orderBy('likes', 'desc'));
+                }
+                else if (state.sortBy === 'top') {
+                    const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                    constraints.push(where('createdAt', '>', lastWeek));
+                    constraints.push(orderBy('createdAt', 'desc'));
+                }
+                else {
+                    constraints.push(orderBy('createdAt', 'desc'));
+                }
+
+                if (isPagination && state.lastFeedDoc) {
+                    constraints.push(startAfter(state.lastFeedDoc));
+                }
+                
+                constraints.push(limit(20)); // Limit per fetch
+                
+                q = query(ref, ...constraints);
+
+                try {
+                    const snap = await getDocs(q);
+                    
+                    if (snap.empty) {
+                        if (!isPagination) {
+                            feed.render([], false);
+                        } else {
+                             // No more posts
+                             loadMoreBtn.classList.add('hidden');
+                        }
+                        return;
+                    }
+
+                    // Update last doc for next page
+                    state.lastFeedDoc = snap.docs[snap.docs.length - 1];
+                    
+                    // Show/Hide Load More Button
+                    if (snap.docs.length < 20) {
+                        loadMoreBtn.classList.add('hidden');
+                    } else {
+                        loadMoreBtn.classList.remove('hidden');
+                        loadMoreBtn.querySelector('button').innerHTML = 'Load More Echoes <i class="fas fa-chevron-down ml-2"></i>';
+                    }
+
+                    const stories = [];
+                    snap.forEach(d => {
+                        const data = {id: d.id, ...d.data()};
+                        if(!data.communityId) stories.push(data); 
+                    });
+                    
+                    // Client-side Sorts for composite fields if needed (mostly covered by index query)
+                    if (state.sortBy === 'top') {
+                        stories.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+                    }
+                    
+                    const authorIds = [...new Set(stories.map(s => s.authorId))];
+                    await Promise.all(authorIds.map(id => getUserProfile(id)));
+
+                    state.feedData = isPagination ? [...state.feedData, ...stories] : stories;
+                    feed.render(stories, isPagination); // Pass append flag
+
+                } catch (e) {
+                    console.error("Feed Load Error:", e);
+                    if(!isPagination) container.innerHTML = '<div class="col-span-3 text-center text-red-500 py-10">The void is disturbed.</div>';
+                }
             }
         };
 
@@ -4468,18 +4713,19 @@
             }
         });
 
-        document.getElementById('inline-image-input').addEventListener('change', async (e) => {
-            const url = await creator.upload(e.target.files[0]);
-            if(url) {
-                const editor = document.getElementById('editor-content');
-                editor.focus(); 
-                const imgHtml = `<img src="${url}" style="width: ${state.draft.imgScale}; margin: 10px auto; display: block;" /><br>`;
-                if (!document.execCommand('insertHTML', false, imgHtml)) {
-                    editor.innerHTML += imgHtml;
-                }
-                state.draft.images++; creator.recalc();
-            }
-        });
+		document.getElementById('inline-image-input').addEventListener('change', async (e) => {
+			const url = await creator.upload(e.target.files[0]);
+			if(url) {
+				const editor = document.getElementById('editor-content');
+				editor.focus(); 
+				const imgHtml = `<img src="${url}" style="width: ${state.draft.imgScale}; margin: 10px auto; display: block;" /><br>`;
+				if (!document.execCommand('insertHTML', false, imgHtml)) {
+					editor.innerHTML += imgHtml;
+				}
+				// state.draft.images++; // This line has been removed
+				creator.recalc();
+			}
+		});
         
         // --- VALIDATION LISTENERS ---
         document.getElementById('signup-name').addEventListener('input', debounce(() => {
