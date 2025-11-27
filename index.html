@@ -4826,15 +4826,10 @@
                         explore.loadFresh();
                         rewards.checkEligibility();
 
-                        // THIS IS THE CORRECT PLACE FOR THIS FUNCTION CALL
-                        // It ensures the app only tries to load content AFTER the user's profile is ready.
                         router.handlePopState(); 
                     }
                 });
-                
-                // THIS LINE WAS THE PROBLEM. It was running before the user profile was loaded.
-                // router.handlePopState(); // REMOVE THIS LINE
-
+				
             } else {
                 document.getElementById('app-shell').classList.add('hidden');
                 document.getElementById('view-auth').classList.remove('hidden');
