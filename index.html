@@ -29,6 +29,28 @@
             --toxin-bright: #2dce89;
         }
 
+	/* --- CUSTOM CURSORS --- */
+		:root {
+			--cursor-arrow: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23FFF" stroke="%23000" stroke-width="1" d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.85a.5.5 0 0 0-.85.35Z"></path></svg>');
+			--cursor-hand: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23FFF" stroke="%23000" stroke-width="1" stroke-linejoin="round" d="M10 11V8.99c0-.88.59-1.64 1.44-1.86h.05A1.99 1.99 0 0 1 14 9.05V12v-2c0-.88.6-1.65 1.46-1.87h.05A1.98 1.98 0 0 1 18 10.06V13v-1.94a2 2 0 0 1 1.51-1.94h0A2 2 0 0 1 22 11.06V14c0 .6-.08 1.27-.21 1.97a7.96 7.96 0 0 1-7.55 6.48 54.98 54.98 0 0 1-4.48 0 7.96 7.96 0 0 1-7.55-6.48C2.08 15.27 2 14.59 2 14v-1.49c0-1.11.9-2.01 2.01-2.01h0a2 2 0 0 1 2.01 2.03l-.01.97v-10c0-1.1.9-2 2-2h0a2 2 0 0 1 2 2V11Z"></path></svg>');
+			--cursor-not-allowed: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23000" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"></path><path fill="%23FFF" d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm0 14a6 6 0 0 1-4.88-9.47l8.36 8.36A5.95 5.95 0 0 1 12.01 18Zm4.88-2.53L8.53 7.11a6 6 0 0 1 8.35 8.36Z"></path></svg>');
+			--cursor-wait: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23FFF" stroke="%23000" stroke-width="1" d="M16.95 3h-9.9a2.06 2.06 0 0 0-1.34 3.62L11.99 12l6.28-5.38A2.06 2.06 0 0 0 16.93 3ZM7.05 21h9.89c1.9 0 2.78-2.38 1.34-3.62L12 12l-6.28 5.38A2.06 2.06 0 0 0 7.06 21Z"></path></svg>');
+			--cursor-lock: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="%23000" stroke-width="1" stroke-linejoin="round"><path fill="%23FFF" d="M17.5 21h-11A1.5 1.5 0 0 1 5 19.5v-7c0-.83.67-1.5 1.5-1.5h11c.83 0 1.5.67 1.5 1.5v7c0 .83-.67 1.5-1.5 1.5Z"></path><path d="M8 11V7a4 4 0 1 1 8 0v4"></path><circle cx="12" cy="16" r=".25"></circle></g></svg>');
+			--cursor-help: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="%23FFF" stroke="%23000" stroke-width="1" stroke-linecap="round"><path d="M12 21.5a9.5 9.5 0 1 1 0-19 9.5 9.5 0 0 1 0 19Z"></path><path d="M12 14c0-1 .32-.98.8-1.11A3 3 0 1 0 9 10"></path><circle cx="12" cy="17.5" r=".05"></circle></g></svg>');
+			--cursor-text: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23FFF" stroke="%23000" stroke-width="1" d="M16.95 3h-9.9a2.06 2.06 0 0 0-1.34 3.62L11.99 12l6.28-5.38A2.06 2.06 0 0 0 16.93 3ZM7.05 21h9.89c1.9 0 2.78-2.38 1.34-3.62L12 12l-6.28 5.38A2.06 2.06 0 0 0 7.06 21Z"></path></svg>');
+		}
+		
+		html { cursor: var(--cursor-arrow) 4 4, auto; }
+		body.wait, body.wait * { cursor: var(--cursor-wait) 12 12, wait !important; }
+		button, a, [onclick], .clickable, .cursor-pointer, .custom-select, .select-items div, label[for] { cursor: var(--cursor-hand) 12 2, pointer !important; }
+		[disabled], .cursor-not-allowed, input:disabled, button:disabled { cursor: var(--cursor-not-allowed) 12 12, not-allowed !important; }
+		.cursor-help { cursor: var(--cursor-help) 12 12, help !important; }
+		.coven-post-card.locked-post { cursor: var(--cursor-lock) 12 12, not-allowed !important; }
+		/* NEW: Apply the text cursor */
+		input[type="text"], input[type="email"], input[type="password"], textarea, [contenteditable="true"] {
+			cursor: var(--cursor-text) 12 12, text !important;
+		}
+
         /* --- RESET & BASE --- */
         * { scrollbar-width: thin; scrollbar-color: var(--blood-red) var(--void); }
         
@@ -58,7 +80,7 @@
         }
         
         input, textarea, button { outline: none; appearance: none; -webkit-appearance: none; font-family: inherit; }
-        img { border-radius: 4px; }
+        img { border-radius: 4px; user-select: none; -webkit-user-drag: none; } /* Added image drag prevention */
 
 		.font-horror { 
 			font-family: 'Skranji', cursive; 
@@ -602,7 +624,7 @@
 		}
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <!-- FX -->
     <div class="vignette"></div>
@@ -1077,7 +1099,7 @@
                              <div class="mb-4 flex flex-col items-center justify-center gap-2 w-full md:w-auto">
                                  <button id="btn-follow" class="btn-main py-2 px-8 text-xs hidden shadow-lg w-full md:w-auto" onclick="profile.toggleFollow()">Follow</button>
                                  <button id="btn-edit-profile" class="btn-secondary py-2 px-6 text-xs hidden border-white/20 hover:bg-white/10 text-gray-300 w-full md:w-auto" onclick="ui.openProfileEditor()">Edit Profile</button>
-                                 <button onclick="ui.openModal('modal-how-it-works')" class="text-gray-600 hover:text-white transition-colors text-xs flex items-center gap-1"><i class="fas fa-question-circle"></i> How It Works</button>
+                                 <button onclick="ui.openModal('modal-how-it-works')" class="cursor-help text-gray-600 hover:text-white transition-colors text-xs flex items-center gap-1"><i class="fas fa-question-circle"></i> How It Works</button>
                              </div>
                          </div>
                      </div>
@@ -1526,6 +1548,27 @@
 
 
     <!-- SCRIPTS -->
+    <script>
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Disable F12, Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+Shift+J, Ctrl+U, Ctrl+S
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) ||
+                (e.ctrlKey && e.key === 'u') ||
+                (e.ctrlKey && e.key === 's')) {
+                e.preventDefault();
+            }
+        });
+
+        // Disable image dragging
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.tagName.toUpperCase() === 'IMG') {
+                e.preventDefault();
+            }
+        });
+    </script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
@@ -1773,6 +1816,12 @@
                 const l = document.getElementById('global-loader');
                 l.style.opacity = show ? '1' : '0';
                 l.style.pointerEvents = show ? 'all' : 'none';
+                // Add/Remove wait cursor class from body
+                if (show) {
+                    document.body.classList.add('wait');
+                } else {
+                    document.body.classList.remove('wait');
+                }
             },
             toggleSelect: (id) => {
                 const container = document.getElementById(id);
@@ -2728,6 +2777,10 @@
                             </div>
                         </div>
                     `;
+                }
+
+                if (isMembersOnly && !communities.isMember()) {
+                    el.classList.add('locked-post');
                 }
                 return el;
             },
