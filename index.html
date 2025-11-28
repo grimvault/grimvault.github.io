@@ -2614,9 +2614,12 @@
                             batch.update(ref, { members: arrayUnion(state.user.uid), memberCount: increment(1), roles: newRoles });
                             await batch.commit();
                             
-                            if(!state.activeCommunity.members) state.activeCommunity.members = [];
-                            state.activeCommunity.members.push(state.user.uid);
-                            state.activeCommunity.memberCount++;
+							if(!state.activeCommunity.members) state.activeCommunity.members = [];
+                            // Fix: Check if member exists locally before pushing to prevent visual duplicates
+                            if (!state.activeCommunity.members.includes(state.user.uid)) {
+                                state.activeCommunity.members.push(state.user.uid);
+                                state.activeCommunity.memberCount++;
+                            }
                             state.activeCommunity.roles = newRoles;
                         }
                         
