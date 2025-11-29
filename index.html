@@ -1808,9 +1808,21 @@
             alert: (title, msg) => {
                 document.getElementById('alert-title').innerText = title;
                 document.getElementById('alert-msg').innerText = msg;
+                document.getElementById('alert-actions').innerHTML = `<button onclick="ui.closeAlert()" class="btn-main w-full">Acknowledged</button>`;
                 document.getElementById('modal-alert').classList.remove('hidden');
             },
             closeAlert: () => document.getElementById('modal-alert').classList.add('hidden'),
+            promptSignIn: (reason) => {
+                document.getElementById('alert-title').innerText = "Access Restricted";
+                document.getElementById('alert-msg').innerText = reason + " you must sign in or create an account to proceed.";
+                document.getElementById('alert-actions').innerHTML = `
+                    <div class="flex flex-col gap-3">
+                        <button onclick="auth.logout()" class="btn-main w-full">Sign In / Create</button>
+                        <button onclick="ui.closeAlert()" class="btn-secondary w-full">Cancel</button>
+                    </div>
+                `;
+                document.getElementById('modal-alert').classList.remove('hidden');
+            },
             confirm: (title, msg, onYes) => {
                 document.getElementById('confirm-title').innerText = title;
                 document.getElementById('confirm-msg').innerText = msg;
@@ -2048,9 +2060,10 @@
                 return visible ? visible.id.replace('view-', '') : 'home';
             },
             go: (view, params = {}) => {
-                if (view === 'create' && state.isAnonymous) {
-                    ui.alert("Access Denied", "You must sign in to create content.");
-                    return router.go('home');
+                const restrictedViews = ['create'];
+                if (state.isAnonymous && restrictedViews.includes(view)) {
+                    ui.promptSignIn(`To ${view} content,`);
+                    return;
                 }
 
                 const currentView = router.getCurrentView();
@@ -2153,8 +2166,21 @@
                  }
 
                  const urlParams = new URLSearchParams(window.location.search);
-                 const section = urlParams.get('section') || 'home';
+                 let section = urlParams.get('section') || 'home';
                  const params = Object.fromEntries(urlParams.entries());
+
+                 const restrictedViews = ['create'];
+                 if (state.isAnonymous && restrictedViews.includes(section)) {
+                     ui.promptSignIn(`To access the '${section}' section,`);
+                     const url = new URL(window.location);
+                     url.searchParams.set('section', 'home');
+                     Object.keys(params).forEach(key => {
+                         if (key !== 'section') url.searchParams.delete(key);
+                     });
+                     window.history.replaceState({view: 'home', params: {}}, '', url);
+                     router.render('home', {});
+                     return;
+                 }
 
                  if(params.post) {
                       getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', params.post)).then(snap => {
@@ -3234,7 +3260,7 @@
         // --- CREATOR & SUGGESTIONS ---
         window.creator = { 
             startNewStory: () => {
-                if (state.isAnonymous) return ui.alert("Action Not Allowed", "You must have an account to create content.");
+                if (state.isAnonymous) return;
                 creator.reset();
                 router.go('create');
             },
