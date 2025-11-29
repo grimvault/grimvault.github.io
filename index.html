@@ -893,23 +893,6 @@
         </div>
     </div>
 
-    <!-- NEW: SIGNUP FOLLOW SUGGESTIONS MODAL -->
-    <div id="modal-follow-suggestions" class="fixed inset-0 z-[150] bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="glass w-[95%] max-w-lg p-8 rounded-xl border border-red-900/40 relative flex flex-col max-h-[90vh]">
-            <h2 class="font-horror text-3xl text-red-500 mb-2 text-center">Souls to Guide You</h2>
-            <p class="text-sm text-gray-500 mb-6 text-center">Follow some prominent authors to start your journey. You can always change this later.</p>
-            
-            <div id="signup-suggestions-list" class="flex-grow overflow-y-auto space-y-3 pr-2 mb-6">
-                <!-- User suggestions populated by JS -->
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-3">
-                <button onclick="suggestions.followAll()" class="btn-secondary w-full">Follow All</button>
-                <button onclick="suggestions.closeSignupSuggestions()" class="btn-main w-full">Enter the Void</button>
-            </div>
-        </div>
-    </div>
-
     <!-- AUTH SCREEN -->
     <section id="view-auth" class="view-section min-h-screen flex items-center justify-center p-4 relative z-20 hidden">
         <div class="glass w-full max-w-md p-10 rounded-2xl border-t-4 border-red-900 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
@@ -1697,7 +1680,6 @@
             user: null,
             profile: null,
             isAnonymous: false,
-            isNewUser: false, // <-- NEW STATE FLAG
             activeStory: null,
             activeProfileId: null,
             activeCommunity: null, 
@@ -2323,7 +2305,6 @@
                     });
                     await updateProfile(cred.user, { displayName: n });
                     state.signupAvatarBlob = null;
-                    state.isNewUser = true; // <-- SET NEW USER FLAG
                 } catch(err) { ui.loading(false); ui.alert('Signup Failed', err.message); }
             },
             signInAnonymously: async () => {
@@ -3503,57 +3484,7 @@
             }
         };
         
-        // --- SUGGESTIONS ---
         window.suggestions = { 
-            // NEW: Signup Suggestions Modal
-            showSignupSuggestions: async () => {
-                const listEl = document.getElementById('signup-suggestions-list');
-                listEl.innerHTML = '<div class="text-center text-gray-500 py-8"><i class="fas fa-spinner fa-spin text-2xl"></i></div>';
-                ui.openModal('modal-follow-suggestions');
-
-                // Fetch top 5 users
-                const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users'), orderBy('followerCount', 'desc'), limit(5));
-                const snap = await getDocs(q);
-
-                listEl.innerHTML = '';
-                if (snap.empty) {
-                    listEl.innerHTML = '<p class="text-center text-gray-600">The void is quiet... no souls to suggest yet.</p>';
-                    return;
-                }
-
-                snap.forEach(d => {
-                    const user = d.data();
-                    const userId = d.id;
-                    const el = document.createElement('div');
-                    el.className = 'flex items-center justify-between p-3 bg-black/20 rounded-lg border border-white/5';
-                    el.innerHTML = `
-                        <div class="flex items-center gap-4 cursor-pointer" onclick="profile.open('${userId}')">
-                            <img src="${user.avatar}" class="w-12 h-12 rounded-full object-cover border-2 border-gray-700">
-                            <div>
-                                <h4 class="font-bold text-white">${formatUsername(userId, user.username)}</h4>
-                                <p class="text-xs text-gray-500">${abbreviateNumber(user.followerCount || 0)} followers</p>
-                            </div>
-                        </div>
-                        <button id="signup-follow-btn-${userId}" onclick="profile.toggleFollow('${userId}', true)" class="btn-secondary py-2 px-6 text-xs">Follow</button>
-                    `;
-                    listEl.appendChild(el);
-                });
-            },
-            closeSignupSuggestions: () => {
-                ui.closeModal('modal-follow-suggestions');
-            },
-            followAll: async () => {
-                const buttons = document.querySelectorAll('[id^="signup-follow-btn-"]');
-                const followPromises = [];
-                buttons.forEach(btn => {
-                    if (btn.innerText === 'Follow') {
-                        const userId = btn.id.replace('signup-follow-btn-', '');
-                        followPromises.push(profile.toggleFollow(userId, true));
-                    }
-                });
-                await Promise.all(followPromises);
-            },
-            // --- END NEW ---
             openReview: async (sugId, notifId = null) => {
                 if (state.isAnonymous) return;
                 ui.loading(true);
@@ -4322,12 +4253,9 @@
 
             const mainProfileButton = document.getElementById('btn-follow');
             const suggestionButton = fromSuggestion ? document.getElementById(`suggest-follow-${idToToggle}`) : null;
-            const signupButton = fromSuggestion ? document.getElementById(`signup-follow-btn-${idToToggle}`) : null;
-
 
             if (mainProfileButton && !fromSuggestion) mainProfileButton.disabled = true;
             if (suggestionButton) suggestionButton.disabled = true;
-            if (signupButton) signupButton.disabled = true;
 
             const targetUserRef = doc(db, 'artifacts', APP_ID_PATH, 'users', idToToggle);
             const currentUserRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
@@ -4357,10 +4285,6 @@
                 } else {
                     if (mainProfileButton && !fromSuggestion) mainProfileButton.innerText = isCurrentlyFollowing ? "Follow" : "Unfollow";
                     if (suggestionButton) suggestionButton.innerText = isCurrentlyFollowing ? "Follow" : "Unfollow";
-                     if (signupButton) {
-                        signupButton.innerText = isCurrentlyFollowing ? "Follow" : "Unfollow";
-                        signupButton.className = isCurrentlyFollowing ? "btn-secondary py-2 px-6 text-xs" : "btn-main py-2 px-6 text-xs";
-                    }
                 }
 
             } catch (error) {
@@ -4369,7 +4293,6 @@
             } finally {
                 if (mainProfileButton && !fromSuggestion) mainProfileButton.disabled = false;
                 if (suggestionButton) suggestionButton.disabled = false;
-                if (signupButton) signupButton.disabled = false;
                 state.followLock = false;
             }
         },
@@ -5253,13 +5176,6 @@
                         explore.loadTrending(); 
                         explore.loadFresh();
                         rewards.checkEligibility();
-
-                        // --- NEW USER ONBOARDING ---
-                        if (state.isNewUser) {
-                            suggestions.showSignupSuggestions();
-                            state.isNewUser = false; // Reset flag
-                        }
-                        // --- END NEW ---
 
                         router.handlePopState(); 
                     }
