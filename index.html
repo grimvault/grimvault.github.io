@@ -3942,9 +3942,6 @@
 						
 						// Claim reward on click
 						if(n.type === 'daily_reward') {
-							// VISUAL FIX: Instantly remove the element from DOM
-							el.remove();
-
 							// Pass the specific ID (d.id)
 							await rewards.claim(d.id);
 							notifications.toggle();
