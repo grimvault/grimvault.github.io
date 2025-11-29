@@ -787,7 +787,7 @@
                 </div>
                 
                 <!-- Reply Box to Main Thread -->
-                <div class="p-4 border-t border-white/10 bg-[#080808] rounded-lg mb-8">
+                <div id="thread-reply-container" class="p-4 border-t border-white/10 bg-[#080808] rounded-lg mb-8">
                     <div class="flex gap-3">
                         <div class="w-8 h-8 rounded-full bg-gray-900 overflow-hidden flex-shrink-0 border border-white/10">
                             <img id="thread-my-avatar" class="w-full h-full object-cover opacity-70">
@@ -906,8 +906,9 @@
                 <input type="email" id="login-email" placeholder="Email Address" class="input-void" required>
                 <input type="password" id="login-pass" placeholder="Password" class="input-void" required>
                 <button type="submit" class="btn-main w-full py-3 mt-4">Enter the Void</button>
-                <div class="text-center mt-6 pt-6 border-t border-white/5">
+                <div class="text-center mt-6 pt-6 border-t border-white/5 space-y-3">
                     <p class="text-xs text-gray-500">New soul? <span onclick="ui.toggleAuth('signup')" class="text-red-500 cursor-pointer hover:text-red-400 transition-colors">Sign Creation Pact</span></p>
+                    <p class="text-xs text-gray-500">or <span onclick="auth.signInAnonymously()" class="text-gray-400 cursor-pointer hover:text-white transition-colors">Continue Anonymously</span></p>
                 </div>
             </form>
 
@@ -950,22 +951,28 @@
 			</div>
 
                 <!-- Desktop Nav Items (Hidden on Mobile) -->
-                <div class="hidden md:flex items-center gap-2 bg-black/40 p-1 rounded-lg border border-white/5">
+                <div id="desktop-nav-items" class="hidden md:flex items-center gap-2 bg-black/40 p-1 rounded-lg border border-white/5">
                     <button onclick="router.go('home')" title="Feed" class="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2">
                         <i class="fas fa-stream"></i> <span>Feed</span>
                     </button>
                     <button onclick="router.go('explore')" title="Abyss" class="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2">
                         <i class="fas fa-compass"></i> <span>Abyss</span>
                     </button>
-                    <button onclick="creator.startNewStory()" title="Create" class="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-widest text-red-700 hover:text-red-500 hover:bg-red-900/10 transition-all flex items-center gap-2">
+                    <button id="desktop-create-btn" onclick="creator.startNewStory()" title="Create" class="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-widest text-red-700 hover:text-red-500 hover:bg-red-900/10 transition-all flex items-center gap-2">
                         <i class="fas fa-pen-fancy"></i> <span>Create</span>
                     </button>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div id="desktop-user-actions" class="flex items-center gap-4">
+
+					<!-- NEW ANONYMOUS SIGN IN BUTTON -->
+					<button id="nav-anon-signin-btn" onclick="auth.logout()" class="btn-main py-2 px-4 text-xs hidden">
+						<i class="fas fa-user-plus mr-2"></i>
+						<span>Sign In / Create</span>
+					</button>
 
 					<!-- Inside navbar, look for notifications.toggle() section -->
-					<div class="relative group cursor-pointer" onclick="notifications.toggle()">
+					<div id="notif-container" class="relative group cursor-pointer" onclick="notifications.toggle()">
 						<i class="fas fa-bell text-gray-400 hover:text-white transition-colors"></i>
 						<div id="notif-badge" class="hidden absolute -top-1 -right-1 w-2 h-2 bg-red-600 rounded-full"></div>
 						
@@ -983,11 +990,11 @@
 						</div>
 					</div>
 
-                    <div class="flex flex-col items-end cursor-pointer group" onclick="profile.viewSelf()">
+                    <div id="nav-user-info" class="flex flex-col items-end cursor-pointer group" onclick="profile.viewSelf()">
                         <span id="nav-user" class="text-xs font-bold text-gray-300 group-hover:text-white hidden md:block">User</span>
                         <span class="text-[10px] text-yellow-600 font-mono tracking-wide"><i class="fas fa-coins mr-1"></i><span id="nav-credits">0</span></span>
                     </div>
-                    <button onclick="auth.logout()" class="text-gray-500 hover:text-red-500 transition-colors"><i class="fas fa-sign-out text-lg"></i></button>
+                    <button id="nav-logout-btn" onclick="auth.logout()" class="text-gray-500 hover:text-red-500 transition-colors"><i class="fas fa-sign-out text-lg"></i></button>
                 </div>
             </div>
         </nav>
@@ -1096,11 +1103,17 @@
                                  </div>
                              </div>
 
-                             <div class="mb-4 flex flex-col items-center justify-center gap-2 w-full md:w-auto">
-                                 <button id="btn-follow" class="btn-main py-2 px-8 text-xs hidden shadow-lg w-full md:w-auto" onclick="profile.toggleFollow()">Follow</button>
-                                 <button id="btn-edit-profile" class="btn-secondary py-2 px-6 text-xs hidden border-white/20 hover:bg-white/10 text-gray-300 w-full md:w-auto" onclick="ui.openProfileEditor()">Edit Profile</button>
-                                 <button onclick="ui.openModal('modal-how-it-works')" class="cursor-help text-gray-600 hover:text-white transition-colors text-xs flex items-center gap-1"><i class="fas fa-question-circle"></i> How It Works</button>
-                             </div>
+                             <div id="profile-actions-user" class="mb-4 flex-col items-center justify-center gap-2 w-full md:w-auto">
+                                <button id="btn-follow" class="btn-main py-2 px-8 text-xs hidden shadow-lg w-full md:w-auto" onclick="profile.toggleFollow()">Follow</button>
+                                <button id="btn-edit-profile" class="btn-secondary py-2 px-6 text-xs hidden border-white/20 hover:bg-white/10 text-gray-300 w-full md:w-auto" onclick="ui.openProfileEditor()">Edit Profile</button>
+                                <button onclick="ui.openModal('modal-how-it-works')" class="cursor-help text-gray-600 hover:text-white transition-colors text-xs flex items-center gap-1"><i class="fas fa-question-circle"></i> How It Works</button>
+                            </div>
+
+                            <!-- Anonymous User CTA -->
+                            <div id="profile-actions-anon" class="hidden mb-4 flex-col items-center justify-center gap-3 w-full md:w-auto bg-black/20 p-4 rounded-lg border border-white/10">
+                                <p class="text-xs text-gray-500 text-center max-w-xs">Join the Grimoire to follow souls, manifest nightmares, and shape the void.</p>
+                                <button onclick="auth.logout()" class="btn-main w-full mt-2">Sign In or Create Account</button>
+                            </div>
                          </div>
                      </div>
                 </div>
@@ -1137,7 +1150,7 @@
                             <div>
                                 <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
                                     <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Active Covens</h3>
-                                    <button onclick="ui.openModal('modal-create-coven')" class="text-[10px] text-purple-400 hover:text-purple-300 font-bold uppercase border border-purple-900 px-3 py-1 rounded hover:bg-purple-900/20 transition-colors">
+                                    <button id="btn-create-coven" onclick="ui.openModal('modal-create-coven')" class="text-[10px] text-purple-400 hover:text-purple-300 font-bold uppercase border border-purple-900 px-3 py-1 rounded hover:bg-purple-900/20 transition-colors">
                                         <i class="fas fa-plus mr-1"></i> Found a Coven
                                     </button>
                                 </div>
@@ -1204,10 +1217,10 @@
                                     <span><i class="fas fa-crown mr-2"></i><span id="coven-creator">Creator</span></span>
                                 </div>
                             </div>
-                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                            <div id="coven-action-buttons" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
                                 <button id="btn-coven-sponsor" onclick="communities.sponsor()" class="btn-main hidden border-yellow-600 text-yellow-400 hover:bg-yellow-900/30 text-xs justify-center">Sponsor (100 CR)</button>
                                 <button id="btn-coven-join" onclick="communities.toggleJoin()" class="btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center">Join Coven</button>
-                                <button onclick="communities.triggerPost()" class="btn-main justify-center">Whisper to Coven</button>
+                                <button id="btn-coven-post" onclick="communities.triggerPost()" class="btn-main justify-center">Whisper to Coven</button>
                             </div>
                         </div>
                     </div>
@@ -1391,7 +1404,7 @@
                                     <div id="reader-cat-tag" class="text-[10px] text-red-500 uppercase tracking-widest font-bold">Category</div>
                                 </div>
                             </div>
-                            <div class="flex gap-4">
+                            <div id="reader-actions" class="flex gap-4">
                                 <button id="btn-reader-edit" onclick="reader.startEdit()" class="hidden text-red-500 hover:text-red-400 transition-colors" title="Edit Story"><i class="fas fa-pen"></i></button>
                                 <button id="btn-reader-suggest" onclick="reader.startSuggestion()" class="text-gray-500 hover:text-red-400 transition-colors" title="Suggest Edit"><i class="fas fa-edit"></i></button>
                                 <button onclick="reader.share()" class="text-gray-500 hover:text-white transition-colors" title="Share URL"><i class="fas fa-share-alt"></i></button>
@@ -1411,7 +1424,7 @@
                             <p class="text-gray-500 mt-2">This story is for Coven coveneers only. Join the Coven to unlock its secrets.</p>
                         </div>
 
-                        <div class="px-8 py-6 bg-black/40 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div id="reader-tip-section" class="px-8 py-6 bg-black/40 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                             <div class="text-center md:text-left">
                                 <h4 class="font-bold text-gray-400 text-sm">Enjoyed the terror?</h4>
                                 <p class="text-xs text-gray-600 mt-1">Reward the creator with credits.</p>
@@ -1437,9 +1450,9 @@
                     </article>
 
                     <!-- Comments -->
-                    <div class="glass p-6 md:p-8 rounded-xl">
+                    <div id="reader-comments-section" class="glass p-6 md:p-8 rounded-xl">
                         <h3 class="font-horror text-2xl text-gray-500 mb-6">Echoes</h3>
-                        <div class="flex flex-col md:flex-row gap-4 mb-8">
+                        <div id="reader-comment-form" class="flex flex-col md:flex-row gap-4 mb-8">
                             <input type="text" id="comment-input" placeholder="Whisper into the dark..." class="input-void w-full">
                             <button onclick="reader.postComment()" class="btn-main py-2 px-6 w-full md:w-auto">Post</button>
                         </div>
@@ -1571,7 +1584,7 @@
     </script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, increment, serverTimestamp, arrayUnion, arrayRemove, where, writeBatch, getDocs, startAt, endAt, startAfter } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
         // --- CONFIG ---
@@ -1666,6 +1679,7 @@
         const state = {
             user: null,
             profile: null,
+            isAnonymous: false,
             activeStory: null,
             activeProfileId: null,
             activeCommunity: null, 
@@ -1745,7 +1759,7 @@
 
             interval = Math.floor(seconds / 60);
             if (interval > 1) return `${interval} minutes ago`;
-            if (interval === 1) return `1 minute ago`;
+             if (interval === 1) return `1 minute ago`;
 
             return `${Math.floor(seconds)} seconds ago`;
         };
@@ -1936,6 +1950,47 @@
                         ui.closeModal('cropper-modal');
                     }, 'image/jpeg', 0.9);
                 };
+            },
+            setAnonymousMode: (isAnonymous) => {
+                const elementsToHide = [
+                    // Nav
+                    'desktop-create-btn', 'notif-container', 'nav-user-info', 'nav-logout-btn',
+                    // Mobile Nav
+                    'nav-mobile-create', 'nav-mobile-profile',
+                    // Reader
+                    'reader-actions', 'reader-tip-section', 'reader-comment-form', 'thread-reply-container',
+                    // Explore / Community
+                    'btn-create-coven', 'coven-action-buttons', 'user-suggestions-container',
+                    // Feed
+                    'sort-following'
+                ];
+
+                elementsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = isAnonymous ? 'none' : '';
+                });
+
+				// --- NEW LOGIC FOR THE SIGN IN BUTTON ---
+				const anonSignInBtn = document.getElementById('nav-anon-signin-btn');
+				if (anonSignInBtn) {
+					anonSignInBtn.style.display = isAnonymous ? 'inline-flex' : 'none';
+				}
+				// --- END NEW LOGIC ---
+
+                // Handle profile action buttons specifically
+                const userActions = document.getElementById('profile-actions-user');
+                const anonActions = document.getElementById('profile-actions-anon');
+                if (userActions && anonActions) {
+                    userActions.style.display = isAnonymous ? 'none' : 'flex';
+                    anonActions.style.display = isAnonymous ? 'flex' : 'none';
+                }
+                
+                const mobileNav = document.getElementById('mobile-nav');
+                if (mobileNav) {
+                    mobileNav.className = isAnonymous 
+                        ? 'md:hidden fixed bottom-0 left-0 right-0 z-50 glass-nav grid grid-cols-2 items-center'
+                        : 'md:hidden fixed bottom-0 left-0 right-0 z-50 glass-nav grid grid-cols-4 items-center';
+                }
             }
         };
 
@@ -1993,6 +2048,11 @@
                 return visible ? visible.id.replace('view-', '') : 'home';
             },
             go: (view, params = {}) => {
+                if (view === 'create' && state.isAnonymous) {
+                    ui.alert("Access Denied", "You must sign in to create content.");
+                    return router.go('home');
+                }
+
                 const currentView = router.getCurrentView();
                 
                 if (currentView === 'create' && (state.draft.isEdit || state.draft.isSuggestion)) {
@@ -2022,7 +2082,9 @@
                 if (view === 'home') document.getElementById('nav-mobile-home').classList.add('active', 'text-white');
                 if (view === 'explore') document.getElementById('nav-mobile-explore').classList.add('active', 'text-white');
                 if (view === 'create') document.getElementById('nav-mobile-create').classList.add('active', 'text-white');
-                if (view === 'profile' && (!params.user || params.user === state.user?.uid)) document.getElementById('nav-mobile-profile').classList.add('active', 'text-white');
+                if (view === 'profile' && !state.isAnonymous && (!params.user || params.user === state.user?.uid)) {
+                    document.getElementById('nav-mobile-profile').classList.add('active', 'text-white');
+                }
             },
             back: () => {
                  if(window.history.length > 1) {
@@ -2218,6 +2280,15 @@
                     await updateProfile(cred.user, { displayName: n });
                     state.signupAvatarBlob = null;
                 } catch(err) { ui.loading(false); ui.alert('Signup Failed', err.message); }
+            },
+            signInAnonymously: async () => {
+                ui.loading(true);
+                try {
+                    await signInAnonymously(authService);
+                } catch(err) {
+                    ui.loading(false);
+                    ui.alert('Anonymous Sign-In Failed', err.message);
+                }
             },
             suggestUsername: async () => {
                 const input = document.getElementById('signup-name');
@@ -2423,6 +2494,7 @@
                 });
             },
             create: async () => { 
+                if (state.isAnonymous) return ui.alert("Action Not Allowed", "You must have an account to create a Coven.");
                 const name = document.getElementById('coven-name').value;
                 const desc = document.getElementById('coven-desc').value;
                 const fileInput = document.getElementById('coven-img-upload');
@@ -2515,13 +2587,13 @@
                     }
                 });
 
-                const isMember = (data.members || []).includes(state.user.uid);
+                const isMember = (data.members || []).includes(state.user?.uid);
                 const btn = document.getElementById('btn-coven-join');
                 btn.innerText = isMember ? "Leave Coven" : "Join Coven";
                 btn.className = isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20 justify-center" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center";
 
                 const sponsorBtn = document.getElementById('btn-coven-sponsor');
-                const isCreator = state.user.uid === data.creatorId;
+                const isCreator = state.user?.uid === data.creatorId;
                 const isSponsored = data.sponsoredUntil && data.sponsoredUntil.toDate() > new Date();
 
                 if (isCreator) {
@@ -2549,6 +2621,7 @@
                 else router.render('community', { coven: id });
             },
             sponsor: async () => {
+                if (state.isAnonymous) return ui.alert("Action Not Allowed", "You must have an account to sponsor a Coven.");
                 if (!state.activeCommunity) return;
                 if (state.profile.credits < 100) {
                     return ui.alert("Insufficient Credits", "You need 100 CR to sponsor this Coven.");
@@ -2581,6 +2654,7 @@
                 );
             },
             toggleJoin: async () => { 
+                if (state.isAnonymous) return ui.alert("Action Not Allowed", "You must have an account to join a Coven.");
                 if(!state.activeCommunity) return;
                 const ref = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', state.activeCommunity.id);
                 const isMember = (state.activeCommunity.members || []).includes(state.user.uid);
@@ -2700,7 +2774,7 @@
             createPostCard: (data, author) => {
                 const isThread = data.type === 'thread';
                 const el = document.createElement('div');
-                const likeIconClass = (state.profile.likedStories || []).includes(data.id) ? 'text-red-600' : 'text-gray-500';
+                const likeIconClass = (state.profile?.likedStories || []).includes(data.id) ? 'text-red-600' : 'text-gray-500';
                 const postedTime = data.createdAt ? timeAgo(data.createdAt) : 'Just now';
                 const isVerified = (author.followerCount || 0) >= 100;
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
@@ -2788,6 +2862,7 @@
                 return el;
             },
             triggerPost: () => {
+                if (state.isAnonymous) return ui.alert("Action Not Allowed", "You must have an account to post.");
                 if(!state.activeCommunity) return;
                 creator.reset();
                 state.draft.communityId = state.activeCommunity.id;
@@ -2850,6 +2925,7 @@
                 if (memberProfiles.length === 0) listEl.innerHTML = '<div class="text-center text-gray-600 text-xs py-4">No coveneers yet.</div>';
             },
             manageRole: async (targetUid, action) => {
+                if (state.isAnonymous) return;
                 const covenRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', state.activeCommunity.id);
                 const newRoles = { ...state.activeCommunity.roles };
                 let notifMessage = '';
@@ -2882,14 +2958,15 @@
                 communities.showMembers();
             },
             getSelfRole: () => {
-                if (!state.activeCommunity || !state.activeCommunity.roles) return null;
+                if (state.isAnonymous || !state.activeCommunity || !state.activeCommunity.roles) return null;
                 return state.activeCommunity.roles[state.user.uid] || null;
             },
             isMember: () => {
-                if (!state.user || !state.activeCommunity || !state.activeCommunity.members) return false;
+                if (!state.user || state.isAnonymous || !state.activeCommunity || !state.activeCommunity.members) return false;
                 return state.activeCommunity.members.includes(state.user.uid);
             },
             togglePin: async (storyId) => {
+                if (state.isAnonymous) return;
                 const covenRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', state.activeCommunity.id);
                 const isPinned = (state.activeCommunity.pinnedPosts || []).includes(storyId);
                 const operation = isPinned ? arrayRemove(storyId) : arrayUnion(storyId);
@@ -2974,7 +3051,7 @@
                 document.getElementById('thread-my-avatar').src = state.profile.avatar;
                 
                 const contentDiv = document.getElementById('thread-main-content');
-                const likeIconClass = (state.profile.likedStories || []).includes(data.id) ? 'text-red-600' : 'text-gray-500';
+                const likeIconClass = (state.profile?.likedStories || []).includes(data.id) ? 'text-red-600' : 'text-gray-500';
                 const postedTime = data.createdAt ? timeAgo(data.createdAt) : 'Just now';
                 const isVerified = (author.followerCount || 0) >= 100;
                 const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
@@ -2992,7 +3069,7 @@
                         <h2 class="text-2xl md:text-3xl font-bold text-white mb-4 font-story leading-tight">${data.title}</h2>
                         <div id="thread-content-body" class="text-gray-300 text-base md:text-lg leading-loose font-story">${data.content}</div>
                         
-                        <div class="flex gap-4 text-xs font-bold pt-4 mt-4 border-t border-white/5">
+                        <div id="thread-action-bar" class="flex gap-4 text-xs font-bold pt-4 mt-4 border-t border-white/5">
                              <button onclick="reader.toggleLike()" class="flex items-center gap-2 hover:text-red-500 transition-colors group">
                                 <i class="fas fa-heart text-lg ${likeIconClass}" id="thread-like-icon"></i> 
                                 <span id="thread-like-count">${likes} ${pluralize(likes, 'Like')}</span>
@@ -3003,6 +3080,12 @@
                         </div>
                     </div>
                 `;
+                
+                // Hide actions for anon users
+                if(state.isAnonymous) {
+                    const actionBar = document.getElementById('thread-action-bar');
+                    if(actionBar) actionBar.style.display = 'none';
+                }
                 
                 threadView.loadComments(id);
                 ui.openModal('modal-thread');
@@ -3047,6 +3130,12 @@
 				const commentTime = comment.createdAt ? timeAgo(comment.createdAt) : 'Just now';
 				const formattedCommentAuthor = formatUsername(comment.authorId, comment.author);
 
+                const replyButton = state.isAnonymous ? '' : `<button class="font-bold text-gray-500 hover:text-white" onclick="threadView.showReplyBox('${comment.id}', '${comment.author}')">Reply</button>`;
+                const likeButton = state.isAnonymous ? '' : `<button class="font-bold text-gray-500 hover:text-red-500 flex items-center gap-1" onclick="threadView.toggleCommentLike('${comment.id}')">
+								<i class="fas fa-heart"></i>
+								<span id="comment-likes-${comment.id}">${comment.likes || 0}</span>
+							</button>`;
+
 				el.innerHTML = `
 					<div class="flex-shrink-0">
 						<img src="${comment.authorAvatar || `https://ui-avatars.com/api/?name=${comment.author.replace(/\s/g, '+')}&background=random`}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
@@ -3061,11 +3150,8 @@
 							<p class="text-sm text-gray-300 leading-relaxed font-story break-words whitespace-pre-wrap">${comment.text}</p>
 						</div>
 						<div class="mt-2 text-xs flex items-center gap-4">
-							<button class="font-bold text-gray-500 hover:text-white" onclick="threadView.showReplyBox('${comment.id}', '${comment.author}')">Reply</button>
-							<button class="font-bold text-gray-500 hover:text-red-500 flex items-center gap-1" onclick="threadView.toggleCommentLike('${comment.id}')">
-								<i class="fas fa-heart"></i>
-								<span id="comment-likes-${comment.id}">${comment.likes || 0}</span>
-							</button>
+                            ${replyButton}
+							${likeButton}
 						</div>
 						<div id="reply-box-${comment.id}" class="hidden mt-3 ml-4"></div>
 						<div id="children-${comment.id}" class="mt-4 space-y-4 border-l-2 border-white/10 pl-4"></div>
@@ -3082,6 +3168,7 @@
                 return el;
             },
             toggleCommentLike: async (commentId) => {
+                if(state.isAnonymous) return;
                 const commentRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', state.activeStory.id, 'comments', commentId);
                 const snap = await getDoc(commentRef);
                 if (!snap.exists()) return;
@@ -3103,6 +3190,7 @@
                 }
             },
             showReplyBox: (commentId, authorName) => {
+                if(state.isAnonymous) return;
                 document.querySelectorAll('[id^=reply-box-]').forEach(box => box.innerHTML = '');
                 const container = document.getElementById(`reply-box-${commentId}`);
                 container.classList.remove('hidden');
@@ -3116,6 +3204,7 @@
                  document.getElementById(`reply-input-${commentId}`).focus();
             },
             postReply: async (parentId = null) => { 
+                 if(state.isAnonymous) return;
                  const inputId = parentId ? `reply-input-${parentId}` : 'thread-reply-input';
                  const input = document.getElementById(inputId);
                  const txt = input.value;
@@ -3145,6 +3234,7 @@
         // --- CREATOR & SUGGESTIONS ---
         window.creator = { 
             startNewStory: () => {
+                if (state.isAnonymous) return ui.alert("Action Not Allowed", "You must have an account to create content.");
                 creator.reset();
                 router.go('create');
             },
@@ -3252,6 +3342,7 @@
 				document.getElementById('create-cost').innerText = cost + " CR";
 			},
             publish: async () => { 
+                if (state.isAnonymous) return;
                 const title = document.getElementById('create-title').value;
                 const desc = document.getElementById('create-desc').value;
                 const content = document.getElementById('editor-content').innerHTML;
@@ -3323,6 +3414,7 @@
                 } catch(e) { ui.loading(false); ui.alert('Error', e.message); }
             },
             submitSuggestion: async () => { 
+                if (state.isAnonymous) return;
                 const content = document.getElementById('editor-content').innerHTML;
                 ui.loading(true);
                 try {
@@ -3343,6 +3435,7 @@
                 } catch(e) { ui.loading(false); ui.alert('Error', e.message); }
             },
             update: async () => { 
+                if (state.isAnonymous) return;
                 const title = document.getElementById('create-title').value;
                 const desc = document.getElementById('create-desc').value;
                 const content = document.getElementById('editor-content').innerHTML;
@@ -3367,6 +3460,7 @@
         
         window.suggestions = { 
             openReview: async (sugId, notifId = null) => {
+                if (state.isAnonymous) return;
                 ui.loading(true);
                 const snap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'suggestions', sugId));
                 if(!snap.exists()) { ui.loading(false); return; }
@@ -3482,7 +3576,7 @@
 
                 const el = document.createElement('div');
                 const isThread = data.type === 'thread';
-                const hasLiked = (state.profile.likedStories || []).includes(data.id);
+                const hasLiked = (state.profile?.likedStories || []).includes(data.id);
                 const likeIconClass = hasLiked ? 'text-red-600' : 'text-red-900';
                 const postedTime = data.createdAt ? timeAgo(data.createdAt) : 'Just now';
                 const isVerified = (author.followerCount || 0) >= 100;
@@ -3495,6 +3589,10 @@
 					const wordCount = textContent.trim().split(/\s+/).length;
 					readTime = Math.ceil(wordCount / 200);
 				}
+
+                const likeButton = state.isAnonymous ? '' : `<button onclick="event.stopPropagation(); reader.toggleLike('${data.id}')" class="text-gray-500 hover:text-red-500 transition-colors">
+                                <i class="fas fa-heart ${likeIconClass} text-lg" id="feed-thread-like-icon-${data.id}"></i>
+                            </button>`;
 
 
                 if (isThread) {
@@ -3509,9 +3607,7 @@
                                     <div class="text-[10px] text-gray-600 font-mono">THREAD • ${postedTime}</div>
                                 </div>
                             </div>
-                            <button onclick="event.stopPropagation(); reader.toggleLike('${data.id}')" class="text-gray-500 hover:text-red-500 transition-colors">
-                                <i class="fas fa-heart ${likeIconClass} text-lg" id="feed-thread-like-icon-${data.id}"></i>
-                            </button>
+                            ${likeButton}
                         </div>
                         <h3 class="font-bold text-xl text-gray-200 mb-3 group-hover:text-gray-200 transition-colors font-story leading-snug relative z-10">${data.title}</h3>
                         <p class="text-sm text-gray-500 line-clamp-2 mb-4 relative z-10">${data.description}</p>
@@ -3557,1479 +3653,1486 @@
                     <h4 class="font-bold text-lg text-white font-story">${formatUsername(userData.id, userData.username)}</h4>
                     <span class="text-xs text-red-500 uppercase tracking-widest">${getRank(userData.credits)}</span>
                     <p class="text-xs text-gray-500 mt-3 line-clamp-2">${userData.bio || 'Staring into the abyss...'}</p>
-                    <div class="flex items-center gap-2 text-xs text-gray-600 font-mono mt-3">
-                        <i class="fas fa-users"></i> ${userData.followerCount || 0} ${pluralize(userData.followerCount || 0, 'Follower')}
-                    </div>
+					<div class="flex items-center gap-2 text-xs text-gray-600 font-mono mt-3">
+                    <i class="fas fa-users"></i> ${userData.followerCount || 0} ${pluralize(userData.followerCount || 0, 'Follower')}
+                </div>
+            `;
+            return el;
+        },
+        loadUserSuggestions: async () => { 
+            if (state.isAnonymous) {
+                document.getElementById('user-suggestions-container').classList.add('hidden');
+                return;
+            }
+            const container = document.getElementById('user-suggestions-container');
+            const scroller = document.getElementById('user-suggestions-scroller');
+            const grid = document.getElementById('user-suggestions-grid');
+            const cloneGrid = document.getElementById('user-suggestions-grid-clone');
+            grid.innerHTML = ''; cloneGrid.innerHTML = '';
+
+            const myFollowing = state.profile.following || [];
+            const usersToExclude = [state.user.uid, ...myFollowing];
+
+            const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users'), orderBy('followerCount', 'desc'), limit(20));
+            const snap = await getDocs(q);
+
+            let suggestions = [];
+            snap.forEach(doc => {
+                if (!usersToExclude.includes(doc.id)) {
+                    suggestions.push({ id: doc.id, ...doc.data() });
+                }
+            });
+
+            suggestions = suggestions.slice(0, 10);
+
+            if (suggestions.length === 0) { container.classList.add('hidden'); return; }
+            container.classList.remove('hidden');
+
+            const createSuggestionCard = (u) => {
+                const el = document.createElement('div');
+                el.className = 'flex-shrink-0 w-40 glass p-4 rounded-lg flex flex-col items-center text-center';
+                el.innerHTML = `
+                    <img src="${u.avatar}" class="w-16 h-16 rounded-full mb-3 border-2 border-gray-800 cursor-pointer" onclick="profile.open('${u.id}')">
+                    <h5 class="font-bold text-sm text-white truncate w-full cursor-pointer" onclick="profile.open('${u.id}')">${formatUsername(u.id, u.username)}</h5>
+                    <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-3">${getRank(u.credits)}</div>
+                    <button id="suggest-follow-${u.id}" onclick="profile.toggleFollow('${u.id}', true)" class="btn-secondary py-1 px-4 text-xs w-full">Follow</button>
                 `;
                 return el;
-            },
-            loadUserSuggestions: async () => { 
-                const container = document.getElementById('user-suggestions-container');
-                const scroller = document.getElementById('user-suggestions-scroller');
-                const grid = document.getElementById('user-suggestions-grid');
-                const cloneGrid = document.getElementById('user-suggestions-grid-clone');
-                grid.innerHTML = ''; cloneGrid.innerHTML = '';
+            };
 
-                const myFollowing = state.profile.following || [];
-                const usersToExclude = [state.user.uid, ...myFollowing];
+            suggestions.forEach(u => {
+                grid.appendChild(createSuggestionCard(u));
+                cloneGrid.appendChild(createSuggestionCard(u));
+            });
 
-                const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users'), orderBy('followerCount', 'desc'), limit(20));
-                const snap = await getDocs(q);
-
-                let suggestions = [];
-                snap.forEach(doc => {
-                    if (!usersToExclude.includes(doc.id)) {
-                        suggestions.push({ id: doc.id, ...doc.data() });
-                    }
-                });
-
-                suggestions = suggestions.slice(0, 10);
-
-                if (suggestions.length === 0) { container.classList.add('hidden'); return; }
+            if (suggestions.length >= 7) {
+                scroller.classList.add('scrolling-enabled');
+                cloneGrid.classList.remove('hidden');
+            } else {
+                scroller.classList.remove('scrolling-enabled');
+                cloneGrid.classList.add('hidden');
+            }
+        },
+        loadSponsors: () => {
+            const container = document.getElementById('sponsored-covens-container');
+            const grid = document.getElementById('sponsored-covens-grid');
+            
+            const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities'), where('sponsoredUntil', '>', new Date()), orderBy('sponsoredUntil', 'desc'));
+            
+            onSnapshot(q, snap => {
+                if (snap.empty) {
+                    container.classList.add('hidden');
+                    return;
+                }
                 container.classList.remove('hidden');
-
-                const createSuggestionCard = (u) => {
+                grid.innerHTML = '';
+                snap.forEach(d => {
+                    const c = d.data();
                     const el = document.createElement('div');
-                    el.className = 'flex-shrink-0 w-40 glass p-4 rounded-lg flex flex-col items-center text-center';
+                    el.className = 'glass p-0 rounded-lg overflow-hidden cursor-pointer hover:border-yellow-700 border border-yellow-900/40 transition-colors group';
+                    el.onclick = () => communities.open(d.id, c);
                     el.innerHTML = `
-                        <img src="${u.avatar}" class="w-16 h-16 rounded-full mb-3 border-2 border-gray-800 cursor-pointer" onclick="profile.open('${u.id}')">
-                        <h5 class="font-bold text-sm text-white truncate w-full cursor-pointer" onclick="profile.open('${u.id}')">${formatUsername(u.id, u.username)}</h5>
-                        <div class="text-[10px] text-gray-500 uppercase tracking-wider mb-3">${getRank(u.credits)}</div>
-                        <button id="suggest-follow-${u.id}" onclick="profile.toggleFollow('${u.id}', true)" class="btn-secondary py-1 px-4 text-xs w-full">Follow</button>
+                        <div class="h-24 bg-cover bg-center" style="background-image: url('${c.coverImage}')"></div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-yellow-400 text-sm mb-1 truncate">${c.name}</h3>
+                            <p class="text-[11px] text-gray-500 line-clamp-2">${c.description}</p>
+                        </div>
                     `;
-                    return el;
-                };
-
-                suggestions.forEach(u => {
-                    grid.appendChild(createSuggestionCard(u));
-                    cloneGrid.appendChild(createSuggestionCard(u));
+                    grid.appendChild(el);
                 });
-
-                if (suggestions.length >= 7) {
-                    scroller.classList.add('scrolling-enabled');
-                    cloneGrid.classList.remove('hidden');
-                } else {
-                    scroller.classList.remove('scrolling-enabled');
-                    cloneGrid.classList.add('hidden');
-                }
-            },
-            loadSponsors: () => {
-                const container = document.getElementById('sponsored-covens-container');
-                const grid = document.getElementById('sponsored-covens-grid');
-                
-                const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities'), where('sponsoredUntil', '>', new Date()), orderBy('sponsoredUntil', 'desc'));
-                
-                onSnapshot(q, snap => {
-                    if (snap.empty) {
-                        container.classList.add('hidden');
-                        return;
-                    }
-                    container.classList.remove('hidden');
-                    grid.innerHTML = '';
-                    snap.forEach(d => {
-                        const c = d.data();
-                        const el = document.createElement('div');
-                        el.className = 'glass p-0 rounded-lg overflow-hidden cursor-pointer hover:border-yellow-700 border border-yellow-900/40 transition-colors group';
-                        el.onclick = () => communities.open(d.id, c);
-                        el.innerHTML = `
-                            <div class="h-24 bg-cover bg-center" style="background-image: url('${c.coverImage}')"></div>
-                            <div class="p-4">
-                                <h3 class="font-bold text-yellow-400 text-sm mb-1 truncate">${c.name}</h3>
-                                <p class="text-[11px] text-gray-500 line-clamp-2">${c.description}</p>
-                            </div>
-                        `;
-                        grid.appendChild(el);
-                    });
-                });
-            },
-            // NEW: Main Feed Loading with Pagination (getDocs instead of onSnapshot for load more)
-            loadFeed: async (isPagination = false) => {
-                const container = document.getElementById('feed-grid');
-                const emptyEl = document.getElementById('feed-empty');
-                const loadMoreBtn = document.getElementById('feed-load-more');
-                
-                if (!isPagination) {
-                    container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Summoning...</div>';
-                    emptyEl.classList.add('hidden');
-                    container.classList.remove('hidden');
-                    loadMoreBtn.classList.add('hidden');
-                    state.lastFeedDoc = null;
-                } else {
-                     // Loading state for button
-                     loadMoreBtn.querySelector('button').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                }
-
-                let q;
-                const ref = collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories');
-                
-                // Build Query
-                let constraints = [];
-                
-                if(state.sortBy === 'following') {
-                    if (state.profile.following && state.profile.following.length > 0) {
-                        constraints.push(where('authorId', 'in', state.profile.following));
-                    } else {
-                        // Following no one
-                        feed.render([], false);
-                        return;
-                    }
-                }
-                else if(state.filter) {
-                    constraints.push(where("category", "==", state.filter));
-                }
-                else if(state.sortBy === 'hot') {
-                    constraints.push(orderBy('likes', 'desc'));
-                }
-                else if (state.sortBy === 'top') {
-                    const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-                    constraints.push(where('createdAt', '>', lastWeek));
-                    constraints.push(orderBy('createdAt', 'desc'));
-                }
-                else {
-                    constraints.push(orderBy('createdAt', 'desc'));
-                }
-
-                if (isPagination && state.lastFeedDoc) {
-                    constraints.push(startAfter(state.lastFeedDoc));
-                }
-                
-                constraints.push(limit(20)); // Limit per fetch
-                
-                q = query(ref, ...constraints);
-
-                try {
-                    const snap = await getDocs(q);
-                    
-                    if (snap.empty) {
-                        if (!isPagination) {
-                            feed.render([], false);
-                        } else {
-                             // No more posts
-                             loadMoreBtn.classList.add('hidden');
-                        }
-                        return;
-                    }
-
-                    // Update last doc for next page
-                    state.lastFeedDoc = snap.docs[snap.docs.length - 1];
-                    
-                    // Show/Hide Load More Button
-                    if (snap.docs.length < 20) {
-                        loadMoreBtn.classList.add('hidden');
-                    } else {
-                        loadMoreBtn.classList.remove('hidden');
-                        loadMoreBtn.querySelector('button').innerHTML = 'Load More Echoes <i class="fas fa-chevron-down ml-2"></i>';
-                    }
-
-                    const stories = [];
-                    snap.forEach(d => {
-                        const data = {id: d.id, ...d.data()};
-                        if(!data.communityId) stories.push(data); 
-                    });
-                    
-                    // Client-side Sorts for composite fields if needed (mostly covered by index query)
-                    if (state.sortBy === 'top') {
-                        stories.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-                    }
-                    
-                    const authorIds = [...new Set(stories.map(s => s.authorId))];
-                    await Promise.all(authorIds.map(id => getUserProfile(id)));
-
-                    state.feedData = isPagination ? [...state.feedData, ...stories] : stories;
-                    feed.render(stories, isPagination); // Pass append flag
-
-                } catch (e) {
-                    console.error("Feed Load Error:", e);
-                    if(!isPagination) container.innerHTML = '<div class="col-span-3 text-center text-red-500 py-10">The void is disturbed.</div>';
-                }
-            }
-        };
-
-		// --- NOTIFICATIONS ---
-		window.notifications = { 
-			init: () => {
-				const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
-				
-				notifications.cleanExpired();
-
-				onSnapshot(q, (snap) => {
-					const list = document.getElementById('notif-list');
-					const badge = document.getElementById('notif-badge');
-					const empty = document.getElementById('notif-empty');
-					
-					list.innerHTML = '';
-					let unreadCount = 0;
-					
-					if(snap.empty) {
-						empty.classList.remove('hidden');
-						badge.classList.add('hidden');
-						return;
-					}
-					empty.classList.add('hidden');
-
-					snap.forEach(d => {
-						const n = d.data();
-						if(!n.read) unreadCount++;
-						
-						let icon = 'fa-bell';
-						let color = 'text-gray-400';
-						
-						// --- ICON LOGIC ---
-						if(n.type === 'credit') { icon = 'fa-coins'; color = 'text-yellow-500'; }
-						if(n.type === 'daily_reward') { icon = 'fa-gift'; color = 'text-green-500'; } 
-						if(n.type === 'suggestion') { icon = 'fa-code-branch'; color = 'text-blue-500'; }
-						if(n.type === 'follow') { icon = 'fa-user-plus'; color = 'text-purple-500'; }
-						if(n.type === 'coven_role') { icon = 'fa-chess-king'; color = 'text-red-500'; }
-
-						const el = document.createElement('div');
-						el.className = `p-3 border-b border-white/5 hover:bg-white/5 cursor-pointer ${!n.read ? 'bg-red-900/10' : ''} flex justify-between items-start`;
-						
-						// Note: Added 'group' class to help targeting
-						el.innerHTML = `
-							<div class="flex gap-3 items-start flex-1 group">
-								<i class="fas ${icon} ${color} mt-1"></i>
-								<div>
-									<div class="text-sm text-gray-300">${n.message}</div>
-									<div class="text-[10px] text-gray-600 mt-1">${n.createdAt ? timeAgo(n.createdAt) : 'Just now'}</div>
-								</div>
-							</div>
-							<button class="text-gray-600 hover:text-red-500 px-2 transition-colors" title="Delete"><i class="fas fa-times"></i></button>
-						`;
-						
-						el.onclick = async (e) => {
-							// FIX 1: Manually hide tooltip on any click inside notification
-							// because the element might disappear
-							const tooltip = document.getElementById('custom-tooltip');
-							tooltip.classList.remove('visible');
-
-							// Handle Delete
-							if(e.target.closest('.fa-times') || e.target.closest('button')) {
-								e.stopPropagation();
-								await deleteDoc(d.ref); 
-								return;
-							}
-							
-							if(!n.read) updateDoc(d.ref, { read: true });
-
-							if(n.type === 'suggestion' && n.payload) suggestions.openReview(n.payload.suggestionId, d.id);
-							
-							// Claim reward on click
-							if(n.type === 'daily_reward') {
-								// Pass the specific ID (d.id)
-								await rewards.claim(d.id);
-								notifications.toggle();
-							}
-						};
-						list.appendChild(el);
-					});
-					
-					if(unreadCount > 0) badge.classList.remove('hidden');
-					else badge.classList.add('hidden');
-				});
-			},
-			toggle: () => {
-				document.getElementById('notif-dropdown').classList.toggle('hidden');
-			},
-			send: async (targetUid, msg, type, payload = {}) => {
-				await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'users', targetUid, 'notifications'), {
-					message: msg, type, createdAt: serverTimestamp(), read: false, payload
-				});
-			},
-			clearAll: async () => {
-					ui.loading(true);
-					try {
-					const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'));
-					const snap = await getDocs(q);
-					const batch = writeBatch(db);
-					snap.forEach(doc => batch.delete(doc.ref));
-					await batch.commit();
-					// Force tooltip hide here too
-					document.getElementById('custom-tooltip').classList.remove('visible');
-					} catch (e) { ui.alert("Error", e.message); } finally { ui.loading(false); }
-			},
-			cleanExpired: async () => {
-				if(!state.user) return;
-				const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-				const q = query(
-					collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
-					where('type', '==', 'daily_reward')
-				);
-				
-				try {
-					const snap = await getDocs(q);
-					const batch = writeBatch(db);
-					let deleteCount = 0;
-					snap.forEach(doc => {
-						const data = doc.data();
-						// Check if older than 24h
-						if (!data.createdAt || data.createdAt.toDate() < yesterday) {
-							batch.delete(doc.ref);
-							deleteCount++;
-						}
-					});
-					if(deleteCount > 0) await batch.commit();
-				} catch(e) { console.error("Cleanup error", e); }
-			}
-		};
-
-		// --- REWARDS ---
-		window.rewards = { 
-			checkEligibility: async () => {
-				if(!state.profile) return;
-				const now = new Date();
-				const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
-				const diff = now - last;
-				const hours = diff / (1000 * 60 * 60);
-
-				if (hours >= 24) {
-					// Check DB to ensure we don't spam the notification
-					const q = query(
-						collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
-						where('type', '==', 'daily_reward')
-					);
-					
-					const snap = await getDocs(q);
-					
-					if(snap.empty) {
-						await notifications.send(
-							state.user.uid, 
-							"Daily Tribute Available. Click to claim 50 CR.", 
-							"daily_reward"
-						);
-					}
-				}
-			},
-			claim: async (notificationId = null) => {
-				if(!state.profile) return;
-				const now = new Date();
-				const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
-				const diff = now - last;
-				const hours = diff / (1000 * 60 * 60);
-
-				// Allow claim if it's been 24 hours OR if the user is clicking a specific notification
-				// (If a notification exists, we assume the user was eligible when it was sent)
-				if(hours >= 24 || notificationId) {
-					ui.loading(true);
-					try {
-						const batch = writeBatch(db);
-						const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
-						
-						// Only give credits if time has passed
-						if (hours >= 24) {
-							batch.update(userRef, {
-								credits: increment(50),
-								lastDaily: serverTimestamp()
-							});
-						}
-
-						// FIX 2: Explicitly handle the notification deletion in the batch
-						if(notificationId) {
-							const notifRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications', notificationId);
-							batch.delete(notifRef);
-						} else {
-							// Cleanup any other daily rewards if claimed via chest
-								const q = query(
-								collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
-								where('type', '==', 'daily_reward')
-							);
-							const snap = await getDocs(q);
-							snap.forEach(d => batch.delete(d.ref));
-						}
-
-						await batch.commit();
-						
-						ui.loading(false);
-						if (hours >= 24) {
-							ui.alert("Fortune", "The Void grants you 50 credits.");
-						} else {
-							// Notification was stale but we deleted it, so no credit, but cleanup done.
-							// Usually this branch won't hit if logic is perfect, but good for safety.
-						}
-						
-					} catch(e) { 
-						ui.loading(false); 
-						ui.alert("Error", e.message); 
-					}
-				} else {
-					const wait = Math.ceil(24 - hours);
-					ui.alert("Greed", `Wait ${wait} more hours, mortal.`);
-				}
-			}
-		};
-
-        // --- PROFILE SYSTEM ---
-        window.profile = {
-            save: async () => { 
-                const newName = document.getElementById('edit-username').value.trim();
-                const newBio = document.getElementById('edit-bio').value.trim();
-                const newLink = document.getElementById('edit-link').value.trim();
-                
-                // Check if changes were made
-                const isNameSame = newName === state.profile.username;
-                const isBioSame = newBio === (state.profile.bio || '');
-                const isLinkSame = newLink === (state.profile.link || '');
-                const isAvatarSame = !state.profileEditAvatarBlob;
-
-                if (isNameSame && isBioSame && isLinkSame && isAvatarSame) {
-                    return ui.alert("Stagnation", "No changes were made to your identity.");
-                }
-
-                // If name changed, check availability again to be safe
-                if (!isNameSame) {
-                    const check = await checkUsername(newName);
-                    if (!check.valid) return ui.alert("Invalid Name", check.message);
-                }
-
-                ui.loading(true);
-
-                let avatarUrl = state.profile.avatar;
-                if (state.profileEditAvatarBlob) {
-                     const uploadedUrl = await creator.upload(state.profileEditAvatarBlob);
-                     if (uploadedUrl) avatarUrl = uploadedUrl;
-                }
-
-                await updateDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid), {
-                    username: newName, bio: newBio, link: newLink, avatar: avatarUrl
-                });
-                
-                // Update Firebase Auth profile display name too
-                if (!isNameSame) {
-                     await updateProfile(authService.currentUser, { displayName: newName });
-                }
-
-                state.profileEditAvatarBlob = null;
-                ui.closeProfileEditor();
-                ui.alert("Identity", "Your mask has been adjusted.");
-                ui.loading(false);
-            },
-            suggestUsername: async () => {
-                const input = document.getElementById('edit-username');
-                const feedback = document.getElementById('edit-username-feedback');
-                input.disabled = true;
-                feedback.classList.remove('hidden');
-                feedback.className = "text-xs font-bold mt-1 text-gray-500";
-                feedback.innerText = "Reimagining your name...";
-
-                let suggestedName = '';
-                let isAvailable = false;
-                let attempts = 0;
-
-                while (!isAvailable && attempts < 20) {
-                    const adj = usernameAdjectives[Math.floor(Math.random() * usernameAdjectives.length)];
-                    const noun = usernameNouns[Math.floor(Math.random() * usernameNouns.length)];
-                    const num = Math.random() > 0.5 ? Math.floor(Math.random() * 999) : '';
-                    suggestedName = `${adj}${noun}${num}`;
-                    
-                    // Pass current username to allow it if generated again
-                    const result = await window.checkUsername(suggestedName, state.profile.username);
-                    isAvailable = result.valid;
-                    attempts++;
-                }
-
-                input.value = suggestedName;
-                input.disabled = false;
-                
-                // Trigger validation UI update, passing current name
-                await handleUsernameInput('edit-username', 'edit-username-feedback', state.profile.username);
-            },
-            viewSelf: () => profile.open(state.user.uid),
-            openFromReader: () => {
-                if(state.activeStory) profile.open(state.activeStory.authorId);
-            },
-            open: async (uid, push = true) => {
-                ui.loading(true);
-                state.activeProfileId = uid;
-                const isSelf = uid === state.user.uid;
-
-                const p = await getUserProfile(uid);
-                if(!p) { ui.loading(false); return ui.alert("Lost", "Soul not found."); }
-
-                const isVerified = (p.followerCount || 0) >= 100;
-                const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
-                
-                // Use formatUsername for profile title
-                document.getElementById('profile-view-name').innerHTML = formatUsername(uid, p.username) + verifiedBadge;
-                document.getElementById('profile-view-bio').innerText = p.bio || "Staring into the abyss...";
-                document.getElementById('profile-view-img').src = p.avatar;
-                document.getElementById('profile-view-followers').innerText = abbreviateNumber((p.followers || []).length);
-                document.getElementById('profile-view-followers-label').innerText = pluralize((p.followers || []).length, 'Follower');
-                
-                document.getElementById('profile-view-following').innerText = abbreviateNumber((p.following || []).length);
-                document.getElementById('profile-rank').innerText = getRank(p.credits || 0);
-                
-                const joinedEl = document.getElementById('profile-view-joined');
-                if (p.joined) {
-                    joinedEl.innerHTML = `<i class="fas fa-clock mr-1"></i> Joined ${timeAgo(p.joined)}`;
-                    joinedEl.classList.remove('hidden');
-                } else {
-                    joinedEl.classList.add('hidden');
-                }
-
-                const rankEl = document.getElementById('profile-leaderboard-rank');
-                if(state.leaderboard) {
-                    const idx = state.leaderboard.findIndex(u => u.id === uid);
-                    if(idx !== -1) {
-                        rankEl.innerText = `#${idx + 1}`;
-                        rankEl.classList.remove('hidden');
-                    } else {
-                        rankEl.classList.add('hidden');
-                    }
-                }
-
-                const badgesContainer = document.getElementById('profile-badges');
-                badgesContainer.innerHTML = '';
-                
-                // Creator Badge Check
-                if(uid === CREATOR_ID) {
-                     badgesContainer.innerHTML += `<span title="The Architect: Creator of Grimoire" class="text-red-600 animate-pulse"><i class="fas fa-code"></i></span>`;
-                }
-                
-                if ((p.covenCreatedCount || 0) > 0) badgesContainer.innerHTML += `<span title="Genesis Coven: Founded a Coven"><i class="fas fa-crown"></i></span>`;
-                if ((p.postCount || 0) >= 10) badgesContainer.innerHTML += `<span title="Prolific Scribe: Published 10+ stories"><i class="fas fa-feather-alt"></i></span>`;
-                if ((p.totalTipped || 0) >= 1000) badgesContainer.innerHTML += `<span title="Patron of Horrors: Tipped over 1000 CR"><i class="fas fa-hand-holding-heart"></i></span>`;
-
-                const linkContainer = document.getElementById('profile-links');
-                linkContainer.innerHTML = p.link ? `<a href="${p.link}" target="_blank" class="hover:text-white"><i class="fas fa-link mr-1"></i> ${new URL(p.link).hostname}</a>` : '';
-
-                const followBtn = document.getElementById('btn-follow');
-                const editBtn = document.getElementById('btn-edit-profile');
-                document.getElementById('profile-img-edit-overlay').style.display = isSelf ? 'flex' : 'none';
-                if(isSelf) {
-                    followBtn.classList.add('hidden');
-                    editBtn.classList.remove('hidden');
-                } else {
-                    editBtn.classList.add('hidden');
-                    followBtn.classList.remove('hidden');
-                    const isFollowing = (state.profile.following || []).includes(uid);
-                    followBtn.innerText = isFollowing ? "Unfollow" : "Follow";
-                }
-
-                profile.switchTab('artifacts');
-
-                if(push) router.go('profile', { user: uid });
-                else router.render('profile', { user: uid });
-                ui.loading(false);
-            },
-            toggleFollow: async (targetUid = null, fromSuggestion = false) => {
-                const idToToggle = targetUid || state.activeProfileId;
-                if (!idToToggle || idToToggle === state.user.uid || state.followLock) return;
-                
-                state.followLock = true;
-                const isCurrentlyFollowing = (state.profile.following || []).includes(idToToggle);
-
-                const mainProfileButton = document.getElementById('btn-follow');
-                const suggestionButton = fromSuggestion ? document.getElementById(`suggest-follow-${idToToggle}`) : null;
-
-                if (mainProfileButton && !fromSuggestion) mainProfileButton.disabled = true;
-                if (suggestionButton) suggestionButton.disabled = true;
-
-                const targetUserRef = doc(db, 'artifacts', APP_ID_PATH, 'users', idToToggle);
-                const currentUserRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
-
-                try {
-                    const batch = writeBatch(db);
-                    if (isCurrentlyFollowing) {
-                        batch.update(targetUserRef, { followers: arrayRemove(state.user.uid), followerCount: increment(-1) });
-                        batch.update(currentUserRef, { following: arrayRemove(idToToggle) });
-                    } else {
-                        batch.update(targetUserRef, { followers: arrayUnion(state.user.uid), followerCount: increment(1) });
-                        batch.update(currentUserRef, { following: arrayUnion(idToToggle) });
-                        notifications.send(idToToggle, `${state.profile.username} followed you.`, 'follow');
-                    }
-                    await batch.commit();
-
-                    state.userCache[idToToggle] = null;
-                    state.userCache[state.user.uid] = null;
-                    
-                    const updatedProfileSnap = await getDoc(currentUserRef);
-                    if(updatedProfileSnap.exists()) {
-                        state.profile = updatedProfileSnap.data();
-                    }
-                    
-                    if (!fromSuggestion && state.activeProfileId === idToToggle) {
-                        profile.open(idToToggle, false);
-                    } else {
-                        if (mainProfileButton && !fromSuggestion) mainProfileButton.innerText = isCurrentlyFollowing ? "Follow" : "Unfollow";
-                        if (suggestionButton) suggestionButton.innerText = isCurrentlyFollowing ? "Follow" : "Unfollow";
-                    }
-
-                } catch (error) {
-                    console.error("Follow/Unfollow Error:", error);
-                     ui.alert("Error", "Could not complete action. Please try again.");
-                } finally {
-                    if (mainProfileButton && !fromSuggestion) mainProfileButton.disabled = false;
-                    if (suggestionButton) suggestionButton.disabled = false;
-                    state.followLock = false;
-                }
-            },
-            showFollowList: async (type) => { 
-                if(!state.activeProfileId) return;
-                const modal = document.getElementById('modal-follow-list');
-                const titleEl = document.getElementById('follow-list-title');
-                const contentEl = document.getElementById('follow-list-content');
-                titleEl.innerText = type === 'followers' ? 'Followers' : 'Following';
-                contentEl.innerHTML = '<div class="text-center text-gray-600 text-xs py-4"><i class="fas fa-spinner fa-spin"></i></div>';
-                ui.openModal('modal-follow-list');
-
-                const profileSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', state.activeProfileId));
-                if (!profileSnap.exists()) return;
-                
-                const idList = profileSnap.data()[type] || [];
-                if (idList.length === 0) {
-                    contentEl.innerHTML = `<div class="text-center text-gray-600 text-xs py-4 italic">No souls found.</div>`;
-                    return;
-                }
-
-                const userPromises = idList.map(uid => getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', uid)));
-                const userSnaps = await Promise.all(userPromises);
-
-                contentEl.innerHTML = '';
-                userSnaps.forEach(snap => {
-                    if (snap.exists()) {
-                        const user = snap.data();
-                        const el = document.createElement('div');
-                        el.className = 'flex items-center justify-between p-2 rounded';
-                        el.innerHTML = `
-                            <div class="flex items-center gap-3 cursor-pointer" onclick="ui.closeModal('modal-follow-list'); profile.open('${snap.id}')">
-                                <img src="${user.avatar}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
-                                <span class="font-bold text-sm text-gray-300">${formatUsername(snap.id, user.username)}</span>
-                            </div>
-                        `;
-                        contentEl.appendChild(el);
-                    }
-                });
-            },
-            switchTab: (tabName) => {
-                document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
-                document.getElementById(`tab-${tabName}`).classList.add('active');
-                
-                const container = document.getElementById('profile-content-area');
-                container.innerHTML = ''; 
-                
-                if (tabName === 'artifacts') profile.loadArtifacts(container);
-                else if (tabName === 'liked') profile.loadLiked(container);
-                else if (tabName === 'allies') profile.loadAllies(container);
-                else if (tabName === 'covens') profile.loadCovens(container);
-            },
-            loadArtifacts: (container) => {
-                container.innerHTML = `<div id="profile-posts-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>`;
-                const grid = document.getElementById('profile-posts-grid');
-                
-                const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories'), where('authorId', '==', state.activeProfileId), limit(50));
-                
-                onSnapshot(q, (snap) => {
-                     let totalLikes = 0;
-                     if(snap.empty) {
-                        grid.innerHTML = `<div class="col-span-3 text-center text-gray-600 py-16">
-                            <i class="fas fa-dungeon text-5xl mb-4"></i>
-                            <h3 class="font-bold text-lg text-gray-400">The Vault is Empty</h3>
-                            <p class="text-sm">This soul has yet to manifest any artifacts.</p>
-                        </div>`;
-                        document.getElementById('profile-view-likes').innerText = '0';
-                        document.getElementById('profile-view-likes-label').innerText = 'Likes';
-                        return;
-                     }
-
-                     let posts = [];
-                     snap.forEach(d => {
-                         const data = d.data();
-                         totalLikes += (data.likes || 0);
-                         posts.push({ id: d.id, ...data });
-                     });
-                     
-                     posts.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-                     grid.innerHTML = '';
-                     posts.forEach(data => {
-                         const el = document.createElement('div');
-                         el.className = 'glass p-4 rounded cursor-pointer hover:bg-white/5 transition-colors border border-transparent hover:border-red-900';
-                         el.onclick = () => reader.open(data.id, data);
-                         el.innerHTML = `
-                             <div class="font-bold text-gray-300 truncate mb-1">${data.title}</div>
-                             <div class="flex justify-between items-center text-xs">
-                                <span class="text-red-500 uppercase font-bold">${data.category}</span>
-                                <span class="text-gray-600"><i class="fas fa-heart mr-1"></i> ${data.likes || 0}</span>
-                             </div>
-                         `;
-                         grid.appendChild(el);
-                     });
-                     
-                     document.getElementById('profile-view-likes').innerText = abbreviateNumber(totalLikes);
-                     document.getElementById('profile-view-likes-label').innerText = pluralize(totalLikes, 'Like');
-                }, (error) => {
-                    console.error("Error loading artifacts:", error);
-                    grid.innerHTML = `<div class="col-span-3 text-center text-red-500 py-16">Failed to load artifacts. The void is disturbed.</div>`;
-                });
-            },
-            loadLiked: (container) => {
-                container.innerHTML = `
-                    <div class="space-y-8">
-                        <div id="liked-stories-section" class="hidden">
-                            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Stories</h3>
-                            <div id="profile-liked-stories-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-                        </div>
-                        <div id="liked-threads-section" class="hidden">
-                            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Threads</h3>
-                            <div id="profile-liked-threads-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                        </div>
-                         <div id="profile-liked-empty" class="hidden col-span-3 text-center text-gray-600 py-16">
-                            <i class="fas fa-heart-crack text-5xl mb-4"></i>
-                            <h3 class="font-bold text-lg text-gray-400">No Liked Posts</h3>
-                            <p class="text-sm">This soul has yet to like any artifacts.</p>
-                        </div>
-                    </div>`;
-
-                const storiesGrid = document.getElementById('profile-liked-stories-grid');
-                const threadsGrid = document.getElementById('profile-liked-threads-grid');
-                const storiesSection = document.getElementById('liked-stories-section');
-                const threadsSection = document.getElementById('liked-threads-section');
-                const emptySection = document.getElementById('profile-liked-empty');
-                
-                const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories'), where('likedBy', 'array-contains', state.activeProfileId), limit(50));
-                
-                onSnapshot(q, async (snap) => {
-                     if(snap.empty) {
-                        storiesSection.classList.add('hidden');
-                        threadsSection.classList.add('hidden');
-                        emptySection.classList.remove('hidden');
-                        return;
-                     }
-
-                     let posts = [];
-                     snap.forEach(d => {
-                         posts.push({ id: d.id, ...d.data() });
-                     });
-
-                     const authorIds = [...new Set(posts.map(p => p.authorId))];
-                    await Promise.all(authorIds.map(id => getUserProfile(id)));
-                     
-                     posts.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-                     // Clear grids
-                     storiesGrid.innerHTML = '';
-                     threadsGrid.innerHTML = '';
-                     let storyCount = 0;
-                     let threadCount = 0;
-
-                     posts.forEach(data => {
-                         const author = state.userCache[data.authorId];
-                         if (!author) return;
-                         
-                         const card = feed.createStoryCard(data);
-                         if (card) {
-                            card.id = `profile-liked-card-${data.id}`;
-                            if(data.type === 'thread') {
-                                threadsGrid.appendChild(card);
-                                threadCount++;
-                            } else {
-                                storiesGrid.appendChild(card);
-                                storyCount++;
-                            }
-                         }
-                     });
-
-                     if(storyCount > 0) storiesSection.classList.remove('hidden'); else storiesSection.classList.add('hidden');
-                     if(threadCount > 0) threadsSection.classList.remove('hidden'); else threadsSection.classList.add('hidden');
-                     if(storyCount === 0 && threadCount === 0) emptySection.classList.remove('hidden'); else emptySection.classList.add('hidden');
-
-                }, (error) => {
-                    console.error("Error loading liked posts:", error);
-                    container.innerHTML = `<div class="text-center text-red-500 py-16">Failed to load liked posts. The void is disturbed.</div>`;
-                });
-            },
-            loadAllies: async (container) => {
-                const profileSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', state.activeProfileId));
-                const followingIds = profileSnap.data().following || [];
-                
-                if (followingIds.length === 0) {
-                    container.innerHTML = `<div class="col-span-full text-center text-gray-600 py-16">
-                        <i class="fas fa-street-view text-5xl mb-4"></i>
-                        <h3 class="font-bold text-lg text-gray-400">A Solitary Path</h3>
-                        <p class="text-sm">This soul walks the void alone, for now.</p>
-                    </div>`;
-                    return;
-                }
-                
-                container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="allies-grid"></div>';
-                const grid = document.getElementById('allies-grid');
-                
-                const promises = followingIds.map(id => getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', id)));
-                const results = await Promise.all(promises);
-                
-                results.forEach(snap => {
-                    if(snap.exists()) {
-                        const u = snap.data();
-                        const el = document.createElement('div');
-                        el.className = 'glass p-3 rounded flex items-center gap-3 cursor-pointer hover:bg-white/5';
-                        el.onclick = () => profile.open(snap.id);
-                        el.innerHTML = `
-                            <img src="${u.avatar}" class="w-10 h-10 rounded-full border border-gray-700">
-                            <div>
-                                <div class="font-bold text-gray-300 text-sm">${formatUsername(snap.id, u.username)}</div>
-                                <div class="text-[10px] text-gray-500">${getRank(u.credits)}</div>
-                            </div>
-                        `;
-                        grid.appendChild(el);
-                    }
-                });
-            },
-            loadCovens: async (container) => {
-                 const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities'), where('members', 'array-contains', state.activeProfileId), limit(20));
-                 const snap = await getDocs(q);
-                 
-                 if(snap.empty) {
-                    container.innerHTML = `<div class="col-span-full text-center text-gray-600 py-16">
-                        <i class="fas fa-street-view text-5xl mb-4"></i>
-                        <h3 class="font-bold text-lg text-gray-400">A Solitary Path</h3>
-                        <p class="text-sm">This soul walks the void alone, for now.</p>
-                    </div>`;
-                    return;
-                }
-                
-                container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="allies-grid"></div>';
-                const grid = document.getElementById('allies-grid');
-                
-                const promises = followingIds.map(id => getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', id)));
-                const results = await Promise.all(promises);
-                
-                results.forEach(snap => {
-                    if(snap.exists()) {
-                        const u = snap.data();
-                        const el = document.createElement('div');
-                        el.className = 'glass p-3 rounded flex items-center gap-3 cursor-pointer hover:bg-white/5';
-                        el.onclick = () => profile.open(snap.id);
-                        el.innerHTML = `
-                            <img src="${u.avatar}" class="w-10 h-10 rounded-full border border-gray-700">
-                            <div>
-                                <div class="font-bold text-gray-300 text-sm">${formatUsername(snap.id, u.username)}</div>
-                                <div class="text-[10px] text-gray-500">${getRank(u.credits)}</div>
-                            </div>
-                        `;
-                        grid.appendChild(el);
-                    }
-                });
-            },
-            loadCovens: async (container) => {
-                 const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities'), where('members', 'array-contains', state.activeProfileId), limit(20));
-                 const snap = await getDocs(q);
-                 
-                 if(snap.empty) {
-                     container.innerHTML = `<div class="col-span-full text-center text-gray-600 py-16">
-                        <i class="fas fa-monument text-5xl mb-4"></i>
-                        <h3 class="font-bold text-lg text-gray-400">Unaligned</h3>
-                        <p class="text-sm">This soul has not pledged allegiance to any coven.</p>
-                    </div>`;
-                     return;
-                 }
-                 
-                 container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="covens-grid"></div>';
-                 const grid = document.getElementById('covens-grid');
-                 
-                 snap.forEach(d => {
-                     const c = d.data();
-                     const el = document.createElement('div');
-                     el.className = 'glass p-0 rounded-lg overflow-hidden cursor-pointer hover:border-red-900 transition-colors group';
-                     el.onclick = () => communities.open(d.id, c);
-                     el.innerHTML = `
-                         <div class="h-16 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all" style="background-image: url('${c.coverImage}')"></div>
-                         <div class="p-3">
-                             <h4 class="font-bold text-red-400 text-sm mb-1">${c.name}</h4>
-                             <div class="text-[10px] text-gray-600 font-mono"><i class="fas fa-users mr-1"></i> ${c.memberCount}</div>
-                         </div>
-                     `;
-                     grid.appendChild(el);
-                 });
-            }
-        };
-
-        // --- READER ---
-        window.reader = { 
-		open: async (id, data, push = true) => {
-                state.activeStory = { id, ...data };
-                // If it's a thread, delegate to threadView (which now has checks)
-                if(data.type === 'thread') { threadView.open(id, data); return; }
-
-                const readerBody = document.getElementById('reader-body');
-                const deniedBody = document.getElementById('reader-access-denied');
-                
-                // Clear previous content to prevent flashing or leak
-                readerBody.innerHTML = '';
-                
-                let hasAccess = true;
-
-                // --- SECURITY CHECK ---
-                if (data.membersOnly && data.communityId) {
-                    ui.loading(true);
-                    try {
-                        const covenSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', data.communityId));
-                        if(covenSnap.exists()){
-                            state.activeCommunity = {id: covenSnap.id, ...covenSnap.data()}; 
-                            if (!communities.isMember()) {
-                                hasAccess = false;
-                            }
-                        }
-                        ui.loading(false);
-                    } catch(e) { ui.loading(false); }
-                }
-
-                if (!hasAccess) {
-                    readerBody.classList.add('hidden');
-                    deniedBody.classList.remove('hidden');
-                } else {
-                    readerBody.classList.remove('hidden');
-                    deniedBody.classList.add('hidden');
-                    // ONLY Render content if access is granted
-                    readerBody.innerHTML = data.content;
-                }
-                // --- END SECURITY CHECK ---
-
-                const author = await getUserProfile(data.authorId);
-                if (!author) return;
-
-                document.getElementById('reader-title').innerText = data.title;
-                document.getElementById('reader-cover').src = data.coverImage;
-                
-                const isVerified = (author.followerCount || 0) >= 100;
-                const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
-                document.getElementById('reader-author').innerHTML = formatUsername(author.id, author.username) + verifiedBadge;
-
-                document.getElementById('reader-avatar').src = author.avatar;
-                document.getElementById('reader-cat-tag').innerText = data.category;
-                
-                const hasLiked = (state.profile.likedStories || []).includes(state.activeStory.id);
-                const icon = document.getElementById('like-icon');
-                if(hasLiked) icon.classList.add('text-red-600'); else icon.classList.remove('text-red-600');
-                document.getElementById('reader-likes').innerText = data.likes || 0;
-
-                const isOwner = state.user.uid === data.authorId;
-                const editBtn = document.getElementById('btn-reader-edit');
-                const suggestBtn = document.getElementById('btn-reader-suggest');
-                
-                if (isOwner) {
-                    editBtn.classList.remove('hidden');
-                    suggestBtn.classList.add('hidden'); 
-                } else {
-                    editBtn.classList.add('hidden');
-                    suggestBtn.classList.remove('hidden');
-                }
-
-                loadComments(id);
-                if(push) router.go('reader', { post: id }); else router.render('reader', { post: id });
-            },
-            toggleLike: async (storyId = null) => {
-                const id = storyId || state.activeStory.id;
-                if (state.isLiking || !id) return;
-                state.isLiking = true;
-
-                const hasLiked = (state.profile.likedStories || []).includes(id);
-
-                if (!hasLiked) {
-                    const storyRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', id);
-                    const storySnap = await getDoc(storyRef);
-                    if (storySnap.exists()) {
-                        const storyData = storySnap.data();
-                        const newLikes = (storyData.likes || 0) + 1;
-                        const milestones = storyData.milestonesReached || [];
-                        let reward = 0;
-                        let milestoneMsg = '';
-
-                        if (newLikes === 10 && !milestones.includes('10_likes')) {
-                            reward = 10;
-                            milestones.push('10_likes');
-                            milestoneMsg = `Your story "${storyData.title}" reached 10 likes! +${reward} CR`;
-                        } else if (newLikes === 50 && !milestones.includes('50_likes')) {
-                            reward = 50;
-                            milestones.push('50_likes');
-                            milestoneMsg = `Your story "${storyData.title}" reached 50 likes! +${reward} CR`;
-                        } else if (newLikes === 100 && !milestones.includes('100_likes')) {
-                             reward = 100;
-                            milestones.push('100_likes');
-                            milestoneMsg = `Your story "${storyData.title}" reached 100 likes! +${reward} CR`;
-                        }
-
-                        if (reward > 0) {
-                            await updateDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', storyData.authorId), { credits: increment(reward) });
-                            await updateDoc(storyRef, { milestonesReached: milestones });
-                            notifications.send(storyData.authorId, milestoneMsg, 'credit');
-                        }
-                    }
-                }
-
-                 // Update UI Immediately
-                 const readerLikeIcon = document.getElementById('like-icon');
-                 const readerLikesCount = document.getElementById('reader-likes');
-                 
-                 // Thread View Specific IDs
-                 const threadLikeIcon = document.getElementById('thread-like-icon');
-                 const threadLikeCount = document.getElementById('thread-like-count');
-
-                 const updateIconUI = (icon, countEl) => {
-                    if (icon && countEl) {
-                        if (hasLiked) {
-                            icon.classList.remove('text-red-600');
-                            let current = parseInt(countEl.innerText);
-                            countEl.innerText = (current - 1) + (countEl.innerText.includes('Like') ? ` ${pluralize(current - 1, 'Like')}` : '');
-                        } else {
-                            icon.classList.add('text-red-600');
-                            let current = parseInt(countEl.innerText);
-                            countEl.innerText = (current + 1) + (countEl.innerText.includes('Like') ? ` ${pluralize(current + 1, 'Like')}` : '');
-                        }
-                    }
-                 };
-
-                 if (state.activeStory && state.activeStory.id === id) {
-                    updateIconUI(readerLikeIcon, readerLikesCount);
-                    updateIconUI(threadLikeIcon, threadLikeCount);
-                 }
-                
-                // If we are on Profile -> Liked Tab, remove the card immediately if unliking
-                if (hasLiked && document.getElementById('view-profile').classList.contains('hidden') === false && 
-                    document.getElementById('tab-liked').classList.contains('active') &&
-                    state.activeProfileId === state.user.uid) {
-                        const cardToRemove = document.getElementById(`profile-liked-card-${id}`);
-                        if(cardToRemove) cardToRemove.remove();
-                }
-
-                try {
-                    const storyRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', id);
-                    const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
-
-                    if (hasLiked) {
-                        await updateDoc(storyRef, { likes: increment(-1), likedBy: arrayRemove(state.user.uid) });
-                        await updateDoc(userRef, { likedStories: arrayRemove(id) });
-                    } else {
-                        const batch = writeBatch(db);
-                        batch.update(storyRef, { likes: increment(1), likedBy: arrayUnion(state.user.uid) });
-                        batch.update(userRef, { likedStories: arrayUnion(id) });
-                        await batch.commit();
-                    }
-                    const profileSnap = await getDoc(userRef);
-                    if (profileSnap.exists()) state.profile = { ...state.profile, ...profileSnap.data() };
-                } catch (e) { console.error("Like error", e); } finally { state.isLiking = false; }
-            },
-            share: (storyId = null) => {
-                const id = storyId || state.activeStory.id;
-                const url = `${window.location.origin}${window.location.pathname}?post=${id}`;
-                navigator.clipboard.writeText(url).then(() => ui.alert("Copied", "Link copied to clipboard."));
-            },
-            reportOpen: () => ui.openModal('modal-report'),
-            submitReport: async (reason) => {
-                 await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'reports'), {
-                     storyId: state.activeStory.id, reporter: state.user.uid, reason, createdAt: serverTimestamp()
-                 });
-                 ui.closeModal('modal-report');
-                 ui.alert("Reported", "The Council has been notified.");
-            },
-            creshare: (amt) => reader.processTip(amt),
-            creshareCustom: () => {
-                const val = parseInt(document.getElementById('reader-tip-input').value);
-                if(val > 0) reader.processTip(val);
-            },
-            processTip: async (amt) => {
-                if(state.profile.credits < amt) return ui.alert("Poor Soul", "Insufficient credits. Your coffers are empty.");
-                if(state.activeStory.authorId === state.user.uid) return ui.alert("Vanity", "Cannot tip yourself.");
-                ui.loading(true);
-                try {
-                    const tipperRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
-                    const authorRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.activeStory.authorId);
-                    
-                    await updateDoc(tipperRef, { 
-                        credits: increment(-amt),
-                        totalTipped: increment(amt) 
-                    });
-                    await updateDoc(authorRef, { credits: increment(amt) });
-                    
-                    notifications.send(state.activeStory.authorId, `Received ${amt} credits from ${state.profile.username}`, 'credit');
-                    ui.loading(false);
-                    ui.alert("Generosity", `You have transferred ${amt} credits.`);
-                } catch(e) { ui.loading(false); ui.alert("Error", e.message); }
-            },
-            postComment: async () => {
-                const txt = document.getElementById('comment-input').value;
-                if(!txt) return;
-                await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', state.activeStory.id, 'comments'), {
-                    text: txt, author: state.profile.username, authorId: state.user.uid, createdAt: serverTimestamp()
-                });
-                await updateDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', state.activeStory.id), {
-                    commentCount: increment(1)
-                });
-                document.getElementById('comment-input').value = '';
-            },
-            startEdit: () => {
-                creator.reset();
-                state.draft.isEdit = true;
-                state.draft.targetStoryId = state.activeStory.id;
-                state.draft.cover = state.activeStory.coverImage;
-                state.draft.category = state.activeStory.category;
-                
-                document.getElementById('create-title').value = state.activeStory.title;
-                document.getElementById('create-desc').value = state.activeStory.description;
-                document.getElementById('editor-content').innerHTML = state.activeStory.content;
-                document.getElementById('create-tags').value = (state.activeStory.tags || []).join(', ');
-                
-                const coverPreview = document.getElementById('cover-preview');
-                if (state.activeStory.coverImage && state.activeStory.coverImage !== 'https://via.placeholder.com/800x400/000?text=Void') {
-                    coverPreview.src = state.activeStory.coverImage;
-                    coverPreview.classList.remove('hidden');
-                }
-                
-                ui.selectOption('cat', state.activeStory.category || "Select Realm");
-                
-                document.getElementById('create-header-title').innerText = "Rewrite History";
-                document.getElementById('create-header-sub').innerText = "You are editing your artifact.";
-                document.getElementById('btn-publish').classList.add('hidden');
-                document.getElementById('btn-suggest').classList.add('hidden');
-                document.getElementById('btn-update-story').classList.remove('hidden');
-                
-                router.go('create');
-            },
-            startSuggestion: () => {
-                if(state.activeStory.authorId === state.user.uid) return reader.startEdit();
-                creator.reset();
-                state.draft.isSuggestion = true;
-                state.draft.targetStoryId = state.activeStory.id;
-                
-                document.getElementById('create-title').value = state.activeStory.title;
-                document.getElementById('create-desc').value = state.activeStory.description;
-                document.getElementById('editor-content').innerHTML = state.activeStory.content;
-                
-                document.getElementById('create-title').disabled = true;
-                document.getElementById('create-desc').disabled = true;
-                document.getElementById('create-tags').value = (state.activeStory.tags || []).join(', ');
-                document.getElementById('create-tags').disabled = true;
-                document.getElementById('cat-dropdown').style.pointerEvents = 'none';
-                document.getElementById('cover-upload-container').style.pointerEvents = 'none';
-
-                const coverPreview = document.getElementById('cover-preview');
-                 if (state.activeStory.coverImage && state.activeStory.coverImage !== 'https://via.placeholder.com/800x400/000?text=Void') {
-                    coverPreview.src = state.activeStory.coverImage;
-                    coverPreview.classList.remove('hidden');
-                }
-                ui.selectOption('cat', state.activeStory.category || "Select Realm");
-
-
-                document.getElementById('create-header-title').innerText = "Suggest Edits";
-                document.getElementById('create-header-sub').innerText = "Your changes will be submitted for review.";
-                document.getElementById('btn-publish').classList.add('hidden');
-                document.getElementById('btn-suggest').classList.remove('hidden');
-                document.getElementById('btn-update-story').classList.add('hidden');
-
-                router.go('create');
-            }
-        };
-
-        // --- DATA ---
-        function loadFeed() { 
+            });
+        },
+        // NEW: Main Feed Loading with Pagination (getDocs instead of onSnapshot for load more)
+        loadFeed: async (isPagination = false) => {
             const container = document.getElementById('feed-grid');
             const emptyEl = document.getElementById('feed-empty');
-            container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Summoning...</div>';
-            emptyEl.classList.add('hidden');
-            container.classList.remove('hidden');
+            const loadMoreBtn = document.getElementById('feed-load-more');
+            
+            if (!isPagination) {
+                container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Summoning...</div>';
+                emptyEl.classList.add('hidden');
+                container.classList.remove('hidden');
+                loadMoreBtn.classList.add('hidden');
+                state.lastFeedDoc = null;
+            } else {
+                 // Loading state for button
+                 loadMoreBtn.querySelector('button').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
 
             let q;
             const ref = collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories');
             
+            // Build Query
+            let constraints = [];
+            
             if(state.sortBy === 'following') {
-                if (state.profile.following && state.profile.following.length > 0) {
-                     q = query(ref, where('authorId', 'in', state.profile.following), limit(50));
+                if (!state.isAnonymous && state.profile.following && state.profile.following.length > 0) {
+                    constraints.push(where('authorId', 'in', state.profile.following));
                 } else {
-                    feed.render([]); return;
+                    // Following no one
+                    feed.render([], false);
+                    return;
                 }
             }
             else if(state.filter) {
-                 q = query(ref, where("category", "==", state.filter), limit(50));
+                constraints.push(where("category", "==", state.filter));
             }
             else if(state.sortBy === 'hot') {
-                q = query(ref, orderBy('likes', 'desc'), limit(50));
+                constraints.push(orderBy('likes', 'desc'));
             }
             else if (state.sortBy === 'top') {
                 const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-                q = query(ref, where('createdAt', '>', lastWeek), orderBy('createdAt', 'desc'), limit(100));
+                constraints.push(where('createdAt', '>', lastWeek));
+                constraints.push(orderBy('createdAt', 'desc'));
             }
             else {
-                q = query(ref, orderBy('createdAt', 'desc'), limit(50));
+                constraints.push(orderBy('createdAt', 'desc'));
             }
 
-            onSnapshot(q, async (snap) => {
-                 if (document.getElementById('feed-search').value.trim() !== '') return;
+            if (isPagination && state.lastFeedDoc) {
+                constraints.push(startAfter(state.lastFeedDoc));
+            }
+            
+            constraints.push(limit(20)); // Limit per fetch
+            
+            q = query(ref, ...constraints);
+
+            try {
+                const snap = await getDocs(q);
+                
+                if (snap.empty) {
+                    if (!isPagination) {
+                        feed.render([], false);
+                    } else {
+                         // No more posts
+                         loadMoreBtn.classList.add('hidden');
+                    }
+                    return;
+                }
+
+                // Update last doc for next page
+                state.lastFeedDoc = snap.docs[snap.docs.length - 1];
+                
+                // Show/Hide Load More Button
+                if (snap.docs.length < 20) {
+                    loadMoreBtn.classList.add('hidden');
+                } else {
+                    loadMoreBtn.classList.remove('hidden');
+                    loadMoreBtn.querySelector('button').innerHTML = 'Load More Echoes <i class="fas fa-chevron-down ml-2"></i>';
+                }
+
                 const stories = [];
                 snap.forEach(d => {
                     const data = {id: d.id, ...d.data()};
                     if(!data.communityId) stories.push(data); 
                 });
                 
+                // Client-side Sorts for composite fields if needed (mostly covered by index query)
                 if (state.sortBy === 'top') {
                     stories.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-                }
-                
-                if (state.filter || state.sortBy === 'following') {
-                    stories.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 }
                 
                 const authorIds = [...new Set(stories.map(s => s.authorId))];
                 await Promise.all(authorIds.map(id => getUserProfile(id)));
 
-                state.feedData = stories;
-                feed.render(state.feedData);
-            });
+                state.feedData = isPagination ? [...state.feedData, ...stories] : stories;
+                feed.render(stories, isPagination); // Pass append flag
+
+            } catch (e) {
+                console.error("Feed Load Error:", e);
+                if(!isPagination) container.innerHTML = '<div class="col-span-3 text-center text-red-500 py-10">The void is disturbed.</div>';
+            }
         }
-        
-		async function searchUsersAndContent(term) { 
-            const lowerTerm = normalize(term);
-            const contentGrid = document.getElementById('feed-grid');
+    };
+
+	// --- NOTIFICATIONS ---
+	window.notifications = { 
+		init: () => {
+            if (state.isAnonymous) return;
+			const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), orderBy('createdAt', 'desc'), limit(20));
+			
+			notifications.cleanExpired();
+
+			onSnapshot(q, (snap) => {
+				const list = document.getElementById('notif-list');
+				const badge = document.getElementById('notif-badge');
+				const empty = document.getElementById('notif-empty');
+				
+				list.innerHTML = '';
+				let unreadCount = 0;
+				
+				if(snap.empty) {
+					empty.classList.remove('hidden');
+					badge.classList.add('hidden');
+					return;
+				}
+				empty.classList.add('hidden');
+
+				snap.forEach(d => {
+					const n = d.data();
+					if(!n.read) unreadCount++;
+					
+					let icon = 'fa-bell';
+					let color = 'text-gray-400';
+					
+					// --- ICON LOGIC ---
+					if(n.type === 'credit') { icon = 'fa-coins'; color = 'text-yellow-500'; }
+					if(n.type === 'daily_reward') { icon = 'fa-gift'; color = 'text-green-500'; } 
+					if(n.type === 'suggestion') { icon = 'fa-code-branch'; color = 'text-blue-500'; }
+					if(n.type === 'follow') { icon = 'fa-user-plus'; color = 'text-purple-500'; }
+					if(n.type === 'coven_role') { icon = 'fa-chess-king'; color = 'text-red-500'; }
+
+					const el = document.createElement('div');
+					el.className = `p-3 border-b border-white/5 hover:bg-white/5 cursor-pointer ${!n.read ? 'bg-red-900/10' : ''} flex justify-between items-start`;
+					
+					// Note: Added 'group' class to help targeting
+					el.innerHTML = `
+						<div class="flex gap-3 items-start flex-1 group">
+							<i class="fas ${icon} ${color} mt-1"></i>
+							<div>
+								<div class="text-sm text-gray-300">${n.message}</div>
+								<div class="text-[10px] text-gray-600 mt-1">${n.createdAt ? timeAgo(n.createdAt) : 'Just now'}</div>
+							</div>
+						</div>
+						<button class="text-gray-600 hover:text-red-500 px-2 transition-colors" title="Delete"><i class="fas fa-times"></i></button>
+					`;
+					
+					el.onclick = async (e) => {
+						// FIX 1: Manually hide tooltip on any click inside notification
+						// because the element might disappear
+						const tooltip = document.getElementById('custom-tooltip');
+						tooltip.classList.remove('visible');
+
+						// Handle Delete
+						if(e.target.closest('.fa-times') || e.target.closest('button')) {
+							e.stopPropagation();
+							await deleteDoc(d.ref); 
+							return;
+						}
+						
+						if(!n.read) updateDoc(d.ref, { read: true });
+
+						if(n.type === 'suggestion' && n.payload) suggestions.openReview(n.payload.suggestionId, d.id);
+						
+						// Claim reward on click
+						if(n.type === 'daily_reward') {
+							// Pass the specific ID (d.id)
+							await rewards.claim(d.id);
+							notifications.toggle();
+						}
+					};
+					list.appendChild(el);
+				});
+				
+				if(unreadCount > 0) badge.classList.remove('hidden');
+				else badge.classList.add('hidden');
+			});
+		},
+		toggle: () => {
+			document.getElementById('notif-dropdown').classList.toggle('hidden');
+		},
+		send: async (targetUid, msg, type, payload = {}) => {
+			await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'users', targetUid, 'notifications'), {
+				message: msg, type, createdAt: serverTimestamp(), read: false, payload
+			});
+		},
+		clearAll: async () => {
+				ui.loading(true);
+				try {
+				const q = query(collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'));
+				const snap = await getDocs(q);
+				const batch = writeBatch(db);
+				snap.forEach(doc => batch.delete(doc.ref));
+				await batch.commit();
+				// Force tooltip hide here too
+				document.getElementById('custom-tooltip').classList.remove('visible');
+				} catch (e) { ui.alert("Error", e.message); } finally { ui.loading(false); }
+		},
+		cleanExpired: async () => {
+			if(!state.user) return;
+			const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+			const q = query(
+				collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
+				where('type', '==', 'daily_reward')
+			);
+			
+			try {
+				const snap = await getDocs(q);
+				const batch = writeBatch(db);
+				let deleteCount = 0;
+				snap.forEach(doc => {
+					const data = doc.data();
+					// Check if older than 24h
+					if (!data.createdAt || data.createdAt.toDate() < yesterday) {
+						batch.delete(doc.ref);
+						deleteCount++;
+					}
+				});
+				if(deleteCount > 0) await batch.commit();
+			} catch(e) { console.error("Cleanup error", e); }
+		}
+	};
+
+	// --- REWARDS ---
+	window.rewards = { 
+		checkEligibility: async () => {
+			if(state.isAnonymous || !state.profile) return;
+			const now = new Date();
+			const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
+			const diff = now - last;
+			const hours = diff / (1000 * 60 * 60);
+
+			if (hours >= 24) {
+				// Check DB to ensure we don't spam the notification
+				const q = query(
+					collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
+					where('type', '==', 'daily_reward')
+				);
+				
+				const snap = await getDocs(q);
+				
+				if(snap.empty) {
+					await notifications.send(
+						state.user.uid, 
+						"Daily Tribute Available. Click to claim 50 CR.", 
+						"daily_reward"
+					);
+				}
+			}
+		},
+		claim: async (notificationId = null) => {
+			if(state.isAnonymous || !state.profile) return;
+			const now = new Date();
+			const last = state.profile.lastDaily ? state.profile.lastDaily.toDate() : new Date(0);
+			const diff = now - last;
+			const hours = diff / (1000 * 60 * 60);
+
+			// Allow claim if it's been 24 hours OR if the user is clicking a specific notification
+			// (If a notification exists, we assume the user was eligible when it was sent)
+			if(hours >= 24 || notificationId) {
+				ui.loading(true);
+				try {
+					const batch = writeBatch(db);
+					const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
+					
+					// Only give credits if time has passed
+					if (hours >= 24) {
+						batch.update(userRef, {
+							credits: increment(50),
+							lastDaily: serverTimestamp()
+						});
+					}
+
+					// FIX 2: Explicitly handle the notification deletion in the batch
+					if(notificationId) {
+						const notifRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications', notificationId);
+						batch.delete(notifRef);
+					} else {
+						// Cleanup any other daily rewards if claimed via chest
+							const q = query(
+							collection(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid, 'notifications'), 
+							where('type', '==', 'daily_reward')
+						);
+						const snap = await getDocs(q);
+						snap.forEach(d => batch.delete(d.ref));
+					}
+
+					await batch.commit();
+					
+					ui.loading(false);
+					if (hours >= 24) {
+						ui.alert("Fortune", "The Void grants you 50 credits.");
+					} else {
+						// Notification was stale but we deleted it, so no credit, but cleanup done.
+						// Usually this branch won't hit if logic is perfect, but good for safety.
+					}
+					
+				} catch(e) { 
+					ui.loading(false); 
+					ui.alert("Error", e.message); 
+				}
+			} else {
+				const wait = Math.ceil(24 - hours);
+				ui.alert("Greed", `Wait ${wait} more hours, mortal.`);
+			}
+		}
+	};
+
+    // --- PROFILE SYSTEM ---
+    window.profile = {
+        save: async () => { 
+            if(state.isAnonymous) return;
+            const newName = document.getElementById('edit-username').value.trim();
+            const newBio = document.getElementById('edit-bio').value.trim();
+            const newLink = document.getElementById('edit-link').value.trim();
             
-            // Loading State
-            contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Scouring the archives...</div>';
+            // Check if changes were made
+            const isNameSame = newName === state.profile.username;
+            const isBioSame = newBio === (state.profile.bio || '');
+            const isLinkSame = newLink === (state.profile.link || '');
+            const isAvatarSame = !state.profileEditAvatarBlob;
+
+            if (isNameSame && isBioSame && isLinkSame && isAvatarSame) {
+                return ui.alert("Stagnation", "No changes were made to your identity.");
+            }
+
+            // If name changed, check availability again to be safe
+            if (!isNameSame) {
+                const check = await checkUsername(newName);
+                if (!check.valid) return ui.alert("Invalid Name", check.message);
+            }
+
+            ui.loading(true);
+
+            let avatarUrl = state.profile.avatar;
+            if (state.profileEditAvatarBlob) {
+                 const uploadedUrl = await creator.upload(state.profileEditAvatarBlob);
+                 if (uploadedUrl) avatarUrl = uploadedUrl;
+            }
+
+            await updateDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid), {
+                username: newName, bio: newBio, link: newLink, avatar: avatarUrl
+            });
+            
+            // Update Firebase Auth profile display name too
+            if (!isNameSame) {
+                 await updateProfile(authService.currentUser, { displayName: newName });
+            }
+
+            state.profileEditAvatarBlob = null;
+            ui.closeProfileEditor();
+            ui.alert("Identity", "Your mask has been adjusted.");
+            ui.loading(false);
+        },
+        suggestUsername: async () => {
+            const input = document.getElementById('edit-username');
+            const feedback = document.getElementById('edit-username-feedback');
+            input.disabled = true;
+            feedback.classList.remove('hidden');
+            feedback.className = "text-xs font-bold mt-1 text-gray-500";
+            feedback.innerText = "Reimagining your name...";
+
+            let suggestedName = '';
+            let isAvailable = false;
+            let attempts = 0;
+
+            while (!isAvailable && attempts < 20) {
+                const adj = usernameAdjectives[Math.floor(Math.random() * usernameAdjectives.length)];
+                const noun = usernameNouns[Math.floor(Math.random() * usernameNouns.length)];
+                const num = Math.random() > 0.5 ? Math.floor(Math.random() * 999) : '';
+                suggestedName = `${adj}${noun}${num}`;
+                
+                // Pass current username to allow it if generated again
+                const result = await window.checkUsername(suggestedName, state.profile.username);
+                isAvailable = result.valid;
+                attempts++;
+            }
+
+            input.value = suggestedName;
+            input.disabled = false;
+            
+            // Trigger validation UI update, passing current name
+            await handleUsernameInput('edit-username', 'edit-username-feedback', state.profile.username);
+        },
+        viewSelf: () => {
+            if (state.isAnonymous) {
+                 ui.alert("Anonymous", "You are browsing anonymously. Create an account to have a profile.");
+                 return;
+            }
+            profile.open(state.user.uid)
+        },
+        openFromReader: () => {
+            if(state.activeStory) profile.open(state.activeStory.authorId);
+        },
+        open: async (uid, push = true) => {
+            ui.loading(true);
+            state.activeProfileId = uid;
+            const isSelf = !state.isAnonymous && uid === state.user.uid;
+
+            const p = await getUserProfile(uid);
+            if(!p) { ui.loading(false); return ui.alert("Lost", "Soul not found."); }
+
+            const isVerified = (p.followerCount || 0) >= 100;
+            const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
+            
+            // Use formatUsername for profile title
+            document.getElementById('profile-view-name').innerHTML = formatUsername(uid, p.username) + verifiedBadge;
+            document.getElementById('profile-view-bio').innerText = p.bio || "Staring into the abyss...";
+            document.getElementById('profile-view-img').src = p.avatar;
+            document.getElementById('profile-view-followers').innerText = abbreviateNumber((p.followers || []).length);
+            document.getElementById('profile-view-followers-label').innerText = pluralize((p.followers || []).length, 'Follower');
+            
+            document.getElementById('profile-view-following').innerText = abbreviateNumber((p.following || []).length);
+            document.getElementById('profile-rank').innerText = getRank(p.credits || 0);
+            
+            const joinedEl = document.getElementById('profile-view-joined');
+            if (p.joined) {
+                joinedEl.innerHTML = `<i class="fas fa-clock mr-1"></i> Joined ${timeAgo(p.joined)}`;
+                joinedEl.classList.remove('hidden');
+            } else {
+                joinedEl.classList.add('hidden');
+            }
+
+            const rankEl = document.getElementById('profile-leaderboard-rank');
+            if(state.leaderboard) {
+                const idx = state.leaderboard.findIndex(u => u.id === uid);
+                if(idx !== -1) {
+                    rankEl.innerText = `#${idx + 1}`;
+                    rankEl.classList.remove('hidden');
+                } else {
+                    rankEl.classList.add('hidden');
+                }
+            }
+
+            const badgesContainer = document.getElementById('profile-badges');
+            badgesContainer.innerHTML = '';
+            
+            // Creator Badge Check
+            if(uid === CREATOR_ID) {
+                 badgesContainer.innerHTML += `<span title="The Architect: Creator of Grimoire" class="text-red-600 animate-pulse"><i class="fas fa-code"></i></span>`;
+            }
+            
+            if ((p.covenCreatedCount || 0) > 0) badgesContainer.innerHTML += `<span title="Genesis Coven: Founded a Coven"><i class="fas fa-crown"></i></span>`;
+            if ((p.postCount || 0) >= 10) badgesContainer.innerHTML += `<span title="Prolific Scribe: Published 10+ stories"><i class="fas fa-feather-alt"></i></span>`;
+            if ((p.totalTipped || 0) >= 1000) badgesContainer.innerHTML += `<span title="Patron of Horrors: Tipped over 1000 CR"><i class="fas fa-hand-holding-heart"></i></span>`;
+
+            const linkContainer = document.getElementById('profile-links');
+            linkContainer.innerHTML = p.link ? `<a href="${p.link}" target="_blank" class="hover:text-white"><i class="fas fa-link mr-1"></i> ${new URL(p.link).hostname}</a>` : '';
+            
+            if(isSelf) {
+                document.getElementById('btn-follow').classList.add('hidden');
+                document.getElementById('btn-edit-profile').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-edit-profile').classList.add('hidden');
+                document.getElementById('btn-follow').classList.remove('hidden');
+                const isFollowing = (state.profile?.following || []).includes(uid);
+                document.getElementById('btn-follow').innerText = isFollowing ? "Unfollow" : "Follow";
+            }
+             document.getElementById('profile-img-edit-overlay').style.display = isSelf ? 'flex' : 'none';
+
+
+            profile.switchTab('artifacts');
+
+            if(push) router.go('profile', { user: uid });
+            else router.render('profile', { user: uid });
+            ui.loading(false);
+        },
+        toggleFollow: async (targetUid = null, fromSuggestion = false) => {
+            if(state.isAnonymous) return ui.alert("Action Not Allowed", "Create an account to follow souls.");
+            const idToToggle = targetUid || state.activeProfileId;
+            if (!idToToggle || idToToggle === state.user.uid || state.followLock) return;
+            
+            state.followLock = true;
+            const isCurrentlyFollowing = (state.profile.following || []).includes(idToToggle);
+
+            const mainProfileButton = document.getElementById('btn-follow');
+            const suggestionButton = fromSuggestion ? document.getElementById(`suggest-follow-${idToToggle}`) : null;
+
+            if (mainProfileButton && !fromSuggestion) mainProfileButton.disabled = true;
+            if (suggestionButton) suggestionButton.disabled = true;
+
+            const targetUserRef = doc(db, 'artifacts', APP_ID_PATH, 'users', idToToggle);
+            const currentUserRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
 
             try {
-                // 1. SEARCH USERS
-                const userResults = [];
-                const userQuery = query(collection(db, 'artifacts', APP_ID_PATH, 'users'), limit(50));
-                const userSnap = await getDocs(userQuery);
-                userSnap.forEach(doc => {
-                     const u = doc.data();
-                     // Simple search logic
-                     if(normalize(u.username).includes(lowerTerm) || normalize(u.bio).includes(lowerTerm)){
-                        userResults.push({ id: doc.id, ...u });
-                     }
-                });
+                const batch = writeBatch(db);
+                if (isCurrentlyFollowing) {
+                    batch.update(targetUserRef, { followers: arrayRemove(state.user.uid), followerCount: increment(-1) });
+                    batch.update(currentUserRef, { following: arrayRemove(idToToggle) });
+                } else {
+                    batch.update(targetUserRef, { followers: arrayUnion(state.user.uid), followerCount: increment(1) });
+                    batch.update(currentUserRef, { following: arrayUnion(idToToggle) });
+                    notifications.send(idToToggle, `${state.profile.username} followed you.`, 'follow');
+                }
+                await batch.commit();
 
-                // 2. SEARCH POSTS
-                const postResults = [];
-                const contentQuery = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories'), limit(100));
-                const contentSnap = await getDocs(contentQuery);
+                state.userCache[idToToggle] = null;
+                state.userCache[state.user.uid] = null;
                 
-                contentSnap.forEach(doc => {
-                    const d = doc.data();
-                    if (d.communityId) return; // Optional: filter out community posts if desired
-                    
-                    const titleMatch = normalize(d.title).includes(lowerTerm);
-                    const descMatch = normalize(d.description).includes(lowerTerm);
-                    const tagMatch = (d.tags || []).some(t => normalize(t).includes(lowerTerm));
-                    
-                    if (titleMatch || descMatch || tagMatch) {
-                        postResults.push({id: doc.id, ...d});
-                    }
-                });
-
-                // Prepare Author Profiles for Posts
-                const authorIds = [...new Set(postResults.map(s => s.authorId))];
-                await Promise.all(authorIds.map(id => getUserProfile(id)));
-
-                // 3. RENDER SECTIONED RESULTS
-                contentGrid.innerHTML = '';
-
-                // -- RENDER USERS --
-                if (userResults.length > 0) {
-                    // Section Header (col-span-full ensures it takes full width of grid)
-                    const userHeader = document.createElement('div');
-                    userHeader.className = "col-span-1 md:col-span-2 lg:col-span-3 pb-2 border-b border-white/10 mb-2 mt-2";
-                    userHeader.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fas fa-users mr-2"></i>Souls Found (${userResults.length})</h3>`;
-                    contentGrid.appendChild(userHeader);
-
-                    userResults.forEach(u => {
-                        contentGrid.appendChild(feed.createUserCard(u));
-                    });
+                const updatedProfileSnap = await getDoc(currentUserRef);
+                if(updatedProfileSnap.exists()) {
+                    state.profile = updatedProfileSnap.data();
+                }
+                
+                if (!fromSuggestion && state.activeProfileId === idToToggle) {
+                    profile.open(idToToggle, false);
+                } else {
+                    if (mainProfileButton && !fromSuggestion) mainProfileButton.innerText = isCurrentlyFollowing ? "Follow" : "Unfollow";
+                    if (suggestionButton) suggestionButton.innerText = isCurrentlyFollowing ? "Follow" : "Unfollow";
                 }
 
-                // -- RENDER POSTS --
-                if (postResults.length > 0) {
-                    // Section Header
-                    const postHeader = document.createElement('div');
-                    postHeader.className = "col-span-1 md:col-span-2 lg:col-span-3 pb-2 border-b border-white/10 mb-2 mt-6";
-                    postHeader.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fas fa-book-open mr-2"></i>Echoes Found (${postResults.length})</h3>`;
-                    contentGrid.appendChild(postHeader);
+            } catch (error) {
+                console.error("Follow/Unfollow Error:", error);
+                 ui.alert("Error", "Could not complete action. Please try again.");
+            } finally {
+                if (mainProfileButton && !fromSuggestion) mainProfileButton.disabled = false;
+                if (suggestionButton) suggestionButton.disabled = false;
+                state.followLock = false;
+            }
+        },
+        showFollowList: async (type) => { 
+            if(!state.activeProfileId) return;
+            const modal = document.getElementById('modal-follow-list');
+            const titleEl = document.getElementById('follow-list-title');
+            const contentEl = document.getElementById('follow-list-content');
+            titleEl.innerText = type === 'followers' ? 'Followers' : 'Following';
+            contentEl.innerHTML = '<div class="text-center text-gray-600 text-xs py-4"><i class="fas fa-spinner fa-spin"></i></div>';
+            ui.openModal('modal-follow-list');
 
-                    postResults.forEach(d => {
-                         const card = feed.createStoryCard(d);
-                         if (card) contentGrid.appendChild(card);
-                    });
-                }
+            const profileSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', state.activeProfileId));
+            if (!profileSnap.exists()) return;
+            
+            const idList = profileSnap.data()[type] || [];
+            if (idList.length === 0) {
+                contentEl.innerHTML = `<div class="text-center text-gray-600 text-xs py-4 italic">No souls found.</div>`;
+                return;
+            }
 
-                // -- EMPTY STATE --
-                if (userResults.length === 0 && postResults.length === 0) {
-                     contentGrid.innerHTML = `
-                        <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16 opacity-50">
-                            <i class="fas fa-search text-4xl mb-4 text-red-900"></i>
-                            <p class="text-gray-500">The void reveals nothing for "${term}".</p>
+            const userPromises = idList.map(uid => getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', uid)));
+            const userSnaps = await Promise.all(userPromises);
+
+            contentEl.innerHTML = '';
+            userSnaps.forEach(snap => {
+                if (snap.exists()) {
+                    const user = snap.data();
+                    const el = document.createElement('div');
+                    el.className = 'flex items-center justify-between p-2 rounded';
+                    el.innerHTML = `
+                        <div class="flex items-center gap-3 cursor-pointer" onclick="ui.closeModal('modal-follow-list'); profile.open('${snap.id}')">
+                            <img src="${user.avatar}" class="w-8 h-8 rounded-full object-cover border border-gray-700">
+                            <span class="font-bold text-sm text-gray-300">${formatUsername(snap.id, user.username)}</span>
                         </div>
+                    `;
+                    contentEl.appendChild(el);
+                }
+            });
+        },
+        switchTab: (tabName) => {
+            document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            const container = document.getElementById('profile-content-area');
+            container.innerHTML = ''; 
+            
+            if (tabName === 'artifacts') profile.loadArtifacts(container);
+            else if (tabName === 'liked') profile.loadLiked(container);
+            else if (tabName === 'allies') profile.loadAllies(container);
+            else if (tabName === 'covens') profile.loadCovens(container);
+        },
+        loadArtifacts: (container) => {
+            container.innerHTML = `<div id="profile-posts-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>`;
+            const grid = document.getElementById('profile-posts-grid');
+            
+            const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories'), where('authorId', '==', state.activeProfileId), limit(50));
+            
+            onSnapshot(q, (snap) => {
+                 let totalLikes = 0;
+                 if(snap.empty) {
+                    grid.innerHTML = `<div class="col-span-3 text-center text-gray-600 py-16">
+                        <i class="fas fa-dungeon text-5xl mb-4"></i>
+                        <h3 class="font-bold text-lg text-gray-400">The Vault is Empty</h3>
+                        <p class="text-sm">This soul has yet to manifest any artifacts.</p>
+                    </div>`;
+                    document.getElementById('profile-view-likes').innerText = '0';
+                    document.getElementById('profile-view-likes-label').innerText = 'Likes';
+                    return;
+                 }
+
+                 let posts = [];
+                 snap.forEach(d => {
+                     const data = d.data();
+                     totalLikes += (data.likes || 0);
+                     posts.push({ id: d.id, ...data });
+                 });
+                 
+                 posts.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+                 grid.innerHTML = '';
+                 posts.forEach(data => {
+                     const el = document.createElement('div');
+                     el.className = 'glass p-4 rounded cursor-pointer hover:bg-white/5 transition-colors border border-transparent hover:border-red-900';
+                     el.onclick = () => reader.open(data.id, data);
+                     el.innerHTML = `
+                         <div class="font-bold text-gray-300 truncate mb-1">${data.title}</div>
+                         <div class="flex justify-between items-center text-xs">
+                            <span class="text-red-500 uppercase font-bold">${data.category}</span>
+                            <span class="text-gray-600"><i class="fas fa-heart mr-1"></i> ${data.likes || 0}</span>
+                         </div>
                      `;
-                }
+                     grid.appendChild(el);
+                 });
+                 
+                 document.getElementById('profile-view-likes').innerText = abbreviateNumber(totalLikes);
+                 document.getElementById('profile-view-likes-label').innerText = pluralize(totalLikes, 'Like');
+            }, (error) => {
+                console.error("Error loading artifacts:", error);
+                grid.innerHTML = `<div class="col-span-3 text-center text-red-500 py-16">Failed to load artifacts. The void is disturbed.</div>`;
+            });
+        },
+        loadLiked: (container) => {
+            container.innerHTML = `
+                <div class="space-y-8">
+                    <div id="liked-stories-section" class="hidden">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Stories</h3>
+                        <div id="profile-liked-stories-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+                    </div>
+                    <div id="liked-threads-section" class="hidden">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Threads</h3>
+                        <div id="profile-liked-threads-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    </div>
+                     <div id="profile-liked-empty" class="hidden col-span-3 text-center text-gray-600 py-16">
+                        <i class="fas fa-heart-crack text-5xl mb-4"></i>
+                        <h3 class="font-bold text-lg text-gray-400">No Liked Posts</h3>
+                        <p class="text-sm">This soul has yet to like any artifacts.</p>
+                    </div>
+                </div>`;
 
-            } catch(e) {
-                console.error(e);
-                contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-red-500 py-10">The void rejected your query.</div>';
+            const storiesGrid = document.getElementById('profile-liked-stories-grid');
+            const threadsGrid = document.getElementById('profile-liked-threads-grid');
+            const storiesSection = document.getElementById('liked-stories-section');
+            const threadsSection = document.getElementById('liked-threads-section');
+            const emptySection = document.getElementById('profile-liked-empty');
+            
+            const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories'), where('likedBy', 'array-contains', state.activeProfileId), limit(50));
+            
+            onSnapshot(q, async (snap) => {
+                 if(snap.empty) {
+                    storiesSection.classList.add('hidden');
+                    threadsSection.classList.add('hidden');
+                    emptySection.classList.remove('hidden');
+                    return;
+                 }
+
+                 let posts = [];
+                 snap.forEach(d => {
+                     posts.push({ id: d.id, ...d.data() });
+                 });
+
+                 const authorIds = [...new Set(posts.map(p => p.authorId))];
+                await Promise.all(authorIds.map(id => getUserProfile(id)));
+                 
+                 posts.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+                 // Clear grids
+                 storiesGrid.innerHTML = '';
+                 threadsGrid.innerHTML = '';
+                 let storyCount = 0;
+                 let threadCount = 0;
+
+                 posts.forEach(data => {
+                     const author = state.userCache[data.authorId];
+                     if (!author) return;
+                     
+                     const card = feed.createStoryCard(data);
+                     if (card) {
+                        card.id = `profile-liked-card-${data.id}`;
+                        if(data.type === 'thread') {
+                            threadsGrid.appendChild(card);
+                            threadCount++;
+                        } else {
+                            storiesGrid.appendChild(card);
+                            storyCount++;
+                        }
+                     }
+                 });
+
+                 if(storyCount > 0) storiesSection.classList.remove('hidden'); else storiesSection.classList.add('hidden');
+                 if(threadCount > 0) threadsSection.classList.remove('hidden'); else threadsSection.classList.add('hidden');
+                 if(storyCount === 0 && threadCount === 0) emptySection.classList.remove('hidden'); else emptySection.classList.add('hidden');
+
+            }, (error) => {
+                console.error("Error loading liked posts:", error);
+                container.innerHTML = `<div class="text-center text-red-500 py-16">Failed to load liked posts. The void is disturbed.</div>`;
+            });
+        },
+        loadAllies: async (container) => {
+            const profileSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', state.activeProfileId));
+            const followingIds = profileSnap.data().following || [];
+            
+            if (followingIds.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center text-gray-600 py-16">
+                    <i class="fas fa-street-view text-5xl mb-4"></i>
+                    <h3 class="font-bold text-lg text-gray-400">A Solitary Path</h3>
+                    <p class="text-sm">This soul walks the void alone, for now.</p>
+                </div>`;
+                return;
             }
+            
+            container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="allies-grid"></div>';
+            const grid = document.getElementById('allies-grid');
+            
+            const promises = followingIds.map(id => getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', id)));
+            const results = await Promise.all(promises);
+            
+            results.forEach(snap => {
+                if(snap.exists()) {
+                    const u = snap.data();
+                    const el = document.createElement('div');
+                    el.className = 'glass p-3 rounded flex items-center gap-3 cursor-pointer hover:bg-white/5';
+                    el.onclick = () => profile.open(snap.id);
+                    el.innerHTML = `
+                        <img src="${u.avatar}" class="w-10 h-10 rounded-full border border-gray-700">
+                        <div>
+                            <div class="font-bold text-gray-300 text-sm">${formatUsername(snap.id, u.username)}</div>
+                            <div class="text-[10px] text-gray-500">${getRank(u.credits)}</div>
+                        </div>
+                    `;
+                    grid.appendChild(el);
+                }
+            });
+        },
+        loadCovens: async (container) => {
+             const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities'), where('members', 'array-contains', state.activeProfileId), limit(20));
+             const snap = await getDocs(q);
+             
+             if(snap.empty) {
+                 container.innerHTML = `<div class="col-span-full text-center text-gray-600 py-16">
+                    <i class="fas fa-monument text-5xl mb-4"></i>
+                    <h3 class="font-bold text-lg text-gray-400">Unaligned</h3>
+                    <p class="text-sm">This soul has not pledged allegiance to any coven.</p>
+                </div>`;
+                 return;
+             }
+             
+             container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="covens-grid"></div>';
+             const grid = document.getElementById('covens-grid');
+             
+             snap.forEach(d => {
+                 const c = d.data();
+                 const el = document.createElement('div');
+                 el.className = 'glass p-0 rounded-lg overflow-hidden cursor-pointer hover:border-red-900 transition-colors group';
+                 el.onclick = () => communities.open(d.id, c);
+                 el.innerHTML = `
+                     <div class="h-16 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all" style="background-image: url('${c.coverImage}')"></div>
+                     <div class="p-3">
+                         <h4 class="font-bold text-red-400 text-sm mb-1">${c.name}</h4>
+                         <div class="text-[10px] text-gray-600 font-mono"><i class="fas fa-users mr-1"></i> ${c.memberCount}</div>
+                     </div>
+                 `;
+                 grid.appendChild(el);
+             });
         }
+    };
 
-		function loadComments(storyId) { 
-			const list = document.getElementById('comments-list');
-			list.innerHTML = ''; 
-			const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', storyId, 'comments'), orderBy('createdAt', 'desc'));
-			onSnapshot(q, snap => {
-				list.innerHTML = '';
-				if(snap.empty) {
-					document.getElementById('comments-empty').classList.remove('hidden');
-				} else {
-					document.getElementById('comments-empty').classList.add('hidden');
-				}
-				snap.forEach(d => {
-					const c = d.data();
-					const commentTime = c.createdAt ? timeAgo(c.createdAt) : 'Just now';
-					
-					// ADDED whitespace-pre-wrap HERE to the div with font-story
-					list.innerHTML += `
-						<div class="bg-white/5 p-4 rounded border-l-2 border-red-900">
-							<div class="text-xs text-red-400 font-bold mb-1">${formatUsername(c.authorId, c.author)} • ${commentTime}</div>
-							<div class="text-sm text-gray-300 font-story break-words whitespace-pre-wrap">${c.text}</div>
-						</div>
-					`;
-				});
-			});
-		}
+    // --- READER ---
+    window.reader = { 
+	open: async (id, data, push = true) => {
+            state.activeStory = { id, ...data };
+            // If it's a thread, delegate to threadView (which now has checks)
+            if(data.type === 'thread') { threadView.open(id, data); return; }
 
-        // --- LISTENERS ---
-        document.getElementById('editor-content').addEventListener('input', creator.recalc);
-        
-        document.getElementById('cover-input').addEventListener('change', async (e) => {
-            if (e.target.files && e.target.files[0]) {
-                const file = e.target.files[0];
+            const readerBody = document.getElementById('reader-body');
+            const deniedBody = document.getElementById('reader-access-denied');
+            
+            // Clear previous content to prevent flashing or leak
+            readerBody.innerHTML = '';
+            
+            let hasAccess = true;
+
+            // --- SECURITY CHECK ---
+            if (data.membersOnly && data.communityId) {
                 ui.loading(true);
-                const url = await creator.upload(file);
-                if(url) { 
-                    state.draft.cover = url; 
-                    document.getElementById('cover-preview').src = url; 
-                    document.getElementById('cover-preview').classList.remove('hidden'); 
+                try {
+                    const covenSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', data.communityId));
+                    if(covenSnap.exists()){
+                        state.activeCommunity = {id: covenSnap.id, ...covenSnap.data()}; 
+                        if (!communities.isMember()) {
+                            hasAccess = false;
+                        }
+                    }
+                    ui.loading(false);
+                } catch(e) { ui.loading(false); }
+            }
+
+            if (!hasAccess) {
+                readerBody.classList.add('hidden');
+                deniedBody.classList.remove('hidden');
+            } else {
+                readerBody.classList.remove('hidden');
+                deniedBody.classList.add('hidden');
+                // ONLY Render content if access is granted
+                readerBody.innerHTML = data.content;
+            }
+            // --- END SECURITY CHECK ---
+
+            const author = await getUserProfile(data.authorId);
+            if (!author) return;
+
+            document.getElementById('reader-title').innerText = data.title;
+            document.getElementById('reader-cover').src = data.coverImage;
+            
+            const isVerified = (author.followerCount || 0) >= 100;
+            const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
+            document.getElementById('reader-author').innerHTML = formatUsername(author.id, author.username) + verifiedBadge;
+
+            document.getElementById('reader-avatar').src = author.avatar;
+            document.getElementById('reader-cat-tag').innerText = data.category;
+            
+            const hasLiked = (state.profile?.likedStories || []).includes(state.activeStory.id);
+            const icon = document.getElementById('like-icon');
+            if(hasLiked) icon.classList.add('text-red-600'); else icon.classList.remove('text-red-600');
+            document.getElementById('reader-likes').innerText = data.likes || 0;
+
+            const isOwner = !state.isAnonymous && state.user.uid === data.authorId;
+            const editBtn = document.getElementById('btn-reader-edit');
+            const suggestBtn = document.getElementById('btn-reader-suggest');
+            
+            if (isOwner) {
+                editBtn.classList.remove('hidden');
+                suggestBtn.classList.add('hidden'); 
+            } else {
+                editBtn.classList.add('hidden');
+                suggestBtn.classList.remove('hidden');
+            }
+
+            loadComments(id);
+            if(push) router.go('reader', { post: id }); else router.render('reader', { post: id });
+        },
+        toggleLike: async (storyId = null) => {
+            if (state.isAnonymous) return ui.alert("Action Not Allowed", "Create an account to like stories.");
+            const id = storyId || state.activeStory.id;
+            if (state.isLiking || !id) return;
+            state.isLiking = true;
+
+            const hasLiked = (state.profile.likedStories || []).includes(id);
+
+            if (!hasLiked) {
+                const storyRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', id);
+                const storySnap = await getDoc(storyRef);
+                if (storySnap.exists()) {
+                    const storyData = storySnap.data();
+                    const newLikes = (storyData.likes || 0) + 1;
+                    const milestones = storyData.milestonesReached || [];
+                    let reward = 0;
+                    let milestoneMsg = '';
+
+                    if (newLikes === 10 && !milestones.includes('10_likes')) {
+                        reward = 10;
+                        milestones.push('10_likes');
+                        milestoneMsg = `Your story "${storyData.title}" reached 10 likes! +${reward} CR`;
+                    } else if (newLikes === 50 && !milestones.includes('50_likes')) {
+                        reward = 50;
+                        milestones.push('50_likes');
+                        milestoneMsg = `Your story "${storyData.title}" reached 50 likes! +${reward} CR`;
+                    } else if (newLikes === 100 && !milestones.includes('100_likes')) {
+                         reward = 100;
+                        milestones.push('100_likes');
+                        milestoneMsg = `Your story "${storyData.title}" reached 100 likes! +${reward} CR`;
+                    }
+
+                    if (reward > 0) {
+                        await updateDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', storyData.authorId), { credits: increment(reward) });
+                        await updateDoc(storyRef, { milestonesReached: milestones });
+                        notifications.send(storyData.authorId, milestoneMsg, 'credit');
+                    }
                 }
-                ui.loading(false);
             }
-        });
 
-        document.getElementById('coven-img-upload').addEventListener('change', async (e) => {
-            const url = await creator.upload(e.target.files[0]);
-            if(url) { document.getElementById('coven-img-preview').src = url; document.getElementById('coven-img-preview').classList.remove('hidden'); }
-        });
+             // Update UI Immediately
+             const readerLikeIcon = document.getElementById('like-icon');
+             const readerLikesCount = document.getElementById('reader-likes');
+             
+             // Thread View Specific IDs
+             const threadLikeIcon = document.getElementById('thread-like-icon');
+             const threadLikeCount = document.getElementById('thread-like-count');
 
-        document.getElementById('profile-img-upload').addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    ui.initCropper(event.target.result, (blob) => {
-                        state.profileEditAvatarBlob = blob;
-                        document.getElementById('edit-profile-avatar').src = URL.createObjectURL(blob);
-                    });
-                };
-                reader.readAsDataURL(e.target.files[0]);
+             const updateIconUI = (icon, countEl) => {
+                if (icon && countEl) {
+                    if (hasLiked) {
+                        icon.classList.remove('text-red-600');
+                        let current = parseInt(countEl.innerText);
+                        countEl.innerText = (current - 1) + (countEl.innerText.includes('Like') ? ` ${pluralize(current - 1, 'Like')}` : '');
+                    } else {
+                        icon.classList.add('text-red-600');
+                        let current = parseInt(countEl.innerText);
+                        countEl.innerText = (current + 1) + (countEl.innerText.includes('Like') ? ` ${pluralize(current + 1, 'Like')}` : '');
+                    }
+                }
+             };
+
+             if (state.activeStory && state.activeStory.id === id) {
+                updateIconUI(readerLikeIcon, readerLikesCount);
+                updateIconUI(threadLikeIcon, threadLikeCount);
+             }
+            
+            // If we are on Profile -> Liked Tab, remove the card immediately if unliking
+            if (hasLiked && document.getElementById('view-profile').classList.contains('hidden') === false && 
+                document.getElementById('tab-liked').classList.contains('active') &&
+                !state.isAnonymous && state.activeProfileId === state.user.uid) {
+                    const cardToRemove = document.getElementById(`profile-liked-card-${id}`);
+                    if(cardToRemove) cardToRemove.remove();
             }
-        });
-         document.getElementById('signup-avatar-input').addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    ui.initCropper(event.target.result, (blob) => {
-                        state.signupAvatarBlob = blob;
-                        document.getElementById('signup-avatar-preview').src = URL.createObjectURL(blob);
-                    });
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
 
-		document.getElementById('inline-image-input').addEventListener('change', async (e) => {
-			const url = await creator.upload(e.target.files[0]);
-			if(url) {
-				const editor = document.getElementById('editor-content');
-				editor.focus(); 
-				const imgHtml = `<img src="${url}" style="width: ${state.draft.imgScale}; margin: 10px auto; display: block;" /><br>`;
-				if (!document.execCommand('insertHTML', false, imgHtml)) {
-					editor.innerHTML += imgHtml;
-				}
-				// state.draft.images++; // This line has been removed
-				creator.recalc();
-			}
-		});
-        
-        // --- VALIDATION LISTENERS ---
-        document.getElementById('signup-name').addEventListener('input', debounce(() => {
-            handleUsernameInput('signup-name', 'signup-username-feedback');
-        }, 500));
+            try {
+                const storyRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', id);
+                const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
 
-        document.getElementById('edit-username').addEventListener('input', debounce(() => {
-            handleUsernameInput('edit-username', 'edit-username-feedback', state.profile.username);
-        }, 500));
-        
-		function setupSearchClear(inputId, clearId, searchIconClass, onClear) {
-            const input = document.getElementById(inputId);
-            const clearBtn = document.getElementById(clearId);
-            // We select the icon but we won't hide it anymore
-            const searchIcon = input.parentElement.querySelector(searchIconClass);
-
-            input.addEventListener('input', () => {
-                const hasValue = input.value.trim().length > 0;
-                // Only toggle the Clear (X) button
-                clearBtn.classList.toggle('hidden', !hasValue);
+                if (hasLiked) {
+                    await updateDoc(storyRef, { likes: increment(-1), likedBy: arrayRemove(state.user.uid) });
+                    await updateDoc(userRef, { likedStories: arrayRemove(id) });
+                } else {
+                    const batch = writeBatch(db);
+                    batch.update(storyRef, { likes: increment(1), likedBy: arrayUnion(state.user.uid) });
+                    batch.update(userRef, { likedStories: arrayUnion(id) });
+                    await batch.commit();
+                }
+                const profileSnap = await getDoc(userRef);
+                if (profileSnap.exists()) state.profile = { ...state.profile, ...profileSnap.data() };
+            } catch (e) { console.error("Like error", e); } finally { state.isLiking = false; }
+        },
+        share: (storyId = null) => {
+            const id = storyId || state.activeStory.id;
+            const url = `${window.location.origin}${window.location.pathname}?post=${id}`;
+            navigator.clipboard.writeText(url).then(() => ui.alert("Copied", "Link copied to clipboard."));
+        },
+        reportOpen: () => {
+            if (state.isAnonymous) return ui.alert("Action Not Allowed", "You must have an account to report content.");
+            ui.openModal('modal-report');
+        },
+        submitReport: async (reason) => {
+             if (state.isAnonymous) return;
+             await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'reports'), {
+                 storyId: state.activeStory.id, reporter: state.user.uid, reason, createdAt: serverTimestamp()
+             });
+             ui.closeModal('modal-report');
+             ui.alert("Reported", "The Council has been notified.");
+        },
+        creshare: (amt) => reader.processTip(amt),
+        creshareCustom: () => {
+            const val = parseInt(document.getElementById('reader-tip-input').value);
+            if(val > 0) reader.processTip(val);
+        },
+        processTip: async (amt) => {
+            if(state.isAnonymous) return ui.alert("Action Not Allowed", "Create an account to reward creators.");
+            if(state.profile.credits < amt) return ui.alert("Poor Soul", "Insufficient credits. Your coffers are empty.");
+            if(state.activeStory.authorId === state.user.uid) return ui.alert("Vanity", "Cannot tip yourself.");
+            ui.loading(true);
+            try {
+                const tipperRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
+                const authorRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.activeStory.authorId);
                 
-                // FIX: We keep the search icon visible to maintain UI stability
-                // The icon sits on the left, the text has padding, so they don't overlap.
-                if (searchIcon) {
-                    searchIcon.classList.remove('hidden'); 
-                    // Optional: Make it glow slightly when active
-                    if(hasValue) searchIcon.classList.add('text-red-500');
-                    else searchIcon.classList.remove('text-red-500');
-                }
+                await updateDoc(tipperRef, { 
+                    credits: increment(-amt),
+                    totalTipped: increment(amt) 
+                });
+                await updateDoc(authorRef, { credits: increment(amt) });
+                
+                notifications.send(state.activeStory.authorId, `Received ${amt} credits from ${state.profile.username}`, 'credit');
+                ui.loading(false);
+                ui.alert("Generosity", `You have transferred ${amt} credits.`);
+            } catch(e) { ui.loading(false); ui.alert("Error", e.message); }
+        },
+        postComment: async () => {
+            if(state.isAnonymous) return;
+            const txt = document.getElementById('comment-input').value;
+            if(!txt) return;
+            await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', state.activeStory.id, 'comments'), {
+                text: txt, author: state.profile.username, authorId: state.user.uid, createdAt: serverTimestamp()
             });
+            await updateDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', state.activeStory.id), {
+                commentCount: increment(1)
+            });
+            document.getElementById('comment-input').value = '';
+        },
+        startEdit: () => {
+            if(state.isAnonymous) return;
+            creator.reset();
+            state.draft.isEdit = true;
+            state.draft.targetStoryId = state.activeStory.id;
+            state.draft.cover = state.activeStory.coverImage;
+            state.draft.category = state.activeStory.category;
+            
+            document.getElementById('create-title').value = state.activeStory.title;
+            document.getElementById('create-desc').value = state.activeStory.description;
+            document.getElementById('editor-content').innerHTML = state.activeStory.content;
+            document.getElementById('create-tags').value = (state.activeStory.tags || []).join(', ');
+            
+            const coverPreview = document.getElementById('cover-preview');
+            if (state.activeStory.coverImage && state.activeStory.coverImage !== 'https://via.placeholder.com/800x400/000?text=Void') {
+                coverPreview.src = state.activeStory.coverImage;
+                coverPreview.classList.remove('hidden');
+            }
+            
+            ui.selectOption('cat', state.activeStory.category || "Select Realm");
+            
+            document.getElementById('create-header-title').innerText = "Rewrite History";
+            document.getElementById('create-header-sub').innerText = "You are editing your artifact.";
+            document.getElementById('btn-publish').classList.add('hidden');
+            document.getElementById('btn-suggest').classList.add('hidden');
+            document.getElementById('btn-update-story').classList.remove('hidden');
+            
+            router.go('create');
+        },
+        startSuggestion: () => {
+            if(state.isAnonymous) return ui.alert("Action Not Allowed", "Create an account to suggest edits.");
+            if(state.activeStory.authorId === state.user.uid) return reader.startEdit();
+            creator.reset();
+            state.draft.isSuggestion = true;
+            state.draft.targetStoryId = state.activeStory.id;
+            
+            document.getElementById('create-title').value = state.activeStory.title;
+            document.getElementById('create-desc').value = state.activeStory.description;
+            document.getElementById('editor-content').innerHTML = state.activeStory.content;
+            
+            document.getElementById('create-title').disabled = true;
+            document.getElementById('create-desc').disabled = true;
+            document.getElementById('create-tags').value = (state.activeStory.tags || []).join(', ');
+            document.getElementById('create-tags').disabled = true;
+            document.getElementById('cat-dropdown').style.pointerEvents = 'none';
+            document.getElementById('cover-upload-container').style.pointerEvents = 'none';
 
-            clearBtn.addEventListener('click', () => {
-                input.value = '';
-                clearBtn.classList.add('hidden');
-                // Ensure icon is visible and reset color
-                if (searchIcon) {
-                    searchIcon.classList.remove('hidden');
-                    searchIcon.classList.remove('text-red-500');
-                }
-                onClear();
-                input.focus();
-            });
+            const coverPreview = document.getElementById('cover-preview');
+             if (state.activeStory.coverImage && state.activeStory.coverImage !== 'https://via.placeholder.com/800x400/000?text=Void') {
+                coverPreview.src = state.activeStory.coverImage;
+                coverPreview.classList.remove('hidden');
+            }
+            ui.selectOption('cat', state.activeStory.category || "Select Realm");
+
+
+            document.getElementById('create-header-title').innerText = "Suggest Edits";
+            document.getElementById('create-header-sub').innerText = "Your changes will be submitted for review.";
+            document.getElementById('btn-publish').classList.add('hidden');
+            document.getElementById('btn-suggest').classList.remove('hidden');
+            document.getElementById('btn-update-story').classList.add('hidden');
+
+            router.go('create');
+        }
+    };
+
+    // --- DATA ---
+    function loadFeed() { 
+        const container = document.getElementById('feed-grid');
+        const emptyEl = document.getElementById('feed-empty');
+        container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Summoning...</div>';
+        emptyEl.classList.add('hidden');
+        container.classList.remove('hidden');
+
+        let q;
+        const ref = collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories');
+        
+        if(state.sortBy === 'following') {
+            if (!state.isAnonymous && state.profile.following && state.profile.following.length > 0) {
+                 q = query(ref, where('authorId', 'in', state.profile.following), limit(50));
+            } else {
+                feed.render([]); return;
+            }
+        }
+        else if(state.filter) {
+             q = query(ref, where("category", "==", state.filter), limit(50));
+        }
+        else if(state.sortBy === 'hot') {
+            q = query(ref, orderBy('likes', 'desc'), limit(50));
+        }
+        else if (state.sortBy === 'top') {
+            const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            q = query(ref, where('createdAt', '>', lastWeek), orderBy('createdAt', 'desc'), limit(100));
+        }
+        else {
+            q = query(ref, orderBy('createdAt', 'desc'), limit(50));
         }
 
-        setupSearchClear('feed-search', 'feed-search-clear', '.fa-search', () => {
+        onSnapshot(q, async (snap) => {
+             if (document.getElementById('feed-search').value.trim() !== '') return;
+            const stories = [];
+            snap.forEach(d => {
+                const data = {id: d.id, ...d.data()};
+                if(!data.communityId) stories.push(data); 
+            });
+            
+            if (state.sortBy === 'top') {
+                stories.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+            }
+            
+            if (state.filter || state.sortBy === 'following') {
+                stories.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+            }
+            
+            const authorIds = [...new Set(stories.map(s => s.authorId))];
+            await Promise.all(authorIds.map(id => getUserProfile(id)));
+
+            state.feedData = stories;
+            feed.render(state.feedData);
+        });
+    }
+    
+	async function searchUsersAndContent(term) { 
+        const lowerTerm = normalize(term);
+        const contentGrid = document.getElementById('feed-grid');
+        
+        // Loading State
+        contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Scouring the archives...</div>';
+
+        try {
+            // 1. SEARCH USERS
+            const userResults = [];
+            const userQuery = query(collection(db, 'artifacts', APP_ID_PATH, 'users'), limit(50));
+            const userSnap = await getDocs(userQuery);
+            userSnap.forEach(doc => {
+                 const u = doc.data();
+                 // Simple search logic
+                 if(normalize(u.username).includes(lowerTerm) || normalize(u.bio).includes(lowerTerm)){
+                    userResults.push({ id: doc.id, ...u });
+                 }
+            });
+
+            // 2. SEARCH POSTS
+            const postResults = [];
+            const contentQuery = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories'), limit(100));
+            const contentSnap = await getDocs(contentQuery);
+            
+            contentSnap.forEach(doc => {
+                const d = doc.data();
+                if (d.communityId) return; // Optional: filter out community posts if desired
+                
+                const titleMatch = normalize(d.title).includes(lowerTerm);
+                const descMatch = normalize(d.description).includes(lowerTerm);
+                const tagMatch = (d.tags || []).some(t => normalize(t).includes(lowerTerm));
+                
+                if (titleMatch || descMatch || tagMatch) {
+                    postResults.push({id: doc.id, ...d});
+                }
+            });
+
+            // Prepare Author Profiles for Posts
+            const authorIds = [...new Set(postResults.map(s => s.authorId))];
+            await Promise.all(authorIds.map(id => getUserProfile(id)));
+
+            // 3. RENDER SECTIONED RESULTS
+            contentGrid.innerHTML = '';
+
+            // -- RENDER USERS --
+            if (userResults.length > 0) {
+                // Section Header (col-span-full ensures it takes full width of grid)
+                const userHeader = document.createElement('div');
+                userHeader.className = "col-span-1 md:col-span-2 lg:col-span-3 pb-2 border-b border-white/10 mb-2 mt-2";
+                userHeader.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fas fa-users mr-2"></i>Souls Found (${userResults.length})</h3>`;
+                contentGrid.appendChild(userHeader);
+
+                userResults.forEach(u => {
+                    contentGrid.appendChild(feed.createUserCard(u));
+                });
+            }
+
+            // -- RENDER POSTS --
+            if (postResults.length > 0) {
+                // Section Header
+                const postHeader = document.createElement('div');
+                postHeader.className = "col-span-1 md:col-span-2 lg:col-span-3 pb-2 border-b border-white/10 mb-2 mt-6";
+                postHeader.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fas fa-book-open mr-2"></i>Echoes Found (${postResults.length})</h3>`;
+                contentGrid.appendChild(postHeader);
+
+                postResults.forEach(d => {
+                     const card = feed.createStoryCard(d);
+                     if (card) contentGrid.appendChild(card);
+                });
+            }
+
+            // -- EMPTY STATE --
+            if (userResults.length === 0 && postResults.length === 0) {
+                 contentGrid.innerHTML = `
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16 opacity-50">
+                        <i class="fas fa-search text-4xl mb-4 text-red-900"></i>
+                        <p class="text-gray-500">The void reveals nothing for "${term}".</p>
+                    </div>
+                 `;
+            }
+
+        } catch(e) {
+            console.error(e);
+            contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-red-500 py-10">The void rejected your query.</div>';
+        }
+    }
+
+	function loadComments(storyId) { 
+		const list = document.getElementById('comments-list');
+		list.innerHTML = ''; 
+		const q = query(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', storyId, 'comments'), orderBy('createdAt', 'desc'));
+		onSnapshot(q, snap => {
+			list.innerHTML = '';
+			if(snap.empty) {
+				document.getElementById('comments-empty').classList.remove('hidden');
+			} else {
+				document.getElementById('comments-empty').classList.add('hidden');
+			}
+			snap.forEach(d => {
+				const c = d.data();
+				const commentTime = c.createdAt ? timeAgo(c.createdAt) : 'Just now';
+				
+				// ADDED whitespace-pre-wrap HERE to the div with font-story
+				list.innerHTML += `
+					<div class="bg-white/5 p-4 rounded border-l-2 border-red-900">
+						<div class="text-xs text-red-400 font-bold mb-1">${formatUsername(c.authorId, c.author)} • ${commentTime}</div>
+						<div class="text-sm text-gray-300 font-story break-words whitespace-pre-wrap">${c.text}</div>
+					</div>
+				`;
+			});
+		});
+	}
+
+    // --- LISTENERS ---
+    document.getElementById('editor-content').addEventListener('input', creator.recalc);
+    
+    document.getElementById('cover-input').addEventListener('change', async (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            ui.loading(true);
+            const url = await creator.upload(file);
+            if(url) { 
+                state.draft.cover = url; 
+                document.getElementById('cover-preview').src = url; 
+                document.getElementById('cover-preview').classList.remove('hidden'); 
+            }
+            ui.loading(false);
+        }
+    });
+
+    document.getElementById('coven-img-upload').addEventListener('change', async (e) => {
+        const url = await creator.upload(e.target.files[0]);
+        if(url) { document.getElementById('coven-img-preview').src = url; document.getElementById('coven-img-preview').classList.remove('hidden'); }
+    });
+
+    document.getElementById('profile-img-upload').addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                ui.initCropper(event.target.result, (blob) => {
+                    state.profileEditAvatarBlob = blob;
+                    document.getElementById('edit-profile-avatar').src = URL.createObjectURL(blob);
+                });
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+     document.getElementById('signup-avatar-input').addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                ui.initCropper(event.target.result, (blob) => {
+                    state.signupAvatarBlob = blob;
+                    document.getElementById('signup-avatar-preview').src = URL.createObjectURL(blob);
+                });
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+	document.getElementById('inline-image-input').addEventListener('change', async (e) => {
+		const url = await creator.upload(e.target.files[0]);
+		if(url) {
+			const editor = document.getElementById('editor-content');
+			editor.focus(); 
+			const imgHtml = `<img src="${url}" style="width: ${state.draft.imgScale}; margin: 10px auto; display: block;" /><br>`;
+			if (!document.execCommand('insertHTML', false, imgHtml)) {
+				editor.innerHTML += imgHtml;
+			}
+			// state.draft.images++; // This line has been removed
+			creator.recalc();
+		}
+	});
+    
+    // --- VALIDATION LISTENERS ---
+    document.getElementById('signup-name').addEventListener('input', debounce(() => {
+        handleUsernameInput('signup-name', 'signup-username-feedback');
+    }, 500));
+
+    document.getElementById('edit-username').addEventListener('input', debounce(() => {
+        handleUsernameInput('edit-username', 'edit-username-feedback', state.profile.username);
+    }, 500));
+    
+	function setupSearchClear(inputId, clearId, searchIconClass, onClear) {
+        const input = document.getElementById(inputId);
+        const clearBtn = document.getElementById(clearId);
+        // We select the icon but we won't hide it anymore
+        const searchIcon = input.parentElement.querySelector(searchIconClass);
+
+        input.addEventListener('input', () => {
+            const hasValue = input.value.trim().length > 0;
+            // Only toggle the Clear (X) button
+            clearBtn.classList.toggle('hidden', !hasValue);
+            
+            // FIX: We keep the search icon visible to maintain UI stability
+            // The icon sits on the left, the text has padding, so they don't overlap.
+            if (searchIcon) {
+                searchIcon.classList.remove('hidden'); 
+                // Optional: Make it glow slightly when active
+                if(hasValue) searchIcon.classList.add('text-red-500');
+                else searchIcon.classList.remove('text-red-500');
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            clearBtn.classList.add('hidden');
+            // Ensure icon is visible and reset color
+            if (searchIcon) {
+                searchIcon.classList.remove('hidden');
+                searchIcon.classList.remove('text-red-500');
+            }
+            onClear();
+            input.focus();
+        });
+    }
+
+    setupSearchClear('feed-search', 'feed-search-clear', '.fa-search', () => {
+        document.getElementById('feed-title').innerText = "Chronicles";
+        document.getElementById('feed-empty').classList.add('hidden');
+        loadFeed();
+    });
+
+    setupSearchClear('explore-search', 'explore-search-clear', '.fa-search', () => {
+        communities.loadAll();
+    });
+
+    let searchTimeout;
+    document.getElementById('feed-search').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        const term = e.target.value.trim();
+        if(!term) { 
             document.getElementById('feed-title').innerText = "Chronicles";
-            document.getElementById('feed-empty').classList.add('hidden');
-            loadFeed();
-        });
+            loadFeed(); 
+            return; 
+        }
+        document.getElementById('feed-title').innerText = `Results for "${term}"`;
+        searchTimeout = setTimeout(() => searchUsersAndContent(term), 500);
+    });
 
-        setupSearchClear('explore-search', 'explore-search-clear', '.fa-search', () => {
+    document.getElementById('explore-search').addEventListener('input', (e) => {
+         clearTimeout(searchTimeout);
+        const term = e.target.value.trim();
+        if (!term) {
             communities.loadAll();
-        });
+        } else {
+            searchTimeout = setTimeout(() => explore.search(term), 500);
+        }
+    });
 
-        let searchTimeout;
-        document.getElementById('feed-search').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const term = e.target.value.trim();
-            if(!term) { 
-                document.getElementById('feed-title').innerText = "Chronicles";
-                loadFeed(); 
-                return; 
-            }
-            document.getElementById('feed-title').innerText = `Results for "${term}"`;
-            searchTimeout = setTimeout(() => searchUsersAndContent(term), 500);
-        });
 
-        document.getElementById('explore-search').addEventListener('input', (e) => {
-             clearTimeout(searchTimeout);
-            const term = e.target.value.trim();
-            if (!term) {
-                communities.loadAll();
+	// --- INIT ---
+    onAuthStateChanged(authService, (user) => {
+        if(user) {
+            state.user = user;
+            
+            if (user.isAnonymous) {
+                state.isAnonymous = true;
+                state.profile = { 
+                    likedStories: [], 
+                    following: [] 
+                }; 
+                
+                ui.setAnonymousMode(true);
+                
+                document.getElementById('view-auth').classList.add('hidden');
+                document.getElementById('app-shell').classList.remove('hidden');
+                
+                explore.loadTrending();
+                explore.loadFresh();
+                
+                router.handlePopState();
+                ui.loading(false);
+
             } else {
-                searchTimeout = setTimeout(() => explore.search(term), 500);
-            }
-        });
-
-
-		// --- INIT ---
-        onAuthStateChanged(authService, (user) => {
-            if(user) {
-                state.user = user;
+                state.isAnonymous = false;
+                ui.setAnonymousMode(false);
                 // This onSnapshot listens for changes to the user's profile data
                 onSnapshot(doc(db, 'artifacts', APP_ID_PATH, 'users', user.uid), d => {
                     if(d.exists()) {
@@ -5050,14 +5153,19 @@
 
                         router.handlePopState(); 
                     }
+                     ui.loading(false);
                 });
-				
-            } else {
-                document.getElementById('app-shell').classList.add('hidden');
-                document.getElementById('view-auth').classList.remove('hidden');
             }
+			
+        } else {
+            state.isAnonymous = false;
+            state.user = null;
+            state.profile = null;
+            document.getElementById('app-shell').classList.add('hidden');
+            document.getElementById('view-auth').classList.remove('hidden');
             ui.loading(false);
-        });
-    </script>
+        }
+    });
+</script>
 </body>
 </html>
