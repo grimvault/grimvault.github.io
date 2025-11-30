@@ -2614,9 +2614,21 @@
                 });
 
                 const isMember = (data.members || []).includes(state.user?.uid);
-                const btn = document.getElementById('btn-coven-join');
-                btn.innerText = isMember ? "Leave Coven" : "Join Coven";
-                btn.className = isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20 justify-center" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center";
+                const joinBtn = document.getElementById('btn-coven-join');
+                const postBtn = document.getElementById('btn-coven-post'); // Get post button
+                
+                joinBtn.innerText = isMember ? "Leave Coven" : "Join Coven";
+                joinBtn.className = isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20 justify-center" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center";
+
+                // --- CHANGE START: Update Post Button State ---
+                if (isMember) {
+                    postBtn.disabled = false;
+                    postBtn.innerText = "Whisper to Coven";
+                } else {
+                    postBtn.disabled = true;
+                    postBtn.innerText = "Join to Post";
+                }
+                // --- CHANGE END ---
 
                 const sponsorBtn = document.getElementById('btn-coven-sponsor');
                 const isCreator = state.user?.uid === data.creatorId;
@@ -2724,9 +2736,22 @@
                         }
                         
                         document.getElementById('coven-member-count').innerText = `${state.activeCommunity.memberCount} ${pluralize(state.activeCommunity.memberCount, 'Coveneer')}`;
-                        const btn = document.getElementById('btn-coven-join');
-                        btn.innerText = !isMember ? "Leave Coven" : "Join Coven";
-                        btn.className = !isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20 justify-center" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center";
+                        const joinBtn = document.getElementById('btn-coven-join');
+                        const postBtn = document.getElementById('btn-coven-post'); // Get post button
+                        
+                        joinBtn.innerText = !isMember ? "Leave Coven" : "Join Coven";
+                        joinBtn.className = !isMember ? "btn-secondary border-red-900 text-red-500 hover:bg-red-900/20 justify-center" : "btn-main border-red-600 text-red-400 hover:bg-red-900/30 justify-center";
+                        
+                        // --- CHANGE START: Update Post Button After Toggling Membership ---
+                        if (!isMember) { // User has just joined
+                            postBtn.disabled = false;
+                            postBtn.innerText = "Whisper to Coven";
+                        } else { // User has just left
+                            postBtn.disabled = true;
+                            postBtn.innerText = "Join to Post";
+                        }
+                        // --- CHANGE END ---
+
                         ui.loading(false);
                     } catch(e) { 
                         ui.loading(false); 
