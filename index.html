@@ -903,7 +903,10 @@
             </div>
 
             <form id="form-login" onsubmit="event.preventDefault(); auth.login();" class="space-y-4">
-                <input type="email" id="login-email" placeholder="Email Address" class="input-void" required>
+                <div class="relative flex items-center">
+                    <input type="text" id="login-email" placeholder="Gmail Username" class="input-void pr-[95px]" required>
+                    <span class="absolute right-4 text-gray-500 pointer-events-none">@gmail.com</span>
+                </div>
                 <input type="password" id="login-pass" placeholder="Password" class="input-void" required>
                 <button type="submit" class="btn-main w-full py-3 mt-4">Enter the Void</button>
                 <div class="text-center mt-6 pt-6 border-t border-white/5 space-y-3">
@@ -927,7 +930,10 @@
                     </div>
                     <p id="signup-username-feedback" class="hidden text-xs font-bold mt-1"></p>
                 </div>
-                <input type="email" id="signup-email" placeholder="Email Address" class="input-void" required>
+                 <div class="relative flex items-center">
+                    <input type="text" id="signup-email" placeholder="Gmail Username" class="input-void pr-[95px]" required>
+                    <span class="absolute right-4 text-gray-500 pointer-events-none">@gmail.com</span>
+                </div>
                 <input type="password" id="signup-pass" placeholder="Password (Min 6)" class="input-void" required>
                 <textarea id="signup-bio" class="input-void h-20 resize-none" placeholder="A brief bio..."></textarea>
                 <input type="text" id="signup-link" class="input-void" placeholder="Website Link (optional)">
@@ -1685,6 +1691,7 @@
             activeCommunity: null, 
             activeSuggestion: null,
             previousRoute: null,
+            previousTitle: null,
             draft: { 
                 images: 0, cost: 0, cover: null, category: null, 
                 isSuggestion: false, isEdit: false, targetStoryId: null,
@@ -2112,7 +2119,21 @@
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
                 document.getElementById(`view-${view}`).classList.remove('hidden');
                 window.scrollTo(0,0);
-                document.title = `Grimoire - ${view.charAt(0).toUpperCase() + view.slice(1)}`;
+                
+                // Set generic title first. Specific titles will be set by their respective `open` functions.
+                switch(view) {
+                    case 'home':
+                        document.title = "Grimoire - Chronicles";
+                        break;
+                    case 'explore':
+                        document.title = "The Abyss - Grimoire";
+                        break;
+                    case 'create':
+                        document.title = "Manifest - Grimoire";
+                        break;
+                    default:
+                        document.title = `Grimoire - ${view.charAt(0).toUpperCase() + view.slice(1)}`;
+                }
 
                 if(view === 'home') {
                     if(params.category) {
@@ -2260,7 +2281,7 @@
             login: async () => {
                 ui.loading(true);
                 try {
-                    const e = document.getElementById('login-email').value;
+                    const e = document.getElementById('login-email').value + '@gmail.com';
                     const p = document.getElementById('login-pass').value;
                     await signInWithEmailAndPassword(authService, e, p);
                 } catch(err) { ui.loading(false); ui.alert('Login Failed', err.message); }
@@ -2273,7 +2294,7 @@
                 if(!check.valid) return ui.alert("Invalid Name", check.message);
 
                 ui.loading(true);
-                const e = document.getElementById('signup-email').value;
+                const e = document.getElementById('signup-email').value + '@gmail.com';
                 const p = document.getElementById('signup-pass').value;
                 const bio = document.getElementById('signup-bio').value;
                 const link = document.getElementById('signup-link').value;
@@ -2655,8 +2676,14 @@
 
                 communities.loadPinned(id, data.pinnedPosts || []);
                 communities.loadFeed(id);
-                if(push) router.go('community', { coven: id });
-                else router.render('community', { coven: id });
+
+                if(push) {
+                    router.go('community', { coven: id });
+                } else {
+                    router.render('community', { coven: id });
+                }
+                // Set specific title AFTER routing
+                document.title = `${data.name} - Grimoire`;
             },
             sponsor: async () => {
                 if (state.isAnonymous) return ui.alert("Action Not Allowed", "You must have an account to sponsor a Coven.");
@@ -3067,7 +3094,8 @@
         // --- THREAD VIEW ---
 		window.threadView = {
             open: async (id, data) => { 
-                state.activeStory = { id, ...data }; 
+                state.activeStory = { id, ...data };
+                state.previousTitle = document.title;
                 
                 // --- SECURITY CHECK START ---
                 if (data.membersOnly && data.communityId) {
@@ -3140,10 +3168,16 @@
                 
                 threadView.loadComments(id);
                 ui.openModal('modal-thread');
+                // Set specific title AFTER opening modal
+                document.title = `${data.title} - Grimoire`;
             },
             // ... (keep close, loadComments, etc. as is)
             close: () => {
                 ui.closeModal('modal-thread');
+                if (state.previousTitle) {
+                    document.title = state.previousTitle;
+                    state.previousTitle = null;
+                }
                 state.activeStory = null;
             },
             loadComments: (storyId) => { 
@@ -4024,7 +4058,7 @@
 		}
 	};
 
-	// --- REWARDS ---
+// --- REWARDS ---
 	window.rewards = { 
 		checkEligibility: async () => {
 			if(state.isAnonymous || !state.profile) return;
@@ -4266,6 +4300,8 @@
 
             if(push) router.go('profile', { user: uid });
             else router.render('profile', { user: uid });
+            
+            document.title = `${p.username} on Grimoire`;
             ui.loading(false);
         },
         toggleFollow: async (targetUid = null, fromSuggestion = false) => {
@@ -4638,6 +4674,8 @@
 
             loadComments(id);
             if(push) router.go('reader', { post: id }); else router.render('reader', { post: id });
+            
+            document.title = `${data.title} - Grimoire`;
         },
         toggleLike: async (storyId = null) => {
             if (state.isAnonymous) return ui.alert("Action Not Allowed", "Create an account to like stories.");
