@@ -5074,6 +5074,17 @@
             ui.loading(false);
         }
     });
+	
+	// PASTE AS PLAIN TEXT LISTENER
+    document.getElementById('editor-content').addEventListener('paste', (e) => {
+        e.preventDefault();
+        // Get plain text from clipboard
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        // Insert text at cursor position (preserves undo/redo history)
+        document.execCommand('insertText', false, text);
+        // Trigger recalc to update character/word counts
+        creator.recalc();
+    });
 
     document.getElementById('coven-img-upload').addEventListener('change', async (e) => {
         const url = await creator.upload(e.target.files[0]);
