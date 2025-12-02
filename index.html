@@ -1307,7 +1307,7 @@
                                 </div>
                                 <input type="text" id="create-tags" placeholder="Tags (comma separated)" class="input-void">
                             </div>
-                            <textarea id="create-desc" placeholder="Brief description..." class="input-void h-24 resize-none"></textarea>
+                            <textarea id="create-desc" placeholder="Provide a short description of your content. Minimum 50 characters." class="input-void h-24 resize-none"></textarea>
                         </div>
 
                         <div id="cover-upload-container" class="relative h-full min-h-[200px] border-2 border-dashed border-gray-800 rounded-lg hover:border-red-900 transition-colors cursor-pointer group overflow-hidden bg-black/20" onclick="document.getElementById('cover-input').click()">
@@ -2138,23 +2138,36 @@
                 }
 
                 if(view === 'home') {
-                    if(params.category) {
-                        feed.filter(params.category, false);
-                    } else {
-                        if(document.getElementById('feed-search').value.trim() === '') {
-                             state.filter = null;
-                             document.getElementById('feed-title').innerText = "Chronicles";
-                             feed.loadFeed(false); // Reload fresh
+                    // Caching logic: Only load feed if the grid is empty or a filter is being applied
+                    const feedGrid = document.getElementById('feed-grid');
+                    if (feedGrid.innerHTML === '' || params.category) {
+                        if(params.category) {
+                            feed.filter(params.category, false);
+                        } else {
+                            if(document.getElementById('feed-search').value.trim() === '') {
+                                 state.filter = null;
+                                 document.getElementById('feed-title').innerText = "Chronicles";
+                                 feed.loadFeed(false); // Reload fresh
+                            }
                         }
                     }
-                    feed.loadUserSuggestions();
-                    feed.loadSponsors();
+                    // Caching for Sponsors and Suggestions
+                    if (document.getElementById('sponsored-covens-grid').innerHTML === '') {
+                        feed.loadSponsors();
+                    }
+                    if (document.getElementById('user-suggestions-grid').innerHTML === '') {
+                        feed.loadUserSuggestions();
+                    }
                 }
 
                 if(view === 'explore') {
-                    communities.loadAll();
-                    explore.loadTrending();
-                    explore.loadFresh();
+                    // Caching logic: Only load explore page content if it's not already there.
+                    const communitiesGrid = document.getElementById('communities-grid');
+                    if (communitiesGrid.innerHTML === '') {
+                        communities.loadAll();
+                        explore.loadTrending();
+                        explore.loadFresh();
+                    }
                 }
                 
                 if (view === 'create') {
@@ -3439,6 +3452,11 @@
 
                 if(!title || text.trim().length === 0) return ui.alert("Incomplete", "Your nightmare needs a title and some content.");
                 
+                // New validation for description length
+                if (desc.trim().length < 50) {
+                    return ui.alert("Description Too Short", "The description must be at least 50 characters long to provide a proper summary.");
+                }
+                
                 // Story specific check: Minimum 50 words
                 if (state.draft.type === 'story' && wordCount < 50) {
                     return ui.alert("Too Short", `A story must be at least 50 words. Current count: ${wordCount}.`);
@@ -4060,7 +4078,7 @@
 		}
 	};
 
-// --- REWARDS ---
+	// --- REWARDS ---
 	window.rewards = { 
 		checkEligibility: async () => {
 			if(state.isAnonymous || !state.profile) return;
