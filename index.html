@@ -1307,7 +1307,7 @@
                                 </div>
                                 <input type="text" id="create-tags" placeholder="Tags (comma separated)" class="input-void">
                             </div>
-                            <textarea id="create-desc" placeholder="Brief description..." class="input-void h-24 resize-none"></textarea>
+                            <textarea id="create-desc" placeholder="Provide a short description of your content. Minimum 50 characters." class="input-void h-24 resize-none"></textarea>
                         </div>
 
                         <div id="cover-upload-container" class="relative h-full min-h-[200px] border-2 border-dashed border-gray-800 rounded-lg hover:border-red-900 transition-colors cursor-pointer group overflow-hidden bg-black/20" onclick="document.getElementById('cover-input').click()">
@@ -2138,17 +2138,26 @@
                 }
 
                 if(view === 'home') {
+                    const feedGrid = document.getElementById('feed-grid');
+                    const isFeedEmpty = !feedGrid || feedGrid.innerHTML.trim() === '' || feedGrid.innerText.includes('Summoning...');
+
+                    // Always handle explicit filtering actions from URL params
                     if(params.category) {
-                        feed.filter(params.category, false);
-                    } else {
+                        feed.filter(params.category, false); // This function will handle reloading
+                    }
+                    // If the feed is empty, it's either the first load or has been intentionally cleared
+                    else if (isFeedEmpty) {
+                        // Ensure search is not active
                         if(document.getElementById('feed-search').value.trim() === '') {
                              state.filter = null;
                              document.getElementById('feed-title').innerText = "Chronicles";
-                             feed.loadFeed(false); // Reload fresh
+                             feed.loadFeed(false);
+                             feed.loadUserSuggestions();
+                             feed.loadSponsors();
                         }
                     }
-                    feed.loadUserSuggestions();
-                    feed.loadSponsors();
+                    // If we reach here, it means we are returning to a populated home view.
+                    // The content is already in the DOM and will just be un-hidden. Do nothing.
                 }
 
                 if(view === 'explore') {
@@ -2183,7 +2192,8 @@
                     document.removeEventListener('selectionchange', editor.checkState);
                 }
             },
-            handlePopState: (event) => {
+            // --- MODIFIED FUNCTION ---
+            handlePopState: async (event) => {
                  if (router.getCurrentView() === 'create' && (state.draft.isEdit || state.draft.isSuggestion)) {
                     creator.reset();
                  }
@@ -2205,16 +2215,37 @@
                      return;
                  }
 
-                 if(params.post) {
-                      getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', params.post)).then(snap => {
-                         if(snap.exists()) reader.open(params.post, snap.data(), false);
-                     });
-                 } else if(params.user) {
-                     profile.open(params.user, false);
-                 } else if(params.coven) {
-                      getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', params.coven)).then(snap => {
-                         if(snap.exists()) communities.open(params.coven, snap.data(), false);
-                     });
+                if(params.post) {
+                    const postId = params.post;
+                    try {
+                        const postSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', postId));
+                        if(postSnap.exists()) {
+                            const storyData = { id: postSnap.id, ...postSnap.data() };
+                            await reader.open(postId, storyData, false);
+                        } else {
+                           router.go('home'); // Post not found, go home
+                        }
+                    } catch (e) {
+                        console.error("Failed to load post on route change", e);
+                        router.go('home');
+                    }
+                } else if(params.user) {
+                    const userId = params.user;
+                    await profile.open(userId, false);
+                } else if(params.coven) {
+                    const covenId = params.coven;
+                     try {
+                        const covenSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'communities', covenId));
+                        if(covenSnap.exists()){
+                            const covenData = { id: covenSnap.id, ...covenSnap.data() };
+                            await communities.open(covenId, covenData, false);
+                        } else {
+                            router.go('explore'); // Coven not found, go to explore
+                        }
+                    } catch (e) {
+                        console.error("Failed to load coven on route change", e);
+                        router.go('explore');
+                    }
                  } else {
                      router.render(section, params);
                  }
@@ -3439,6 +3470,11 @@
 
                 if(!title || text.trim().length === 0) return ui.alert("Incomplete", "Your nightmare needs a title and some content.");
                 
+                // New validation for description length
+                if (desc.trim().length < 50) {
+                    return ui.alert("Description Too Short", "The description must be at least 50 characters long to provide a proper summary.");
+                }
+                
                 // Story specific check: Minimum 50 words
                 if (state.draft.type === 'story' && wordCount < 50) {
                     return ui.alert("Too Short", `A story must be at least 50 words. Current count: ${wordCount}.`);
@@ -4060,7 +4096,7 @@
 		}
 	};
 
-// --- REWARDS ---
+	// --- REWARDS ---
 	window.rewards = { 
 		checkEligibility: async () => {
 			if(state.isAnonymous || !state.profile) return;
@@ -4608,7 +4644,10 @@
 	open: async (id, data, push = true) => {
             state.activeStory = { id, ...data };
             // If it's a thread, delegate to threadView (which now has checks)
-            if(data.type === 'thread') { threadView.open(id, data); return; }
+            if(data.type === 'thread') {
+                await threadView.open(id, data);
+                return;
+            }
 
             const readerBody = document.getElementById('reader-body');
             const deniedBody = document.getElementById('reader-access-denied');
@@ -5210,10 +5249,10 @@
 
 
 	// --- INIT ---
-    onAuthStateChanged(authService, (user) => {
+    // --- MODIFIED FUNCTION ---
+    onAuthStateChanged(authService, async (user) => {
         if(user) {
             state.user = user;
-            
             if (user.isAnonymous) {
                 state.isAnonymous = true;
                 state.profile = { 
@@ -5222,44 +5261,60 @@
                 }; 
                 
                 ui.setAnonymousMode(true);
-                
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('app-shell').classList.remove('hidden');
                 
+                // Wait for router to handle initial page load before hiding loader
+                await router.handlePopState();
+                
+                // Load non-essential data in the background
                 explore.loadTrending();
                 explore.loadFresh();
                 
-                router.handlePopState();
                 ui.loading(false);
-
             } else {
                 state.isAnonymous = false;
                 ui.setAnonymousMode(false);
-                // This onSnapshot listens for changes to the user's profile data
+
+                // Attach the real-time listener first. It will populate the UI as data comes in.
                 onSnapshot(doc(db, 'artifacts', APP_ID_PATH, 'users', user.uid), d => {
                     if(d.exists()) {
                         const profileData = d.data();
                         state.profile = profileData;
                         state.userCache[user.uid] = { id: user.uid, ...profileData };
 
-                        const navUser = document.getElementById('nav-user');
-                        if(navUser) navUser.innerText = state.profile.username;
+                        // Update constantly changing UI elements here
+                        document.getElementById('nav-user').innerText = state.profile.username;
                         document.getElementById('nav-credits').innerText = state.profile.credits;
-                        document.getElementById('view-auth').classList.add('hidden');
-                        document.getElementById('app-shell').classList.remove('hidden');
-                        
-                        notifications.init();
-                        explore.loadTrending(); 
-                        explore.loadFresh();
-                        rewards.checkEligibility();
-
-                        router.handlePopState(); 
                     }
-                     ui.loading(false);
                 });
+
+                // Get the initial profile data to unblock the rest of the app load
+                const userDoc = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'users', user.uid));
+                if (userDoc.exists()) {
+                    state.profile = userDoc.data();
+                    
+                    document.getElementById('view-auth').classList.add('hidden');
+                    document.getElementById('app-shell').classList.remove('hidden');
+
+                    // Now that we have the initial profile, handle the route
+                    await router.handlePopState();
+                    
+                    // Initialize other modules that depend on a loaded profile
+                    notifications.init();
+                    explore.loadTrending(); 
+                    explore.loadFresh();
+                    rewards.checkEligibility();
+                } else {
+                    // This is an error state, user exists in Auth but not Firestore.
+                    console.error("User authenticated but no profile document found. Logging out.");
+                    await auth.logout();
+                }
+                
+                ui.loading(false);
             }
-			
         } else {
+            // No user is signed in.
             state.isAnonymous = false;
             state.user = null;
             state.profile = null;
