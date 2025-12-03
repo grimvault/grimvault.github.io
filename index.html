@@ -68,7 +68,8 @@
         body {
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
-            overflow-y: auto;
+            /* CHANGE: Set overflow-y to scroll to prevent layout shift */
+            overflow-y: scroll;
         }
 
         /* Fix: Lock body on mobile when modal is open to prevent background scroll */
@@ -1413,8 +1414,8 @@
                     <div id="editor-content" contenteditable="true" class="glass rounded-b-lg p-4 md:p-8 border-t-0 min-h-[500px] focus:outline-none focus:bg-black/60 transition-colors text-gray-300 font-story leading-loose text-base md:text-lg relative z-0"></div>
 
                     <div class="flex flex-col md:flex-row justify-between items-center mt-8 gap-4">
-                        <div class="text-xs text-gray-500 font-mono">
-                            <span id="char-count">0</span> chars | <span id="img-count">0</span> images
+                        <div id="editor-stats" class="text-xs text-gray-500 font-mono">
+                            0 chars | 0 words | 0 images
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                             <button id="btn-publish" onclick="creator.publish()" class="btn-main px-10 w-full md:w-auto">
@@ -2949,7 +2950,11 @@
                         return;
                     }
                     if (isThread) threadView.open(data.id, data);
-					else if (isPoll) return; // Clicking the card does nothing, must use button
+					else if (isPoll) { // FIX: Clicking poll card should do nothing, only the button works
+                        if (isMembersOnly && !communities.isMember()) return;
+                        pollView.toggle(data.id);
+                        return;
+                    }
                     else reader.open(data.id, data);
                 };
 
@@ -2957,7 +2962,8 @@
 				
 				if (isPoll) {
 					el.className = 'glass rounded-lg p-4 poll-card flex flex-col coven-post-card';
-					el.innerHTML = pollView.createCard(data, author);
+                    // FIX: Pass all required data to createCard, including membersOnly status
+					el.innerHTML = pollView.createCard(data, author, isMembersOnly, communities.isMember());
 				}
                 else if (isThread) {
                     el.className = 'glass rounded-lg p-3 thread-card flex flex-col coven-post-card cursor-pointer'; 
@@ -3463,7 +3469,7 @@
                 const editorContainer = document.getElementById('editor-content');
                 const toolbarContainer = editorContainer.previousElementSibling;
                 const pollCreator = document.getElementById('poll-creator-container');
-                const footerStats = document.getElementById('char-count').parentElement; // Get stats footer
+                const footerStats = document.getElementById('editor-stats');
 
                 // Reset all buttons
                 btnStory.className = "px-4 py-1 text-xs uppercase font-bold rounded text-gray-500 hover:text-white";
@@ -3531,10 +3537,14 @@
 
                 const len = text.length;
                 const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-                const readTime = Math.ceil(wordCount / 200); 
-
-                document.getElementById('char-count').innerText = `${len} chars | ${wordCount} words | ~${readTime} min read`;
-                document.getElementById('img-count').innerText = state.draft.images;
+                
+                // CHANGE: Conditional string for editor stats
+                let statsHTML = `${len} ${pluralize(len, 'char')} | ${wordCount} ${pluralize(wordCount, 'word')} | ${imageCount} ${pluralize(imageCount, 'image')}`;
+                if (state.draft.type === 'story') {
+                    const readTime = Math.ceil(wordCount / 200);
+                    statsHTML += ` | ~${readTime} min read`;
+                }
+                document.getElementById('editor-stats').innerText = statsHTML;
                 
                 let cost = 0;
                 if (!state.draft.isEdit && !state.draft.isSuggestion) {
@@ -5116,12 +5126,28 @@
 	
 	// --- NEW: POLL VIEW & LOGIC ---
     window.pollView = {
-        createCard: (data, author) => {
+        createCard: (data, author, isMembersOnly, isMember) => {
             const postedTime = data.createdAt ? timeAgo(data.createdAt) : 'Just now';
             const isVerified = (author.followerCount || 0) >= 100;
             const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
             const formattedAuthorName = formatUsername(author.id, author.username);
             const totalVotes = data.pollData.totalVotes || 0;
+
+            // FIX: Conditional rendering for the button based on access
+            let buttonHTML = '';
+            if (isMembersOnly && !isMember) {
+                buttonHTML = `
+                    <button class="btn-secondary text-xs py-1 px-3 border-yellow-800 text-yellow-600 cursor-not-allowed">
+                        <i class="fas fa-lock mr-2"></i> Join to View
+                    </button>
+                `;
+            } else {
+                buttonHTML = `
+                    <button onclick="pollView.toggle('${data.id}')" class="btn-secondary text-xs py-1 px-3 border-purple-800 text-purple-400 hover:bg-purple-900/20">
+                        <span class="btn-poll-text">View Poll</span> <i class="fas fa-chevron-down ml-2 btn-poll-icon transition-transform"></i>
+                    </button>
+                `;
+            }
 
             return `
                 <div class="flex items-start justify-between mb-3">
@@ -5132,7 +5158,7 @@
                             <div class="text-[10px] text-gray-600 font-mono">POLL • ${postedTime}</div>
                         </div>
                     </div>
-                    <i class="fas fa-poll-h text-lg text-purple-500"></i>
+                    ${isMembersOnly ? '<i class="fas fa-lock text-yellow-600" title="Coveneers Only"></i>' : '<i class="fas fa-poll-h text-lg text-purple-500"></i>'}
                 </div>
                 <h4 class="font-bold text-lg text-gray-200 mb-4">${data.title}</h4>
                 <div id="poll-content-${data.id}" class="space-y-3 transition-all duration-300 max-h-0 overflow-hidden">
@@ -5140,15 +5166,14 @@
                 </div>
                 <div class="flex items-center justify-between text-xs text-gray-600 font-mono mt-4 pt-3 border-t border-white/10">
                     <span><i class="fas fa-vote-yea mr-1"></i> <span id="poll-total-votes-${data.id}">${totalVotes}</span> Votes</span>
-                    <button onclick="pollView.toggle('${data.id}')" class="btn-secondary text-xs py-1 px-3 border-purple-800 text-purple-400 hover:bg-purple-900/20">
-                        <span class="btn-poll-text">View Poll</span> <i class="fas fa-chevron-down ml-2 btn-poll-icon transition-transform"></i>
-                    </button>
+                    ${buttonHTML}
                 </div>
             `;
         },
         toggle: async (pollId) => {
             const contentDiv = document.getElementById(`poll-content-${pollId}`);
             const button = document.querySelector(`button[onclick="pollView.toggle('${pollId}')"]`);
+            if (!button) return; // Button might not exist if locked
             const buttonText = button.querySelector('.btn-poll-text');
             const buttonIcon = button.querySelector('.btn-poll-icon');
 
@@ -5168,10 +5193,17 @@
                 // Opening
                 contentDiv.innerHTML = '<div class="text-center text-xs text-gray-500 py-2"><i class="fas fa-spinner fa-spin"></i></div>';
                 
+                // FIX: Add security check before fetching/rendering poll data
                 const pollSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', pollId));
                 if (!pollSnap.exists()) return;
                 
                 const pollData = pollSnap.data();
+                if (pollData.membersOnly && !communities.isMember()) {
+                    // This is a redundant check, but good for security. The UI should prevent this.
+                    contentDiv.innerHTML = '<div class="text-center text-xs text-red-500 py-2">Access Denied.</div>';
+                    return;
+                }
+                
                 pollView.renderOptions(pollId, pollData.pollData);
 
                 contentDiv.classList.remove('max-h-0');
