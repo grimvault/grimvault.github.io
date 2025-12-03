@@ -313,6 +313,16 @@
             background-color: rgba(20, 10, 10, 0.9);
             transform: translateX(4px);
         }
+		
+		/* NEW: Poll Card & Hover Effect */
+		.poll-card {
+			transition: border-color 0.3s ease, background-color 0.3s ease;
+		}
+		.poll-card:hover {
+			transform: none; /* Override scaling */
+			border-color: var(--blood-red);
+			background-color: rgba(20, 10, 10, 0.9);
+		}
 
         .stats-card {
             background: linear-gradient(180deg, rgba(5,5,5,0.4) 0%, rgba(0,0,0,0.6) 100%);
@@ -522,6 +532,19 @@
 			box-shadow: 0 2px 10px var(--blood-bright);
 			border-radius: 0 0 4px 4px;
 			animation: fadeIn 0.3s ease;
+		}
+		
+		/* --- NEW: POLL STYLES --- */
+		.poll-option-bar {
+			background: linear-gradient(90deg, var(--blood-red) 0%, rgba(138,3,3,0.2) 100%);
+			transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+		.poll-option.voted-by-user {
+			border-color: var(--blood-bright);
+			background: rgba(138,3,3,0.1);
+		}
+		.poll-option.voted-by-user .fa-circle {
+			color: var(--blood-bright);
 		}
 
         @media (max-width: 640px) {
@@ -1277,6 +1300,7 @@
                             <div id="post-type-toggle-container" class="hidden flex bg-black/40 p-1 rounded border border-white/5 w-fit mb-2">
                                 <button onclick="creator.setType('story')" id="type-story" class="px-4 py-1 text-xs uppercase font-bold rounded bg-red-900/30 text-white">Story</button>
                                 <button onclick="creator.setType('thread')" id="type-thread" class="px-4 py-1 text-xs uppercase font-bold rounded text-gray-500 hover:text-white">Thread</button>
+								<button onclick="creator.setType('poll')" id="type-poll" class="px-4 py-1 text-xs uppercase font-bold rounded text-gray-500 hover:text-white">Poll</button>
                             </div>
 
                             <input type="text" id="create-title" placeholder="Title" class="input-void text-xl font-bold bg-transparent border-none px-0 rounded-none border-b focus:border-red-800 focus:shadow-none placeholder-gray-700">
@@ -1334,6 +1358,23 @@
                             <span class="text-sm text-gray-400">Start a Collaboration (Coming Soon)</span>
                         </label>
                     </div>
+
+					<!-- NEW: Poll Creator Section -->
+					<div id="poll-creator-container" class="hidden space-y-4 mb-6">
+						<input type="text" id="create-poll-question" placeholder="Poll Question..." class="input-void text-lg font-semibold bg-black/20 placeholder-gray-600">
+						
+						<div id="poll-options-list" class="space-y-3">
+							<!-- Poll options will be added here by JS -->
+						</div>
+
+						<div class="flex justify-start">
+							<button id="btn-add-poll-option" onclick="creator.addPollOption()" class="btn-secondary text-xs py-1.5 px-3">
+								<i class="fas fa-plus mr-1"></i> Add Option
+							</button>
+						</div>
+						<input type="file" id="poll-option-image-input" class="hidden" accept="image/*">
+					</div>
+					<!-- END: Poll Creator Section -->
 
 					<div class="glass glass-toolbar border-b-0 rounded-t-lg p-3 flex justify-center gap-2 items-center flex-wrap toolbar-layer">
 						<button id="btn-fmt-bold" onmousedown="event.preventDefault()" onclick="editor.format('bold')" class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded text-gray-400 flex-shrink-0 transition-colors" title="Bold"><i class="fas fa-bold"></i></button>
@@ -1593,7 +1634,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, increment, serverTimestamp, arrayUnion, arrayRemove, where, writeBatch, getDocs, startAt, endAt, startAfter } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, query, orderBy, limit, onSnapshot, increment, serverTimestamp, arrayUnion, arrayRemove, where, writeBatch, getDocs, startAt, endAt, startAfter, runTransaction } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
         // --- CONFIG ---
         const firebaseConfig = {
@@ -1699,7 +1740,8 @@
                 isSuggestion: false, isEdit: false, targetStoryId: null,
                 type: 'story',
                 communityId: null,
-                imgScale: '100%'
+                imgScale: '100%',
+				pollOptionImages: {}
             },
             sortBy: 'new',
             filter: null,
@@ -2884,6 +2926,7 @@
             },
             createPostCard: (data, author) => {
                 const isThread = data.type === 'thread';
+				const isPoll = data.type === 'poll';
                 const el = document.createElement('div');
                 const likeIconClass = (state.profile?.likedStories || []).includes(data.id) ? 'text-red-600' : 'text-gray-500';
                 const postedTime = data.createdAt ? timeAgo(data.createdAt) : 'Just now';
@@ -2906,12 +2949,17 @@
                         return;
                     }
                     if (isThread) threadView.open(data.id, data);
+					else if (isPoll) return; // Clicking the card does nothing, must use button
                     else reader.open(data.id, data);
                 };
 
                 const formattedAuthorName = formatUsername(author.id, author.username);
-
-                if (isThread) {
+				
+				if (isPoll) {
+					el.className = 'glass rounded-lg p-4 poll-card flex flex-col coven-post-card';
+					el.innerHTML = pollView.createCard(data, author);
+				}
+                else if (isThread) {
                     el.className = 'glass rounded-lg p-3 thread-card flex flex-col coven-post-card cursor-pointer'; 
                     el.onclick = commonClickHandler;
                     el.innerHTML = `
@@ -3362,12 +3410,18 @@
                     isSuggestion: false, isEdit: false, targetStoryId: null,
                     type: 'story',
                     communityId: null,
-                    imgScale: '100%'
+                    imgScale: '100%',
+                    pollOptionImages: {}
                 };
                 document.getElementById('create-title').value = '';
                 document.getElementById('create-desc').value = '';
                 document.getElementById('editor-content').innerHTML = '';
                 document.getElementById('create-tags').value = '';
+                
+                // Clear Poll Specifics
+                document.getElementById('create-poll-question').value = '';
+                document.getElementById('poll-options-list').innerHTML = '';
+                
                 document.getElementById('create-title').disabled = false;
                 document.getElementById('create-desc').disabled = false;
                 document.getElementById('create-tags').disabled = false;
@@ -3377,7 +3431,7 @@
                 document.getElementById('create-members-only').checked = false;
                 
                 document.getElementById('post-type-toggle-container').classList.add('hidden');
-                creator.setType('story');
+                creator.setType('story'); // Default view
                 document.getElementById('cover-preview').classList.add('hidden');
                 document.getElementById('cover-preview').src = '';
                 document.getElementById('cat-selected').innerText = 'Select Realm';
@@ -3388,6 +3442,11 @@
                 document.getElementById('btn-publish').classList.remove('hidden');
                 document.getElementById('btn-suggest').classList.add('hidden');
                 document.getElementById('btn-update-story').classList.add('hidden');
+                
+                // Poll reset - Add default 2 options
+                document.getElementById('poll-creator-container').classList.add('hidden');
+                creator.addPollOption(); 
+                creator.addPollOption(); 
 
                 creator.recalc();
             },
@@ -3395,29 +3454,55 @@
                 state.draft.type = type;
                 const btnStory = document.getElementById('type-story');
                 const btnThread = document.getElementById('type-thread');
+                const btnPoll = document.getElementById('type-poll');
+
                 const coverContainer = document.getElementById('cover-upload-container');
                 const inputsContainer = document.getElementById('create-form-left');
-                const metaRow = document.getElementById('create-meta-row'); // Category/Tags row
-                
+                const metaRow = document.getElementById('create-meta-row');
+                const descInput = document.getElementById('create-desc');
+                const editorContainer = document.getElementById('editor-content');
+                const toolbarContainer = editorContainer.previousElementSibling;
+                const pollCreator = document.getElementById('poll-creator-container');
+                const footerStats = document.getElementById('char-count').parentElement; // Get stats footer
+
+                // Reset all buttons
+                btnStory.className = "px-4 py-1 text-xs uppercase font-bold rounded text-gray-500 hover:text-white";
+                btnThread.className = "px-4 py-1 text-xs uppercase font-bold rounded text-gray-500 hover:text-white";
+                btnPoll.className = "px-4 py-1 text-xs uppercase font-bold rounded text-gray-500 hover:text-white";
+
+                // Hide all special containers
+                coverContainer.classList.add('hidden');
+                metaRow.classList.add('hidden');
+                descInput.classList.add('hidden');
+                editorContainer.classList.add('hidden');
+                toolbarContainer.classList.add('hidden');
+                pollCreator.classList.add('hidden');
+                footerStats.style.display = 'block'; // Show stats by default
+
+                // Configure based on type
                 if(type === 'story') {
                     btnStory.className = "px-4 py-1 text-xs uppercase font-bold rounded bg-red-900/50 text-white border border-red-700";
-                    btnThread.className = "px-4 py-1 text-xs uppercase font-bold rounded text-gray-500 hover:text-white";
                     coverContainer.classList.remove('hidden');
-                    metaRow.classList.remove('hidden'); // Show category/tags
-                    if(inputsContainer) {
-                        inputsContainer.classList.remove('md:col-span-3');
-                        inputsContainer.classList.add('md:col-span-2');
-                    }
-                } else {
+                    metaRow.classList.remove('hidden');
+                    descInput.classList.remove('hidden');
+                    editorContainer.classList.remove('hidden');
+                    toolbarContainer.classList.remove('hidden');
+                } else if (type === 'thread') {
                     btnThread.className = "px-4 py-1 text-xs uppercase font-bold rounded bg-white/10 text-white border border-white/20";
-                    btnStory.className = "px-4 py-1 text-xs uppercase font-bold rounded text-gray-500 hover:text-white";
-                    coverContainer.classList.add('hidden');
-                    metaRow.classList.add('hidden'); // Hide category/tags for Threads
-                    if(inputsContainer) {
-                        inputsContainer.classList.remove('md:col-span-2');
-                        inputsContainer.classList.add('md:col-span-3');
-                    }
+                    descInput.classList.remove('hidden');
+                    editorContainer.classList.remove('hidden');
+                    toolbarContainer.classList.remove('hidden');
+                } else if (type === 'poll') {
+                    btnPoll.className = "px-4 py-1 text-xs uppercase font-bold rounded bg-purple-900/50 text-white border border-purple-700";
+                    pollCreator.classList.remove('hidden');
+                    footerStats.style.display = 'none'; // Hide char/word count for polls
                 }
+
+                // Adjust layout
+                const isStory = type === 'story';
+                inputsContainer.classList.toggle('md:col-span-3', !isStory);
+                inputsContainer.classList.toggle('md:col-span-2', isStory);
+                
                 creator.recalc();
             },
             triggerImage: () => document.getElementById('inline-image-input').click(),
@@ -3430,35 +3515,39 @@
                     return d.success ? d.data.url : null;
                 } catch { return null; }
             },
-			recalc: () => {
-				const editorEl = document.getElementById('editor-content');
-				const text = editorEl.innerText;
-				const imageCount = editorEl.getElementsByTagName('img').length; // Actively count images
-				
-				// Update the state with the correct count
-				state.draft.images = imageCount;
+            recalc: () => {
+                // If poll, just set fixed cost and return, don't read editor content
+                if (state.draft.type === 'poll') {
+                     document.getElementById('create-cost').innerText = "15 CR";
+                     state.draft.cost = 15;
+                     return;
+                }
 
-				const len = text.length;
-				const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-				
-				const readTime = Math.ceil(wordCount / 200); 
+                const editorEl = document.getElementById('editor-content');
+                const text = editorEl.innerText;
+                const imageCount = editorEl.getElementsByTagName('img').length; 
+                
+                state.draft.images = imageCount;
 
-				document.getElementById('char-count').innerText = `${len} chars | ${wordCount} words | ~${readTime} min read`;
-				document.getElementById('img-count').innerText = state.draft.images; // Display the correct count
-				
-				let cost = 0;
-				if (!state.draft.isEdit && !state.draft.isSuggestion) {
-					if(state.draft.type === 'story') {
-						// Use the correct count for cost calculation
-						cost = len < 50 ? 0 : 25 + Math.ceil(len / 20) + (state.draft.images * 10);
-					} else {
-						cost = len < 10 ? 0 : 5 + Math.ceil(len / 50);
-					}
-				}
-				
-				state.draft.cost = cost;
-				document.getElementById('create-cost').innerText = cost + " CR";
-			},
+                const len = text.length;
+                const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+                const readTime = Math.ceil(wordCount / 200); 
+
+                document.getElementById('char-count').innerText = `${len} chars | ${wordCount} words | ~${readTime} min read`;
+                document.getElementById('img-count').innerText = state.draft.images;
+                
+                let cost = 0;
+                if (!state.draft.isEdit && !state.draft.isSuggestion) {
+                    if(state.draft.type === 'story') {
+                        cost = len < 50 ? 0 : 25 + Math.ceil(len / 20) + (state.draft.images * 10);
+                    } else if (state.draft.type === 'thread') {
+                        cost = len < 10 ? 0 : 5 + Math.ceil(len / 50);
+                    }
+                }
+                
+                state.draft.cost = cost;
+                document.getElementById('create-cost').innerText = cost + " CR";
+            },
             publish: async () => { 
                 if (state.isAnonymous) return;
                 const title = document.getElementById('create-title').value;
@@ -3468,62 +3557,67 @@
                 const isMembersOnly = document.getElementById('create-members-only').checked;
                 const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 
-                if(!title || text.trim().length === 0) return ui.alert("Incomplete", "Your nightmare needs a title and some content.");
+                if(!title) return ui.alert("Incomplete", "Your creation needs a title.");
                 
-                // New validation for description length
-                if (desc.trim().length < 50) {
-                    return ui.alert("Description Too Short", "The description must be at least 50 characters long to provide a proper summary.");
-                }
-                
-                // Story specific check: Minimum 50 words
-                if (state.draft.type === 'story' && wordCount < 50) {
-                    return ui.alert("Too Short", `A story must be at least 50 words. Current count: ${wordCount}.`);
-                }
+                // Type-specific validation
+                let postData = {};
+                if(state.draft.type === 'story') {
+                    if (text.trim().length === 0) return ui.alert("Incomplete", "Your story needs content.");
+                    if (desc.trim().length < 50) return ui.alert("Description Too Short", "The description must be at least 50 characters.");
+                    if (wordCount < 50) return ui.alert("Too Short", `A story must be at least 50 words. Current count: ${wordCount}.`);
+                    if (!state.draft.cover) return ui.alert("Missing", "A story requires a cover image.");
+                    if (!state.draft.category) return ui.alert("Missing", "Please select a Realm (category).");
+                    postData = { description: desc, content, coverImage: state.draft.cover, category: state.draft.category, tags: document.getElementById('create-tags').value.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) };
+                } else if(state.draft.type === 'thread') {
+                    if (text.trim().length === 0) return ui.alert("Incomplete", "Your thread needs content.");
+                    postData = { description: desc || text.substring(0, 150), content };
+                } else if (state.draft.type === 'poll') {
+                    const question = document.getElementById('create-poll-question').value.trim();
+                    if(!question) return ui.alert("Incomplete", "Your poll needs a question.");
+                    
+                    const options = [];
+                    const optionElements = document.querySelectorAll('.poll-option-creator');
+                    for(const el of optionElements) {
+                        // FIX: Specifically select input[type=text] to avoid getting C:\fakepath from file input
+                        const optionText = el.querySelector('input[type="text"]').value.trim();
+                        if(!optionText) return ui.alert("Incomplete", "All poll options must have text.");
+                        options.push({
+                            text: optionText,
+                            imageUrl: state.draft.pollOptionImages[el.dataset.id] || null,
+                            votes: 0,
+                            voters: []
+                        });
+                    }
+                    if(options.length < 2) return ui.alert("Incomplete", "A poll needs at least 2 options.");
 
-                if(state.draft.type === 'story' && !state.draft.cover) return ui.alert("Missing", "A story requires a cover image. Please upload one.");
-                if(state.draft.type === 'story' && !state.draft.category) return ui.alert("Missing", "Please select a Realm (category) for your story.");
+                    postData = { pollData: { question, options, totalVotes: 0 }};
+                }
+                
                 if(state.profile.credits < state.draft.cost) return ui.alert("Insufficient Funds", "You need more credits.");
 
                 ui.loading(true);
                 try {
                     const userRef = doc(db, 'artifacts', APP_ID_PATH, 'users', state.user.uid);
-                    let finalCost = state.draft.cost;
-                    
                     if (state.profile.postCount === 0) {
                         await updateDoc(userRef, { credits: increment(25) });
                         notifications.send(state.user.uid, `Bonus! +25 CR for your first story.`, 'credit');
                     }
-
                     await updateDoc(userRef, { 
-                        credits: increment(-finalCost),
+                        credits: increment(-state.draft.cost),
                         postCount: increment(1)
                     });
                     
-                    // For Threads, tags and categories are null/default
-                    let keywords = [...title.toLowerCase().split(/\s+/)];
-                    let tags = [];
-                    
-                    if (state.draft.type === 'story') {
-                        const tagsInput = document.getElementById('create-tags').value;
-                        tags = tagsInput.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0);
-                        const descKeywords = desc.toLowerCase().split(/\s+/).slice(0, 15);
-                        keywords = [...new Set([...keywords, ...tags, ...descKeywords])];
-                        if(state.draft.category) keywords.push(state.draft.category.toLowerCase());
-                    }
-
                     await addDoc(collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories'), {
                         title, 
-                        category: state.draft.type === 'thread' ? 'Thread' : state.draft.category, 
-                        description: desc || text.substring(0, 100), 
-                        content,
-                        coverImage: state.draft.cover || 'https://via.placeholder.com/800x400/000?text=Void', 
                         authorId: state.user.uid,
-                        createdAt: serverTimestamp(), likes: 0, likedBy: [], keywords, tags,
+                        createdAt: serverTimestamp(),
                         type: state.draft.type,
                         communityId: state.draft.communityId || null,
                         membersOnly: isMembersOnly,
                         commentCount: 0,
-                        milestonesReached: []
+                        likes: 0,
+                        likedBy: [],
+                        ...postData
                     });
                     
                     ui.loading(false);
@@ -3578,6 +3672,98 @@
                     ui.alert("Rewritten", "History has been altered.");
                     creator.reset(); 
                 } catch(e) { ui.loading(false); ui.alert("Error", e.message); }
+            },
+            // --- UPDATED POLL CREATOR FUNCTIONS ---
+            addPollOption: () => {
+                const list = document.getElementById('poll-options-list');
+                if(list.children.length >= 10) return;
+                
+                // FIX: Use random number to ensure uniqueness when calling reset() fast
+                const newId = `poll-opt-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                const el = document.createElement('div');
+                el.className = "flex items-center gap-2 poll-option-creator";
+                el.dataset.id = newId;
+
+                el.innerHTML = `
+                    <div class="relative w-12 h-12 flex-shrink-0 bg-black/40 border border-gray-700 rounded flex items-center justify-center cursor-pointer hover:border-red-700 group">
+                        <img data-img-preview class="absolute w-full h-full object-cover rounded hidden">
+                        <i data-img-icon class="fas fa-image text-gray-600 group-hover:text-white"></i>
+                        <input type="file" class="hidden" accept="image/*" onchange="creator.handlePollOptionImage(this, '${newId}')">
+                    </div>
+                    <input type="text" class="input-void" placeholder="Option Text">
+                    <button onclick="creator.clearPollOption('${newId}')" class="btn-secondary py-3 px-2 text-xs"><i class="fas fa-broom"></i></button>
+                    <button onclick="creator.removePollOption('${newId}')" class="btn-secondary py-3 px-2 text-xs text-red-500 border-red-900"><i class="fas fa-times"></i></button>
+                `;
+                list.appendChild(el);
+                
+                // Add click listener specifically for the image container
+                const imgContainer = el.querySelector('.relative.w-12');
+                const fileInput = el.querySelector('input[type="file"]');
+                imgContainer.onclick = () => fileInput.click();
+
+                creator.updatePollOptionUI();
+            },
+            removePollOption: (id) => {
+                const el = document.querySelector(`[data-id="${id}"]`);
+                if(el) el.remove();
+                delete state.draft.pollOptionImages[id];
+                creator.updatePollOptionUI();
+            },
+            clearPollOption: (id) => {
+                const container = document.querySelector(`[data-id="${id}"]`);
+                if(container) {
+                    container.querySelector('input[type="text"]').value = '';
+                    const preview = container.querySelector('[data-img-preview]');
+                    const icon = container.querySelector('[data-img-icon]');
+                    const fileInput = container.querySelector('input[type="file"]');
+                    
+                    preview.classList.add('hidden');
+                    preview.src = '';
+                    icon.classList.remove('hidden');
+                    icon.className = "fas fa-image text-gray-600 group-hover:text-white"; // Reset icon
+                    fileInput.value = ''; // Clear file input so same file can be selected again
+                    
+                    delete state.draft.pollOptionImages[id];
+                }
+            },
+            handlePollOptionImage: async (input, id) => {
+                if(input.files && input.files[0]) {
+                    const file = input.files[0];
+                    const container = document.querySelector(`[data-id="${id}"]`);
+                    if(!container) return; // Safety check
+                    
+                    const preview = container.querySelector('[data-img-preview]');
+                    const icon = container.querySelector('[data-img-icon]');
+                    
+                    icon.className = "fas fa-spinner fa-spin text-gray-500";
+                    
+                    const url = await creator.upload(file);
+                    
+                    if(url) {
+                        state.draft.pollOptionImages[id] = url;
+                        preview.src = url;
+                        preview.classList.remove('hidden');
+                        icon.classList.add('hidden');
+                    } else {
+                        // Reset on failure
+                        icon.className = "fas fa-image text-gray-600 group-hover:text-white"; 
+                        input.value = ''; 
+                    }
+                }
+            },
+            updatePollOptionUI: () => {
+                const list = document.getElementById('poll-options-list');
+                const options = list.querySelectorAll('.poll-option-creator');
+                options.forEach((opt, index) => {
+                    opt.querySelector('input[type="text"]').placeholder = `Option ${index + 1}`;
+                });
+                
+                document.getElementById('btn-add-poll-option').disabled = options.length >= 10;
+                options.forEach(opt => {
+                    // Only disable remove if there are 2 or fewer options
+                    const removeBtn = opt.querySelector('button[onclick*="removePollOption"]');
+                    if(removeBtn) removeBtn.disabled = options.length <= 2;
+                });
             }
         };
         
@@ -3708,7 +3894,7 @@
 
                 let readTime = null;
 				if (data.type !== 'thread') {
-					const textContent = data.content.replace(/<[^>]*>/g, ' ');
+					const textContent = data.content?.replace(/<[^>]*>/g, ' ') || '';
 					const wordCount = textContent.trim().split(/\s+/).length;
 					readTime = Math.ceil(wordCount / 200);
 				}
@@ -3932,8 +4118,7 @@
                     }
                     return;
                 }
-
-                // Update last doc for next page
+			                // Update last doc for next page
                 state.lastFeedDoc = snap.docs[snap.docs.length - 1];
                 
                 // Show/Hide Load More Button
@@ -4926,6 +5111,193 @@
             document.getElementById('btn-update-story').classList.add('hidden');
 
             router.go('create');
+        }
+    };
+	
+	// --- NEW: POLL VIEW & LOGIC ---
+    window.pollView = {
+        createCard: (data, author) => {
+            const postedTime = data.createdAt ? timeAgo(data.createdAt) : 'Just now';
+            const isVerified = (author.followerCount || 0) >= 100;
+            const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
+            const formattedAuthorName = formatUsername(author.id, author.username);
+            const totalVotes = data.pollData.totalVotes || 0;
+
+            return `
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <img src="${author.avatar}" class="w-8 h-8 rounded-full bg-gray-800 border border-white/10">
+                        <div>
+                            <div class="text-xs font-bold text-gray-400">${formattedAuthorName}${verifiedBadge}</div>
+                            <div class="text-[10px] text-gray-600 font-mono">POLL • ${postedTime}</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-poll-h text-lg text-purple-500"></i>
+                </div>
+                <h4 class="font-bold text-lg text-gray-200 mb-4">${data.title}</h4>
+                <div id="poll-content-${data.id}" class="space-y-3 transition-all duration-300 max-h-0 overflow-hidden">
+                    <!-- Poll options will be rendered here on expand -->
+                </div>
+                <div class="flex items-center justify-between text-xs text-gray-600 font-mono mt-4 pt-3 border-t border-white/10">
+                    <span><i class="fas fa-vote-yea mr-1"></i> <span id="poll-total-votes-${data.id}">${totalVotes}</span> Votes</span>
+                    <button onclick="pollView.toggle('${data.id}')" class="btn-secondary text-xs py-1 px-3 border-purple-800 text-purple-400 hover:bg-purple-900/20">
+                        <span class="btn-poll-text">View Poll</span> <i class="fas fa-chevron-down ml-2 btn-poll-icon transition-transform"></i>
+                    </button>
+                </div>
+            `;
+        },
+        toggle: async (pollId) => {
+            const contentDiv = document.getElementById(`poll-content-${pollId}`);
+            const button = document.querySelector(`button[onclick="pollView.toggle('${pollId}')"]`);
+            const buttonText = button.querySelector('.btn-poll-text');
+            const buttonIcon = button.querySelector('.btn-poll-icon');
+
+            const isExpanded = !contentDiv.classList.contains('max-h-0');
+
+            if (isExpanded) {
+                // Closing
+                contentDiv.style.maxHeight = contentDiv.scrollHeight + "px"; // Set exact height for transition
+                // Force reflow
+                contentDiv.offsetHeight;
+                contentDiv.style.maxHeight = '0px';
+                contentDiv.classList.add('max-h-0');
+                
+                buttonText.innerText = 'View Poll';
+                buttonIcon.classList.remove('rotate-180');
+            } else {
+                // Opening
+                contentDiv.innerHTML = '<div class="text-center text-xs text-gray-500 py-2"><i class="fas fa-spinner fa-spin"></i></div>';
+                
+                const pollSnap = await getDoc(doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', pollId));
+                if (!pollSnap.exists()) return;
+                
+                const pollData = pollSnap.data();
+                pollView.renderOptions(pollId, pollData.pollData);
+
+                contentDiv.classList.remove('max-h-0');
+                
+                // Allow transition
+                contentDiv.style.maxHeight = contentDiv.scrollHeight + "px";
+                
+                // Remove max-height after transition to allow dynamic resizing (loading images)
+                setTimeout(() => {
+                    if(!contentDiv.classList.contains('max-h-0')) {
+                        contentDiv.style.maxHeight = 'none';
+                    }
+                }, 310);
+
+                buttonText.innerText = 'Hide Poll';
+                buttonIcon.classList.add('rotate-180');
+            }
+        },
+        renderOptions: (pollId, pollData) => {
+            const contentDiv = document.getElementById(`poll-content-${pollId}`);
+            contentDiv.innerHTML = `<h5 class="font-semibold text-gray-300 mb-3">${pollData.question}</h5>`;
+            
+            const myVote = pollData.votes?.[state.user?.uid];
+            const hasVoted = myVote !== undefined && myVote !== null;
+
+            pollData.options.forEach((opt, index) => {
+                const percentage = pollData.totalVotes > 0 ? (opt.votes / pollData.totalVotes * 100).toFixed(1) : 0;
+                const isMyVote = myVote === index;
+
+                // VISUAL LOGIC:
+                // If user has voted, dim the other options and remove pointer cursor
+                let wrapperClass = `poll-option p-2 rounded border border-gray-700 relative overflow-hidden transition-all `;
+                
+                if (hasVoted) {
+                    if (isMyVote) {
+                        wrapperClass += `voted-by-user border-red-500 bg-red-900/20 `;
+                    } else {
+                        wrapperClass += `opacity-40 grayscale `;
+                    }
+                    wrapperClass += `cursor-not-allowed `;
+                } else {
+                    wrapperClass += `cursor-pointer hover:border-red-700 `;
+                }
+
+                const el = document.createElement('div');
+                el.className = wrapperClass;
+                
+                // CLICK LOGIC: Only allow vote if not voted yet
+                el.onclick = () => {
+                    if (!hasVoted) {
+                        pollView.vote(pollId, index);
+                    }
+                };
+                
+                el.innerHTML = `
+                    <div class="absolute top-0 left-0 h-full poll-option-bar" style="width: ${percentage}%;"></div>
+                    <div class="relative z-10 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="${isMyVote ? 'fas fa-check-circle text-red-500' : 'far fa-circle text-gray-600'}"></i>
+                            ${opt.imageUrl ? `<img src="${opt.imageUrl}" class="w-8 h-8 rounded object-cover border border-black">` : ''}
+                            <span class="text-sm font-medium text-gray-200">${opt.text}</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs">
+                            <span class="font-mono text-gray-400">${percentage}%</span>
+                            <span class="font-bold text-white">${opt.votes}</span>
+                        </div>
+                    </div>
+                `;
+                contentDiv.appendChild(el);
+            });
+            
+            if(hasVoted) {
+                const status = document.createElement('div');
+                status.className = "text-[10px] text-gray-500 text-center mt-2 italic";
+                status.innerText = "Vote locked in.";
+                contentDiv.appendChild(status);
+            }
+        },
+        vote: async (pollId, optionIndex) => {
+            if(state.isAnonymous) return ui.promptSignIn("To vote on polls,");
+            const pollRef = doc(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories', pollId);
+
+            try {
+                // Optimistic UI update (immediate feedback) - Optional, but feels snappy
+                const contentDiv = document.getElementById(`poll-content-${pollId}`);
+                if(contentDiv) contentDiv.style.opacity = '0.7';
+
+                await runTransaction(db, async (transaction) => {
+                    const pollDoc = await transaction.get(pollRef);
+                    if (!pollDoc.exists()) throw "Poll not found!";
+
+                    let pollData = pollDoc.data().pollData;
+                    const votes = pollData.votes || {};
+                    const myPreviousVote = votes[state.user.uid];
+
+                    // --- LOCK LOGIC START ---
+                    // If user has voted, prevent any changes.
+                    if (myPreviousVote !== undefined && myPreviousVote !== null) {
+                        throw "LOCKED";
+                    }
+                    // --- LOCK LOGIC END ---
+
+                    // Add vote
+                    if (!pollData.options[optionIndex]) throw "Invalid Option"; // Safety check
+                    
+                    pollData.options[optionIndex].votes += 1;
+                    votes[state.user.uid] = optionIndex;
+                    
+                    // Recalculate total votes
+                    pollData.totalVotes = pollData.options.reduce((sum, opt) => sum + opt.votes, 0);
+                    pollData.votes = votes;
+                    
+                    transaction.update(pollRef, { pollData: pollData });
+                });
+                
+                if(contentDiv) contentDiv.style.opacity = '1';
+                
+            } catch (e) {
+                if(contentDiv) contentDiv.style.opacity = '1';
+                if (e === "LOCKED") {
+                    ui.alert("Vote Sealed", "You have already cast your vote. It cannot be changed.");
+                } else {
+                    console.error("Poll vote failed: ", e);
+                    ui.alert("Error", "Could not cast vote.");
+                }
+            }
         }
     };
 
