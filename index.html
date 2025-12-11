@@ -54,6 +54,11 @@
         /* --- RESET & BASE --- */
         * { scrollbar-width: thin; scrollbar-color: var(--blood-red) var(--void); }
         
+        ::selection {
+            background-color: var(--blood-red);
+            color: white;
+        }
+
         html, body {
             background-color: var(--void);
             color: #e5e5e5;
@@ -1514,6 +1519,16 @@
                     </div>
                 </div>
             </section>
+            
+            <!-- NEW: 404 VIEW -->
+            <section id="view-404" class="view-section hidden animate-in">
+                <div class="text-center py-24">
+                    <i class="fas fa-compass-slash text-8xl text-red-900 mb-6"></i>
+                    <h2 class="font-horror text-6xl text-gray-400 mb-4">404 - Soul Not Found</h2>
+                    <p class="text-gray-600 mb-8">The path you seek is veiled in shadow or does not exist.</p>
+                    <button onclick="router.go('home')" class="btn-main">Return to the Void</button>
+                </div>
+            </section>
 
         </main>
 
@@ -1642,7 +1657,7 @@
             apiKey: "AIzaSyCf869FUD-h2AUwLeXQtxpCFBNm9BYOIEM", 
             authDomain: "storedstorablestories.firebaseapp.com",
             projectId: "storedstorablestories",
-            storageBucket: "storedstorablestorage.app",
+            storageBucket: "storedstorablorage.app",
             messagingSenderId: "329819137762",
             appId: "1:329819137762:web:6fd48985a42f07368a60bb",
             measurementId: "G-BRGC6T806R"
@@ -1654,6 +1669,8 @@
         const IMGBB_KEY = "b7e9ce509e0ce673e002f8afd73fb71b"; 
         const APP_ID_PATH = "1:329819137762:web:6fd48985a42f07368a60bb"; 
         const CREATOR_ID = "bXFA3reA4veXpQ0tmMDbwSq9oF23";
+        const VALID_CATEGORIES = ['Paranormal', 'Psychological', 'Slasher', 'Cosmic', 'Urban Legend', 'Folk Horror', 'Body Horror', 'Gothic', 'Survival', 'Eldritch', 'Found Footage', 'Occult', 'Monster', 'Dystopian', 'Creepypasta', 'Disturbing', 'Gore', 'Analog'];
+
 
         // --- CUSTOM TOOLTIP LOGIC ---
         let tooltipTimer;
@@ -1799,19 +1816,23 @@
 
             interval = Math.floor(seconds / 2592000);
             if (interval > 1) return `${interval} months ago`;
-             if (interval === 1) return `1 month ago`;
+            if (interval === 1) return `1 month ago`;
+            
+            interval = Math.floor(seconds / 604800);
+            if (interval > 1) return `${interval} weeks ago`;
+            if (interval === 1) return `1 week ago`;
 
             interval = Math.floor(seconds / 86400);
             if (interval > 1) return `${interval} days ago`;
-             if (interval === 1) return `1 day ago`;
+            if (interval === 1) return `1 day ago`;
 
             interval = Math.floor(seconds / 3600);
             if (interval > 1) return `${interval} hours ago`;
-             if (interval === 1) return `1 hour ago`;
+            if (interval === 1) return `1 hour ago`;
 
             interval = Math.floor(seconds / 60);
             if (interval > 1) return `${interval} minutes ago`;
-             if (interval === 1) return `1 minute ago`;
+            if (interval === 1) return `1 minute ago`;
 
             return `${Math.floor(seconds)} seconds ago`;
         };
@@ -2162,7 +2183,14 @@
             },
             render: (view, params) => {
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-                document.getElementById(`view-${view}`).classList.remove('hidden');
+                const viewEl = document.getElementById(`view-${view}`);
+                // If the view doesn't exist, show 404
+                if (!viewEl) {
+                    document.getElementById('view-404').classList.remove('hidden');
+                    document.title = "404 - Not Found";
+                    return;
+                }
+                viewEl.classList.remove('hidden');
                 window.scrollTo(0,0);
                 
                 // Set generic title first. Specific titles will be set by their respective `open` functions.
@@ -2175,6 +2203,9 @@
                         break;
                     case 'create':
                         document.title = "Manifest - Grimoire";
+                        break;
+                    case '404':
+                        document.title = "404 - Soul Not Found";
                         break;
                     default:
                         document.title = `Grimoire - ${view.charAt(0).toUpperCase() + view.slice(1)}`;
@@ -2245,6 +2276,21 @@
                  let section = urlParams.get('section') || 'home';
                  const params = Object.fromEntries(urlParams.entries());
 
+                 // 404 checks for invalid section
+                 if (!document.getElementById(`view-${section}`)) {
+                     router.go('404');
+                     return;
+                 }
+                
+                // 404 checks for invalid category
+                if (section === 'home' && params.category && !VALID_CATEGORIES.includes(params.category)) {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('category');
+                    window.history.replaceState({view: 'home', params: {}}, '', url);
+                    router.go('home'); // Go to default home
+                    return;
+                }
+
                  const restrictedViews = ['create'];
                  if (state.isAnonymous && restrictedViews.includes(section)) {
                      ui.promptSignIn(`To access the '${section}' section,`);
@@ -2257,6 +2303,13 @@
                      router.render('home', {});
                      return;
                  }
+                 
+                 // 404 checks for missing required params
+                if ((section === 'reader' && !params.post) || (section === 'profile' && !params.user) || (section === 'community' && !params.coven)) {
+                    router.go('404');
+                    return;
+                }
+
 
                 if(params.post) {
                     const postId = params.post;
@@ -2266,11 +2319,11 @@
                             const storyData = { id: postSnap.id, ...postSnap.data() };
                             await reader.open(postId, storyData, false);
                         } else {
-                           router.go('home'); // Post not found, go home
+                           router.go('404'); // Post not found
                         }
                     } catch (e) {
                         console.error("Failed to load post on route change", e);
-                        router.go('home');
+                        router.go('404');
                     }
                 } else if(params.user) {
                     const userId = params.user;
@@ -2283,11 +2336,11 @@
                             const covenData = { id: covenSnap.id, ...covenSnap.data() };
                             await communities.open(covenId, covenData, false);
                         } else {
-                            router.go('explore'); // Coven not found, go to explore
+                            router.go('404'); // Coven not found
                         }
                     } catch (e) {
                         console.error("Failed to load coven on route change", e);
-                        router.go('explore');
+                        router.go('404');
                     }
                  } else {
                      router.render(section, params);
@@ -4468,7 +4521,11 @@
             const isSelf = !state.isAnonymous && uid === state.user.uid;
 
             const p = await getUserProfile(uid);
-            if(!p) { ui.loading(false); return ui.alert("Lost", "Soul not found."); }
+            if(!p) { 
+                ui.loading(false); 
+                router.go('404');
+                return;
+            }
 
             const isVerified = (p.followerCount || 0) >= 100;
             const verifiedBadge = isVerified ? ` <span class="text-red-600" title="Verified Soul"><i class="fas fa-check-circle"></i></span>` : '';
@@ -5334,62 +5391,12 @@
     };
 
     // --- DATA ---
-    function loadFeed() { 
-        const container = document.getElementById('feed-grid');
-        const emptyEl = document.getElementById('feed-empty');
-        container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Summoning...</div>';
-        emptyEl.classList.add('hidden');
-        container.classList.remove('hidden');
-
-        let q;
-        const ref = collection(db, 'artifacts', APP_ID_PATH, 'public', 'data', 'stories');
-        
-        if(state.sortBy === 'following') {
-            if (!state.isAnonymous && state.profile.following && state.profile.following.length > 0) {
-                 q = query(ref, where('authorId', 'in', state.profile.following), limit(50));
-            } else {
-                feed.render([]); return;
-            }
-        }
-        else if(state.filter) {
-             q = query(ref, where("category", "==", state.filter), limit(50));
-        }
-        else if(state.sortBy === 'hot') {
-            q = query(ref, orderBy('likes', 'desc'), limit(50));
-        }
-        else if (state.sortBy === 'top') {
-            const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-            q = query(ref, where('createdAt', '>', lastWeek), orderBy('createdAt', 'desc'), limit(100));
-        }
-        else {
-            q = query(ref, orderBy('createdAt', 'desc'), limit(50));
+    async function searchUsersAndContent(term) {
+        if (term === ':all_users:') {
+            await showAllUsers();
+            return;
         }
 
-        onSnapshot(q, async (snap) => {
-             if (document.getElementById('feed-search').value.trim() !== '') return;
-            const stories = [];
-            snap.forEach(d => {
-                const data = {id: d.id, ...d.data()};
-                if(!data.communityId) stories.push(data); 
-            });
-            
-            if (state.sortBy === 'top') {
-                stories.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-            }
-            
-            if (state.filter || state.sortBy === 'following') {
-                stories.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-            }
-            
-            const authorIds = [...new Set(stories.map(s => s.authorId))];
-            await Promise.all(authorIds.map(id => getUserProfile(id)));
-
-            state.feedData = stories;
-            feed.render(state.feedData);
-        });
-    }
-    
-	async function searchUsersAndContent(term) { 
         const lowerTerm = normalize(term);
         const contentGrid = document.getElementById('feed-grid');
         
@@ -5403,7 +5410,6 @@
             const userSnap = await getDocs(userQuery);
             userSnap.forEach(doc => {
                  const u = doc.data();
-                 // Simple search logic
                  if(normalize(u.username).includes(lowerTerm) || normalize(u.bio).includes(lowerTerm)){
                     userResults.push({ id: doc.id, ...u });
                  }
@@ -5416,7 +5422,7 @@
             
             contentSnap.forEach(doc => {
                 const d = doc.data();
-                if (d.communityId) return; // Optional: filter out community posts if desired
+                if (d.communityId) return;
                 
                 const titleMatch = normalize(d.title).includes(lowerTerm);
                 const descMatch = normalize(d.description).includes(lowerTerm);
@@ -5434,34 +5440,25 @@
             // 3. RENDER SECTIONED RESULTS
             contentGrid.innerHTML = '';
 
-            // -- RENDER USERS --
             if (userResults.length > 0) {
-                // Section Header (col-span-full ensures it takes full width of grid)
                 const userHeader = document.createElement('div');
                 userHeader.className = "col-span-1 md:col-span-2 lg:col-span-3 pb-2 border-b border-white/10 mb-2 mt-2";
                 userHeader.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fas fa-users mr-2"></i>Souls Found (${userResults.length})</h3>`;
                 contentGrid.appendChild(userHeader);
-
-                userResults.forEach(u => {
-                    contentGrid.appendChild(feed.createUserCard(u));
-                });
+                userResults.forEach(u => contentGrid.appendChild(feed.createUserCard(u)));
             }
 
-            // -- RENDER POSTS --
             if (postResults.length > 0) {
-                // Section Header
                 const postHeader = document.createElement('div');
                 postHeader.className = "col-span-1 md:col-span-2 lg:col-span-3 pb-2 border-b border-white/10 mb-2 mt-6";
                 postHeader.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest"><i class="fas fa-book-open mr-2"></i>Echoes Found (${postResults.length})</h3>`;
                 contentGrid.appendChild(postHeader);
-
                 postResults.forEach(d => {
                      const card = feed.createStoryCard(d);
                      if (card) contentGrid.appendChild(card);
                 });
             }
 
-            // -- EMPTY STATE --
             if (userResults.length === 0 && postResults.length === 0) {
                  contentGrid.innerHTML = `
                     <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16 opacity-50">
@@ -5474,6 +5471,30 @@
         } catch(e) {
             console.error(e);
             contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-red-500 py-10">The void rejected your query.</div>';
+        }
+    }
+    
+    async function showAllUsers() {
+        const contentGrid = document.getElementById('feed-grid');
+        contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Summoning all souls...</div>';
+        try {
+            const usersQuery = query(collection(db, 'artifacts', APP_ID_PATH, 'users'), orderBy('followerCount', 'desc'));
+            const usersSnap = await getDocs(usersQuery);
+            contentGrid.innerHTML = '';
+            
+            if (usersSnap.empty) {
+                contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10 text-gray-500">No souls found in the void.</div>';
+                return;
+            }
+            
+            usersSnap.forEach(doc => {
+                const user = { id: doc.id, ...doc.data() };
+                contentGrid.appendChild(feed.createUserCard(user));
+            });
+
+        } catch(e) {
+            console.error(e);
+            contentGrid.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-red-500 py-10">Failed to summon souls.</div>';
         }
     }
 
@@ -5621,7 +5642,7 @@
     setupSearchClear('feed-search', 'feed-search-clear', '.fa-search', () => {
         document.getElementById('feed-title').innerText = "Chronicles";
         document.getElementById('feed-empty').classList.add('hidden');
-        loadFeed();
+        feed.loadFeed(false);
     });
 
     setupSearchClear('explore-search', 'explore-search-clear', '.fa-search', () => {
@@ -5634,7 +5655,7 @@
         const term = e.target.value.trim();
         if(!term) { 
             document.getElementById('feed-title').innerText = "Chronicles";
-            loadFeed(); 
+            feed.loadFeed(false); 
             return; 
         }
         document.getElementById('feed-title').innerText = `Results for "${term}"`;
